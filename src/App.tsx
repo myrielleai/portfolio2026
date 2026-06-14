@@ -65,8 +65,8 @@ export default function App() {
       {/* Entry preloader screen */}
       <Preloader onComplete={() => setLoadingComplete(true)} />
       
-      {/* Structural vertical border container */}
-      <div className="max-w-7xl mx-auto border-x border-zinc-900 min-h-screen flex flex-col bg-zinc-950/10">
+      {/* Structural full-width container */}
+      <div className="w-full min-h-screen flex flex-col bg-zinc-950/10">
         
         {/* Sticky Header - hidden during preload */}
         {loadingComplete && <Navbar />}

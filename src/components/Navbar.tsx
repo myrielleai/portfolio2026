@@ -19,7 +19,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-black/40 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div className="w-full px-8 lg:px-16">
         <div className="flex items-center justify-between h-20">
           
           {/* Logo - Minimalist "RH" text */}
