@@ -26,29 +26,30 @@ export default function AvatarShowcase() {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative w-full min-h-[calc(100vh-5rem)] flex flex-col justify-center bg-black overflow-hidden px-6 sm:px-12 lg:px-20 py-10 lg:py-16 select-none"
+      className="relative w-full min-h-[300vh] flex flex-col justify-center bg-black px-6 sm:px-12 lg:px-20 py-10 lg:py-16 select-none"
     >
 
       {/* 3D Spiderman Model with Scroll Animation */}
       <SpidermanViewer modelUrl="/amazing_spiderman.glb" onScrollProgress={setScrollProgress} />
       
       {/* DESIGNER//DEVELOPER Text Overlay */}
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
-        animate={{ y: -scrollProgress * 200 }}
-        transition={{ type: "tween", duration: 0 }}
+      <div
+        className="fixed top-1/2 left-1/2 z-20 pointer-events-none"
+        style={{
+          transform: `translate(-50%, calc(-50% - ${scrollProgress * 200}px))`,
+        }}
       >
         <h2 className="text-white font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center whitespace-nowrap">
           DESIGNER//DEVELOPER
         </h2>
-      </motion.div>
+      </div>
 
       {/* Quote Text - appears as model reaches left side view */}
-      <motion.div
-        className="absolute top-1/2 right-6 sm:right-12 lg:right-20 z-20 pointer-events-none max-w-xs lg:max-w-sm"
+      <div
+        className="fixed top-1/2 right-6 sm:right-12 lg:right-20 z-20 pointer-events-none max-w-xs lg:max-w-sm"
         style={{
           opacity: Math.max(0, (scrollProgress - 0.4) * 2.5),
-          y: scrollProgress < 0.5 ? 20 + (50 * (1 - scrollProgress)) : 20,
+          transform: `translateY(calc(-50% + ${scrollProgress < 0.5 ? 20 + (50 * (1 - scrollProgress)) : 20}px))`,
         }}
       >
         <p className="text-white font-medium text-lg sm:text-xl leading-relaxed text-right">
@@ -56,7 +57,7 @@ export default function AvatarShowcase() {
           Design is emotion.<br />
           I build with both.
         </p>
-      </motion.div>
+      </div>
 
       {/* 1. Custom Interactive Glowing Mouse Cursor Graphic */}
       {isHovered && (

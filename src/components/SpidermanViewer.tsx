@@ -60,9 +60,9 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
     // Handle scroll
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      // Animation happens over the full viewport height (~1000px)
+      // Animation happens over 3 full viewport heights
       const viewportHeight = window.innerHeight;
-      const scrollProgress = Math.max(0, Math.min(1, scrollTop / viewportHeight));
+      const scrollProgress = Math.max(0, Math.min(1, scrollTop / (viewportHeight * 3)));
       scrollProgressRef.current = scrollProgress;
       if (onScrollProgress) {
         onScrollProgress(scrollProgress);
@@ -158,11 +158,12 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
       className="model-viewer-container"
       style={{
         width: "100%",
-        height: "100%",
-        position: "absolute",
+        height: "100vh",
+        position: "fixed",
         top: 0,
         left: 0,
         zIndex: 0,
+        pointerEvents: "none",
       }}
     />
   );
