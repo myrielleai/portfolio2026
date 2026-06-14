@@ -31,7 +31,7 @@ export default function Experience() {
 
               {/* Role & Company */}
               <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1.5 border-b border-zinc-950 pb-2">
-                <h3 className="text-white font-display text-xl sm:text-2xl font-light italic tracking-tight">
+                <h3 className="text-white font-display text-xl sm:text-2xl font-light tracking-tight">
                   {exp.role}
                 </h3>
                 <span className="text-xs font-mono text-zinc-400 tracking-wider">

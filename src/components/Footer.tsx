@@ -27,7 +27,7 @@ export default function Footer() {
         
         {/* Contact Invitation */}
         <div className="py-24 lg:py-36 px-8 lg:px-16 space-y-8 reveal">
-          <h2 className="text-white font-display text-4xl sm:text-5xl lg:text-6xl font-light italic tracking-tight leading-[1.1]">
+          <h2 className="text-white font-display text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-[1.1]">
             Let's construct something premium together.
           </h2>
           

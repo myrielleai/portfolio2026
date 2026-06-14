@@ -37,9 +37,11 @@ export default function AvatarShowcase() {
         className="fixed top-1/2 left-1/2 z-20 pointer-events-none"
         style={{
           transform: `translate(-50%, calc(-50% - ${Math.max(0, (scrollProgress - 1/3) * 300)}px))`,
+          opacity: Math.max(0, Math.min(1, (1 - scrollProgress) * 12)),
+          display: scrollProgress >= 0.99 ? "none" : "block",
         }}
       >
-        <h2 className="text-white font-display font-light italic text-5xl sm:text-6xl lg:text-8xl tracking-tight text-center whitespace-nowrap">
+        <h2 className="text-white font-display font-light text-5xl sm:text-6xl lg:text-8xl tracking-tight text-center whitespace-nowrap">
           Designer // Developer
         </h2>
       </div>
@@ -48,11 +50,12 @@ export default function AvatarShowcase() {
       <div
         className="fixed top-1/2 right-6 sm:right-12 lg:right-20 z-20 pointer-events-none max-w-xs lg:max-w-md"
         style={{
-          opacity: Math.max(0, (scrollProgress - 2/3) * 3),
+          opacity: Math.max(0, (scrollProgress - 2/3) * 3) * Math.max(0, Math.min(1, (1 - scrollProgress) * 12)),
           transform: `translateY(-50%)`,
+          display: scrollProgress >= 0.99 ? "none" : "block",
         }}
       >
-        <p className="text-white font-display font-light italic text-2xl sm:text-3xl lg:text-4xl leading-normal text-right">
+        <p className="text-white font-display font-light text-2xl sm:text-3xl lg:text-4xl leading-normal text-right">
           Code is logic.<br />
           Design is emotion.<br />
           I build with both.

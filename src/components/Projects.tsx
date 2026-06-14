@@ -24,7 +24,7 @@ export default function Projects() {
               <div>
                 {/* Header: Title and Outbound Links */}
                 <div className="flex items-start justify-between gap-4">
-                  <h3 className="text-white font-display text-lg sm:text-xl font-light italic tracking-wide group-hover:text-purple-400 transition-colors duration-300">
+                  <h3 className="text-white font-display text-lg sm:text-xl font-light tracking-wide group-hover:text-purple-400 transition-colors duration-300">
                     {proj.title}
                   </h3>
                   <div className="flex items-center gap-2">

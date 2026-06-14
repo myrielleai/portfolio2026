@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 interface SpidermanViewerProps {
   modelUrl: string;
@@ -57,21 +59,28 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
     pointLight.position.set(-5, 3, 3);
     scene.add(pointLight);
 
-    // Handle scroll
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      // Animation happens over 3 full viewport heights
-      const viewportHeight = window.innerHeight;
-      const scrollProgress = Math.max(0, Math.min(1, scrollTop / (viewportHeight * 3)));
-      scrollProgressRef.current = scrollProgress;
-      if (onScrollProgress) {
-        onScrollProgress(scrollProgress);
-      }
-    };
+    gsap.registerPlugin(ScrollTrigger);
 
-    // Initialize scroll position on mount
-    handleScroll();
-    window.addEventListener("scroll", handleScroll);
+    const trigger = ScrollTrigger.create({
+      trigger: "#showcase",
+      start: "top top",
+      end: "bottom bottom",
+      scrub: true,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        scrollProgressRef.current = progress;
+
+        if (containerRef.current) {
+          const exitFade = Math.max(0, Math.min(1, (1 - progress) * 12));
+          containerRef.current.style.opacity = exitFade.toString();
+          containerRef.current.style.display = progress >= 0.99 ? "none" : "block";
+        }
+
+        if (onScrollProgress) {
+          onScrollProgress(progress);
+        }
+      }
+    });
 
     // Load model
     const loader = new GLTFLoader();
@@ -143,7 +152,7 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
 
     // Cleanup
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      trigger.kill();
       window.removeEventListener("resize", handleResize);
       if (containerRef.current && rendererRef.current) {
         containerRef.current.removeChild(rendererRef.current.domElement);
