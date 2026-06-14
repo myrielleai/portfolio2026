@@ -30,7 +30,8 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
       0.1,
       1000
     );
-    camera.position.set(2, 0, 4);
+    camera.position.set(0, 0, 4);
+    camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
     // Renderer setup
@@ -107,13 +108,13 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
         const progress = scrollProgressRef.current;
 
         // Rotation: Start facing front (0, 0, 0), rotate to side (0, Math.PI / 2, 0)
-        modelRef.current.rotation.y = progress * (Math.PI / 2.2);
+        modelRef.current.rotation.y = progress * (Math.PI / 2);
 
-        // Translation: Start at center (0), move to left (-4)
-        modelRef.current.position.x = -progress * 4;
+        // Translation: Start at center (0), move to left (-2)
+        modelRef.current.position.x = -progress * 2;
 
         // Subtle up movement on scroll
-        modelRef.current.position.y = progress * 0.8;
+        modelRef.current.position.y = progress * 0.5;
       }
 
       renderer.render(scene, camera);
