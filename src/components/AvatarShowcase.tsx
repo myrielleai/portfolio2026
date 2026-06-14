@@ -1,12 +1,8 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { FileText } from "lucide-react";
-import { GithubIcon, LinkedinIcon, TwitterIcon, InstagramIcon } from "./Icons";
 import SpidermanViewer from "./SpidermanViewer";
-import { portfolioData } from "../data/portfolioData";
 
 export default function AvatarShowcase() {
-  const { name, githubUrl, linkedinUrl, twitterUrl } = portfolioData;
 
   // Custom mouse cursor position state
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -44,133 +40,6 @@ export default function AvatarShowcase() {
         />
       )}
 
-      {/* Main Grid: Left, Center, Right columns on desktop */}
-      <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center relative z-10 pointer-events-none">
-        
-        {/* Left Column: Hello Message & Social Icons (lg: 4 cols) */}
-        <div className="lg:col-span-4 flex flex-col justify-between h-full space-y-12 text-left order-2 lg:order-1 pointer-events-auto">
-          
-          {/* Headline Text */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="space-y-1"
-          >
-            <span className="text-purple-400 font-sans text-lg sm:text-xl font-medium">
-              Hello! I'm
-            </span>
-            <h1 className="text-white text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight uppercase leading-[1.05]">
-              {name}
-            </h1>
-          </motion.div>
-
-          {/* Stacked Social Icons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex lg:flex-col items-center gap-6 pt-4 lg:pt-0"
-          >
-            {githubUrl && (
-              <a
-                href={githubUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-zinc-500 hover:text-white transition-colors duration-300"
-                aria-label="GitHub"
-              >
-                <GithubIcon className="w-5 h-5" />
-              </a>
-            )}
-            {linkedinUrl && (
-              <a
-                href={linkedinUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-zinc-500 hover:text-white transition-colors duration-300"
-                aria-label="LinkedIn"
-              >
-                <LinkedinIcon className="w-5 h-5" />
-              </a>
-            )}
-            {twitterUrl && (
-              <a
-                href={twitterUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-zinc-500 hover:text-white transition-colors duration-300"
-                aria-label="Twitter"
-              >
-                <TwitterIcon className="w-5 h-5" />
-              </a>
-            )}
-            <a
-              href="#"
-              className="text-zinc-550 hover:text-white transition-colors duration-300"
-              aria-label="Instagram"
-            >
-              <InstagramIcon className="w-5 h-5" />
-            </a>
-          </motion.div>
-
-        </div>
-
-        {/* Center Column: 3D Model (lg: 4 cols) - Hidden since 3D model takes full space */}
-        <div className="hidden lg:col-span-4" />
-
-        {/* Right Column: Floating orb & Stacked Role Text (lg: 4 cols) */}
-        <div className="lg:col-span-4 flex flex-col items-start lg:items-end justify-between h-full space-y-12 lg:space-y-0 text-left lg:text-right order-3 pointer-events-auto">
-          
-          {/* Floating purple light orb */}
-          <motion.div
-            initial={{ opacity: 0, y: -25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 80,
-              delay: 0.2,
-            }}
-            className="hidden lg:block w-10 h-10 rounded-full bg-gradient-to-br from-purple-300 to-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.7)] blur-[0.5px]"
-          />
-
-          {/* Role Text Container */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-0.5 w-full flex flex-col items-start lg:items-end"
-          >
-            <span className="text-purple-400 font-sans text-lg font-medium block">
-              An
-            </span>
-            <span className="text-purple-500/20 font-black text-5xl sm:text-6xl lg:text-7xl leading-none uppercase tracking-tight block select-none">
-              AI ENGINEER
-            </span>
-            <span className="text-white font-black text-3xl sm:text-4xl lg:text-[40px] leading-none uppercase tracking-tight block -mt-1 lg:-mt-2">
-              FULL-STACK DEVELOPER
-            </span>
-          </motion.div>
-
-        </div>
-
-      </div>
-
-      {/* Stylized RESUME button at bottom-right of the layout screen */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="absolute bottom-6 right-6 sm:bottom-10 sm:right-12 z-20 pointer-events-auto"
-      >
-        <a
-          href="#"
-          className="group flex items-center gap-2 px-3 py-1.5 text-zinc-500 hover:text-white font-mono text-[10px] font-bold tracking-widest transition-all duration-300 uppercase"
-        >
-          <span>RESUME</span>
-          <FileText className="w-3.5 h-3.5 text-zinc-650 group-hover:text-white transition-colors duration-300" />
-        </a>
-      </motion.div>
 
     </section>
   );

@@ -83,16 +83,16 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
 
     // Handle scroll
     const handleScroll = () => {
-      const heroSection = document.querySelector("#showcase");
+      const heroSection = document.querySelector("#showcase") as HTMLElement | null;
       if (heroSection) {
-        const rect = heroSection.getBoundingClientRect();
-        const heroHeight = rect.height;
+        const scrollTop = window.scrollY;
+        const heroTop = heroSection.offsetTop;
+        const heroHeight = heroSection.clientHeight;
 
-        // Calculate scroll progress based on hero section visibility
-        // Progress starts when hero top reaches viewport top, ends when hero bottom leaves viewport
+        // Calculate scroll progress: 0 at hero start, 1 when hero is fully scrolled past
         const scrollProgress = Math.max(
           0,
-          Math.min(1, (heroHeight - rect.bottom) / heroHeight)
+          Math.min(1, (scrollTop - heroTop) / heroHeight)
         );
         scrollProgressRef.current = scrollProgress;
       }
@@ -108,13 +108,13 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
         const progress = scrollProgressRef.current;
 
         // Rotation: Start facing front (0, 0, 0), rotate to side (0, Math.PI / 2, 0)
-        modelRef.current.rotation.y = progress * (Math.PI / 2);
+        modelRef.current.rotation.y = progress * (Math.PI / 2.2);
 
-        // Translation: Start at center (0), move to left (-3)
-        modelRef.current.position.x = -progress * 3;
+        // Translation: Start at center (0), move to left (-4)
+        modelRef.current.position.x = -progress * 4;
 
-        // Optional: subtle up movement on scroll
-        modelRef.current.position.y = progress * 0.5;
+        // Subtle up movement on scroll
+        modelRef.current.position.y = progress * 0.8;
       }
 
       renderer.render(scene, camera);
