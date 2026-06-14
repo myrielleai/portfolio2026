@@ -32,6 +32,27 @@ export default function App() {
     gsap.ticker.add(updateTicker);
     gsap.ticker.lagSmoothing(0);
 
+    // GSAP Scroll Reveal Animation for elements with class '.reveal'
+    const revealElements = gsap.utils.toArray(".reveal");
+    revealElements.forEach((elem: any) => {
+      gsap.fromTo(
+        elem,
+        { y: 45, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1.3,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: elem,
+            start: "top 88%",
+            toggleActions: "play none none none",
+            once: true,
+          },
+        }
+      );
+    });
+
     return () => {
       gsap.ticker.remove(updateTicker);
       lenis.destroy();

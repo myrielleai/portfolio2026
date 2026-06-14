@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Mail, ArrowUpRight } from "lucide-react";
 import { GithubIcon, LinkedinIcon, TwitterIcon } from "./Icons";
 import { portfolioData } from "../data/portfolioData";
@@ -7,25 +6,6 @@ export default function Footer() {
   const { name, email, githubUrl, linkedinUrl, twitterUrl } = portfolioData;
 
   const currentYear = new Date().getFullYear();
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring" as const, stiffness: 100, damping: 15 },
-    },
-  };
 
   const socialLinks = [
     { icon: <GithubIcon className="w-4 h-4" />, url: githubUrl, label: "GitHub" },
@@ -38,56 +18,50 @@ export default function Footer() {
     <footer id="contact" className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
       
       {/* Left Column (4 cols) */}
-      <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-zinc-900 p-8 lg:p-12 bg-black/20">
-        <span className="font-mono text-xs text-zinc-500 tracking-widest block">04 // CONTACT</span>
+      <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-zinc-900 py-24 lg:py-36 px-8 lg:px-16 bg-black/20 flex flex-col justify-start">
+        <span className="font-mono text-xs text-zinc-500 tracking-widest block reveal">04 // CONTACT</span>
       </div>
 
       {/* Right Column (8 cols) */}
       <div className="lg:col-span-8 flex flex-col justify-between">
         
         {/* Contact Invitation */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="p-8 lg:p-12 space-y-6 lg:space-y-8"
-        >
-          <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.1]">
+        <div className="py-24 lg:py-36 px-8 lg:px-16 space-y-8 reveal">
+          <h2 className="text-white font-display text-4xl sm:text-5xl lg:text-6xl font-light italic tracking-tight leading-[1.1]">
             Let's construct something premium together.
-          </motion.h2>
+          </h2>
           
-          <motion.p variants={itemVariants} className="text-zinc-400 max-w-xl text-sm sm:text-base leading-relaxed">
+          <p className="text-zinc-400 max-w-xl text-xs sm:text-sm leading-relaxed">
             I am always open to consulting engagements, full-time contracts, and speaking opportunities. Drop me a line, and let's get standard protocols established.
-          </motion.p>
+          </p>
 
-          <motion.div variants={itemVariants} className="pt-2">
+          <div className="pt-2">
             <a
               href={`mailto:${email}`}
               className="group inline-flex items-center gap-3 border border-zinc-900 hover:border-zinc-750 bg-zinc-950/40 p-4 sm:p-5 w-full sm:w-auto transition-all duration-300"
             >
               <div className="space-y-1">
                 <div className="font-mono text-[9px] text-zinc-500 tracking-widest uppercase">DIRECT EMAIL</div>
-                <div className="text-sm sm:text-base font-mono text-white font-medium group-hover:text-zinc-350 transition-colors">
+                <div className="text-xs sm:text-sm font-mono text-white font-medium group-hover:text-purple-400 transition-colors">
                   {email}
                 </div>
               </div>
               <ArrowUpRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ml-auto sm:ml-8" />
             </a>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Sub-Footer: Grid Border System */}
-        <div className="border-t border-zinc-900 p-8 lg:p-12 bg-zinc-950/20">
+        <div className="border-t border-zinc-900 py-10 px-8 lg:px-16 bg-zinc-950/20 reveal">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             
             {/* Copyright & Info */}
             <div className="space-y-1">
-              <div className="text-xs text-zinc-550 font-mono tracking-wider">
+              <div className="text-[10px] text-zinc-500 font-mono tracking-wider">
                 © {currentYear} // {name.toUpperCase()}
               </div>
-              <div className="text-[10px] text-zinc-650 font-mono">
-                BUILT WITH REACT + VITE + TAILWIND V4 + FRAMER MOTION
+              <div className="text-[9px] text-zinc-650 font-mono">
+                BUILT WITH REACT + VITE + TAILWIND V4 + GSAP + LENIS
               </div>
             </div>
 
