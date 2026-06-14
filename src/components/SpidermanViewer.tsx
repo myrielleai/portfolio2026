@@ -60,8 +60,9 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
     // Handle scroll
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      // Animation happens over the first 600px of scroll
-      const scrollProgress = Math.max(0, Math.min(1, scrollTop / 600));
+      // Animation happens over the full viewport height (~1000px)
+      const viewportHeight = window.innerHeight;
+      const scrollProgress = Math.max(0, Math.min(1, scrollTop / viewportHeight));
       scrollProgressRef.current = scrollProgress;
       if (onScrollProgress) {
         onScrollProgress(scrollProgress);
@@ -114,8 +115,8 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
         // Rotation: Start facing front (0, 0, 0), rotate to side (0, Math.PI / 2, 0)
         modelRef.current.rotation.y = progress * (Math.PI / 2);
 
-        // Translation: Start at center (0), move to left (-1) - less movement to stay centered
-        modelRef.current.position.x = -progress * 1;
+        // Translation: Start at center (0), move to left (-3) for full transition
+        modelRef.current.position.x = -progress * 3;
 
         // Subtle up movement on scroll
         modelRef.current.position.y = progress * 0.5;

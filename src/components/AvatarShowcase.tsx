@@ -35,12 +35,28 @@ export default function AvatarShowcase() {
       {/* DESIGNER//DEVELOPER Text Overlay */}
       <motion.div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
-        animate={{ y: -scrollProgress * 150 }}
+        animate={{ y: -scrollProgress * 200 }}
         transition={{ type: "tween", duration: 0 }}
       >
         <h2 className="text-white font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center whitespace-nowrap">
           DESIGNER//DEVELOPER
         </h2>
+      </motion.div>
+
+      {/* Quote Text - appears as model reaches left side view */}
+      <motion.div
+        className="absolute top-1/2 right-6 sm:right-12 lg:right-20 z-20 pointer-events-none max-w-xs lg:max-w-sm translate-y-1/2"
+        animate={{
+          opacity: scrollProgress > 0.5 ? 1 : 0,
+          y: scrollProgress > 0.5 ? 0 : 20
+        }}
+        transition={{ type: "tween", duration: 0.3 }}
+      >
+        <p className="text-white font-medium text-lg sm:text-xl leading-relaxed text-right">
+          Code is logic.<br />
+          Design is emotion.<br />
+          I build with both.
+        </p>
       </motion.div>
 
       {/* 1. Custom Interactive Glowing Mouse Cursor Graphic */}
