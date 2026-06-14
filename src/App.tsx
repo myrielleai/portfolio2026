@@ -20,19 +20,11 @@ export default function App() {
     // Register GSAP ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
 
-    // Initialize Lenis smooth scroll
-    const lenis = new Lenis({
-      duration: 1.25,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-    });
+    // Initialize Lenis smooth scroll using exact boilerplate
+    const lenis = new Lenis();
 
-    // Update ScrollTrigger on Lenis scroll
-    lenis.on("scroll", ScrollTrigger.update);
+    lenis.on('scroll', ScrollTrigger.update);
 
-    // Sync GSAP ticker with Lenis raf
     const updateTicker = (time: number) => {
       lenis.raf(time * 1000);
     };
