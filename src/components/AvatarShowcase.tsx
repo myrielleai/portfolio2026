@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { FileText } from "lucide-react";
 import { GithubIcon, LinkedinIcon, TwitterIcon, InstagramIcon } from "./Icons";
+import SpidermanViewer from "./SpidermanViewer";
 import { portfolioData } from "../data/portfolioData";
 
 export default function AvatarShowcase() {
@@ -30,6 +31,9 @@ export default function AvatarShowcase() {
       onMouseLeave={() => setIsHovered(false)}
       className="relative w-full min-h-[calc(100vh-5rem)] flex flex-col justify-center bg-black overflow-hidden px-6 sm:px-12 lg:px-20 py-10 lg:py-16 select-none"
     >
+
+      {/* 3D Spiderman Model with Scroll Animation */}
+      <SpidermanViewer modelUrl="/amazing_spiderman.glb" />
       
       {/* 1. Custom Interactive Glowing Mouse Cursor Graphic */}
       {isHovered && (
@@ -41,10 +45,10 @@ export default function AvatarShowcase() {
       )}
 
       {/* Main Grid: Left, Center, Right columns on desktop */}
-      <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center relative z-10">
+      <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center relative z-10 pointer-events-none">
         
         {/* Left Column: Hello Message & Social Icons (lg: 4 cols) */}
-        <div className="lg:col-span-4 flex flex-col justify-between h-full space-y-12 text-left order-2 lg:order-1">
+        <div className="lg:col-span-4 flex flex-col justify-between h-full space-y-12 text-left order-2 lg:order-1 pointer-events-auto">
           
           {/* Headline Text */}
           <motion.div
@@ -112,28 +116,11 @@ export default function AvatarShowcase() {
 
         </div>
 
-        {/* Center Column: Big 3D Avatar (lg: 4 cols) */}
-        <div className="lg:col-span-4 flex justify-center relative order-1 lg:order-2">
-          {/* Purple ambient backglow circle behind character */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[350px] h-[280px] sm:h-[350px] rounded-full bg-purple-900/20 blur-3xl z-0" />
-          
-          {/* Avatar Image container */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="relative z-10 w-full max-w-[280px] sm:max-w-[340px] aspect-square flex items-center justify-center"
-          >
-            <img
-              src="/scene1.png"
-              alt="Avatar Character"
-              className="w-full h-full object-cover filter brightness-95"
-            />
-          </motion.div>
-        </div>
+        {/* Center Column: 3D Model (lg: 4 cols) - Hidden since 3D model takes full space */}
+        <div className="hidden lg:col-span-4" />
 
         {/* Right Column: Floating orb & Stacked Role Text (lg: 4 cols) */}
-        <div className="lg:col-span-4 flex flex-col items-start lg:items-end justify-between h-full space-y-12 lg:space-y-0 text-left lg:text-right order-3">
+        <div className="lg:col-span-4 flex flex-col items-start lg:items-end justify-between h-full space-y-12 lg:space-y-0 text-left lg:text-right order-3 pointer-events-auto">
           
           {/* Floating purple light orb */}
           <motion.div
@@ -174,7 +161,7 @@ export default function AvatarShowcase() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="absolute bottom-6 right-6 sm:bottom-10 sm:right-12 z-20"
+        className="absolute bottom-6 right-6 sm:bottom-10 sm:right-12 z-20 pointer-events-auto"
       >
         <a
           href="#"
