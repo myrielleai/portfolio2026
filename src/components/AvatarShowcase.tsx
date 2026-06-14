@@ -7,6 +7,7 @@ export default function AvatarShowcase() {
   // Custom mouse cursor position state
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -29,8 +30,19 @@ export default function AvatarShowcase() {
     >
 
       {/* 3D Spiderman Model with Scroll Animation */}
-      <SpidermanViewer modelUrl="/amazing_spiderman.glb" />
+      <SpidermanViewer modelUrl="/amazing_spiderman.glb" onScrollProgress={setScrollProgress} />
       
+      {/* DESIGNER//DEVELOPER Text Overlay */}
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+        animate={{ y: -scrollProgress * 150 }}
+        transition={{ type: "tween", duration: 0 }}
+      >
+        <h2 className="text-white font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center whitespace-nowrap">
+          DESIGNER//DEVELOPER
+        </h2>
+      </motion.div>
+
       {/* 1. Custom Interactive Glowing Mouse Cursor Graphic */}
       {isHovered && (
         <motion.div

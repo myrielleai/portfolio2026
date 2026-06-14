@@ -5,9 +5,10 @@ import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 interface SpidermanViewerProps {
   modelUrl: string;
+  onScrollProgress?: (progress: number) => void;
 }
 
-export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
+export default function SpidermanViewer({ modelUrl, onScrollProgress }: SpidermanViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -30,8 +31,8 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
       0.1,
       1000
     );
-    camera.position.set(0, 0, 4);
-    camera.lookAt(0, 0, 0);
+    camera.position.set(1.5, 0, 4);
+    camera.lookAt(0.5, 0, 0);
     cameraRef.current = camera;
 
     // Renderer setup
@@ -59,9 +60,12 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
     // Handle scroll
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      // Animation happens over the first 800px of scroll
-      const scrollProgress = Math.max(0, Math.min(1, scrollTop / 800));
+      // Animation happens over the first 600px of scroll
+      const scrollProgress = Math.max(0, Math.min(1, scrollTop / 600));
       scrollProgressRef.current = scrollProgress;
+      if (onScrollProgress) {
+        onScrollProgress(scrollProgress);
+      }
     };
 
     // Initialize scroll position on mount
@@ -110,8 +114,8 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
         // Rotation: Start facing front (0, 0, 0), rotate to side (0, Math.PI / 2, 0)
         modelRef.current.rotation.y = progress * (Math.PI / 2);
 
-        // Translation: Start at center (0), move to left (-2)
-        modelRef.current.position.x = -progress * 2;
+        // Translation: Start at center (0), move to left (-1) - less movement to stay centered
+        modelRef.current.position.x = -progress * 1;
 
         // Subtle up movement on scroll
         modelRef.current.position.y = progress * 0.5;
