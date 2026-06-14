@@ -55,6 +55,18 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
     pointLight.position.set(-5, 3, 3);
     scene.add(pointLight);
 
+    // Handle scroll
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      // Animation happens over the first 800px of scroll
+      const scrollProgress = Math.max(0, Math.min(1, scrollTop / 800));
+      scrollProgressRef.current = scrollProgress;
+    };
+
+    // Initialize scroll position on mount
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+
     // Load model
     const loader = new GLTFLoader();
     loader.load(
@@ -72,6 +84,12 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
         const scale = 3 / maxDim;
         model.scale.multiplyScalar(scale);
 
+        // Reset position and rotation to start state based on current scroll
+        model.position.x = 0;
+        model.position.y = 0;
+        model.position.z = 0;
+        model.rotation.y = 0;
+
         scene.add(model);
         modelRef.current = model;
       },
@@ -80,25 +98,6 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
         console.error("Error loading model:", error);
       }
     );
-
-    // Handle scroll
-    const handleScroll = () => {
-      const heroSection = document.querySelector("#showcase") as HTMLElement | null;
-      if (heroSection) {
-        const scrollTop = window.scrollY;
-        const heroTop = heroSection.offsetTop;
-        const heroHeight = heroSection.clientHeight;
-
-        // Calculate scroll progress: 0 at hero start, 1 when hero is fully scrolled past
-        const scrollProgress = Math.max(
-          0,
-          Math.min(1, (scrollTop - heroTop) / heroHeight)
-        );
-        scrollProgressRef.current = scrollProgress;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
 
     // Animation loop
     const animate = () => {
