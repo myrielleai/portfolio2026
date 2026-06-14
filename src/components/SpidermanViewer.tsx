@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 interface SpidermanViewerProps {
   modelUrl: string;
@@ -58,7 +59,7 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
     const loader = new GLTFLoader();
     loader.load(
       modelUrl,
-      (gltf) => {
+      (gltf: GLTF) => {
         const model = gltf.scene;
         // Center the model
         const box = new THREE.Box3().setFromObject(model);
@@ -75,7 +76,7 @@ export default function SpidermanViewer({ modelUrl }: SpidermanViewerProps) {
         modelRef.current = model;
       },
       undefined,
-      (error) => {
+      (error: unknown) => {
         console.error("Error loading model:", error);
       }
     );
