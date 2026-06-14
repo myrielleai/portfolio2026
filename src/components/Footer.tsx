@@ -17,7 +17,7 @@ export default function Footer() {
       };
       const formatter = new Intl.DateTimeFormat("en-US", options);
       const timeStr = formatter.format(new Date());
-      // Strip AM/PM suffix to match standard digital clock format "H:MM:SS"
+      // Strip AM/PM suffix to match standard digital clock format "H:MM:SS" shown in Figma
       setTime(timeStr.replace(/\s*[AP]M$/i, ""));
     };
 
@@ -39,7 +39,7 @@ export default function Footer() {
       {/* 2. Directory Layout with restricted Horizontal Line */}
       <div className="pt-8 pb-16 grid grid-cols-1 md:grid-cols-12 gap-8">
         
-        {/* Left padding offset to push columns right-aligned */}
+        {/* Left padding offset to align exactly with the Figma mockup columns */}
         <div className="hidden md:block md:col-span-5" />
         
         {/* Directory Columns with top border only */}
@@ -100,40 +100,50 @@ export default function Footer() {
 
       </div>
 
-      {/* 3. Massive decorative name "myrielle" - lowercase Space Grotesk regular weight */}
-      <div className="w-full overflow-hidden select-none -mb-[3.8vw] relative z-0">
-        <div className="text-[16vw] sm:text-[18vw] lg:text-[21vw] font-space font-normal text-white text-right leading-[0.75] tracking-tighter">
+      {/* 3. Massive decorative name "myrielle" - Space Grotesk light weight with tight tracking.
+          Pushed down precisely using negative margins so baseline sits on border-t and 'y' crosses it. */}
+      <div className="w-full overflow-hidden select-none -mb-[2.6vw] relative z-0">
+        <div className="text-[16vw] sm:text-[18vw] lg:text-[21vw] font-space font-light text-white text-right leading-[0.75] tracking-[-0.05em]">
           {name.toLowerCase()}
         </div>
       </div>
 
-      {/* 4. Sub-Footer divided by border-t */}
-      <div className="border-t border-zinc-850 pt-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+      {/* 4. Sub-Footer divided by border-t - layered explicitly in front (z-10) to render on top of branding.
+          Horizontal columns align vertically with the directories above. */}
+      <div className="border-t border-zinc-850 pt-8 pb-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-start relative z-10 bg-transparent">
         
-        {/* Left: Copyright */}
-        <div className="col-span-12 md:col-span-3 space-y-0.5">
-          <div className="text-[8.5px] text-zinc-500 font-mono tracking-wider">
-            © 2026 // {name.toUpperCase()}
+        {/* Left padding offset to align exactly with the Figma mockup columns */}
+        <div className="hidden md:block md:col-span-5" />
+        
+        {/* Sub-Footer Columns aligned with the directories above */}
+        <div className="md:col-span-7 grid grid-cols-12 gap-6">
+          
+          {/* Column 1 (Left): Copyright */}
+          <div className="col-span-12 sm:col-span-3 space-y-0.5">
+            <div className="text-[8.5px] text-zinc-500 font-mono tracking-wider uppercase">
+              © 2026 // {name.toUpperCase()}
+            </div>
+            <div className="text-[8.5px] text-zinc-605 font-mono tracking-wider uppercase">
+              ALL RIGHTS RESERVED
+            </div>
           </div>
-          <div className="text-[8.5px] text-zinc-650 font-mono tracking-wider">
-            ALL RIGHTS RESERVED
-          </div>
-        </div>
 
-        {/* Center: Makati City */}
-        <div className="col-span-12 md:col-span-3 space-y-0.5">
-          <div className="text-[8.5px] text-zinc-500 font-mono tracking-wider">
-            MAKATI CITY, PH
+          {/* Column 2 (Center): Makati City */}
+          <div className="col-span-12 sm:col-span-3 space-y-0.5">
+            <div className="text-[8.5px] text-zinc-500 font-mono tracking-wider uppercase">
+              MAKATI CITY, PH
+            </div>
+            <div className="text-[8.5px] text-zinc-350 font-mono tracking-wider uppercase">
+              {time}
+            </div>
           </div>
-          <div className="text-[8.5px] text-zinc-350 font-mono tracking-wider">
-            {time}
-          </div>
-        </div>
 
-        {/* Right: Monospace tagline */}
-        <div className="col-span-12 md:col-span-6 text-right space-y-0.5 font-mono text-[8.5px] text-zinc-600 tracking-tight leading-relaxed">
-          <div>IT'S A LEAP OF FAITH. THAT'S ALL IT IS. A LEAP OF FAITH//////////</div>
-          <div>/////////////////////////////////////////////////////////////////</div>
+          {/* Column 3 (Right): Monospace tagline - left aligned under Contact column */}
+          <div className="col-span-12 sm:col-span-6 text-left space-y-0.5 font-mono text-[8.5px] text-zinc-500 tracking-tight leading-relaxed">
+            <div>IT'S A LEAP OF FAITH. THAT'S ALL IT IS. A LEAP OF FAITH//////////</div>
+            <div>/////////////////////////////////////////////////////////////////</div>
+          </div>
+
         </div>
 
       </div>
