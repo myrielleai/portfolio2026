@@ -32,11 +32,11 @@ export default function AvatarShowcase() {
       {/* 3D Spiderman Model with Scroll Animation */}
       <SpidermanViewer modelUrl="/amazing_spiderman.glb" onScrollProgress={setScrollProgress} />
       
-      {/* DESIGNER//DEVELOPER Text Overlay */}
+      {/* DESIGNER//DEVELOPER Text Overlay - moves up after 1 full page */}
       <div
         className="fixed top-1/2 left-1/2 z-20 pointer-events-none"
         style={{
-          transform: `translate(-50%, calc(-50% - ${scrollProgress * 200}px))`,
+          transform: `translate(-50%, calc(-50% - ${Math.max(0, (scrollProgress - 1/3) * 300)}px))`,
         }}
       >
         <h2 className="text-white font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center whitespace-nowrap">
@@ -44,12 +44,12 @@ export default function AvatarShowcase() {
         </h2>
       </div>
 
-      {/* Quote Text - appears as model reaches left side view */}
+      {/* Quote Text - unfades on 3rd full page height */}
       <div
         className="fixed top-1/2 right-6 sm:right-12 lg:right-20 z-20 pointer-events-none max-w-xs lg:max-w-sm"
         style={{
-          opacity: Math.max(0, (scrollProgress - 0.4) * 2.5),
-          transform: `translateY(calc(-50% + ${scrollProgress < 0.5 ? 20 + (50 * (1 - scrollProgress)) : 20}px))`,
+          opacity: Math.max(0, (scrollProgress - 2/3) * 3),
+          transform: `translateY(-50%)`,
         }}
       >
         <p className="text-white font-medium text-lg sm:text-xl leading-relaxed text-right">
