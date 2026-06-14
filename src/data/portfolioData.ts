@@ -48,7 +48,7 @@ export interface PortfolioData {
 export const portfolioData: PortfolioData = {
   name: "Myrielle",
   role: "AI Engineer & Full-Stack Developer",
-  email: "myrielle@gmail.com",
+  email: "myrielle.work@gmail.com",
   resumeUrl: "#",
   githubUrl: "https://github.com",
   linkedinUrl: "https://linkedin.com",
