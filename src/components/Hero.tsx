@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowDownRight } from "lucide-react";
@@ -30,7 +30,7 @@ export default function Hero() {
   }, [keywords]);
 
   // Motion variants for container fade-ins
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -41,24 +41,24 @@ export default function Hero() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 100, damping: 15 },
+      transition: { type: "spring", stiffness: 100, damping: 15 } as any,
     },
   };
 
   return (
     <>
       {/* Fixed title wrapper */}
-      <div id="title-wrapper" style={{position: "fixed", top: 0, left: 0, width: "100%", zIndex: 10, pointerEvents: "none", textAlign: "center"}}>
+      <div id="title-wrapper" style={{ position: "fixed", top: 0, left: 0, width: "100%", zIndex: 10, pointerEvents: "none", textAlign: "center" }}>
         <motion.h1
           id="title"
           variants={itemVariants}
           className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.05]"
-          style={{margin: "0 auto"}}
+          style={{ margin: "0 auto" }}
         >
           {headline}
         </motion.h1>
