@@ -17,6 +17,7 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const modelRef = useRef<THREE.Group | null>(null);
   const scrollProgressRef = useRef<number>(0);
+  const mouseRef = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -33,8 +34,9 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
       0.1,
       1000
     );
-    camera.position.set(1.5, 0, 4);
-    camera.lookAt(0.5, 0, 0);
+    // Position camera to nicely frame the model
+    camera.position.set(0, 0, 2.5);
+    camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
     // Renderer setup
@@ -48,7 +50,7 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
     rendererRef.current = renderer;
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2);
     scene.add(ambientLight);
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -82,6 +84,32 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
       }
     });
 
+    // Fallback scroll listener for progress updates if ScrollTrigger does not fire
+    const handleWindowScroll = () => {
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      const scrollTop = window.scrollY;
+      const progress = docHeight > 0 ? scrollTop / docHeight : 0;
+      scrollProgressRef.current = progress;
+    };
+    window.addEventListener('scroll', handleWindowScroll);
+    // Ensure cleanup removes listener
+    const cleanupScrollListener = () => {
+      window.removeEventListener('scroll', handleWindowScroll);
+    };
+
+    // Mouse move handling for parallax
+    const handleMouseMove = (event: MouseEvent) => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const x = (event.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+      const y = (event.clientY - rect.top) / rect.height - 0.5;
+      mouseRef.current = { x, y };
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    const cleanupMouseListener = () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+
     // Load model
     const loader = new GLTFLoader();
     loader.load(
@@ -96,17 +124,35 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
         // Scale appropriately
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 3 / maxDim;
+        // Scale so the model roughly fills the height of the viewport (adjust multiplier as needed)
+        const scale = 4 / maxDim;
         model.scale.multiplyScalar(scale);
-
-        // Reset position and rotation to start state based on current scroll
-        model.position.x = 0;
+        // Keep model vertically centered
         model.position.y = 0;
-        model.position.z = 0;
-        model.rotation.y = 0;
+
+        // Position model centered in view
+        model.position.z = -0.5; // bring model forward
+        model.position.y = 0.2; // slight upward offset for better fit
+        model.rotation.y = .5;
+        model.rotation.x = .2;
+
+        // Removed redundant dummy GSAP animation – the existing animation loop uses scrollProgressRef to drive rotation and translation
 
         scene.add(model);
         modelRef.current = model;
+        // GSAP tween to drive model animation based on scroll progress
+        gsap.to(model, {
+          rotation: { y: Math.PI / 2 },
+          x: -3,
+          y: 0.5,
+          ease: "none",
+          scrollTrigger: {
+            trigger: "#showcase",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: true,
+          },
+        });
       },
       undefined,
       (error: unknown) => {
@@ -118,19 +164,16 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
     const animate = () => {
       requestAnimationFrame(animate);
 
-      if (modelRef.current) {
-        const progress = scrollProgressRef.current;
+      // Apply mouse parallax to camera position
+      const { x, y } = mouseRef.current;
+      // Slight offset factor for subtle effect
+      const offsetFactor = 0.5; // adjust for heaviness
+      const parallaxFactor = .5; // heavier parallax effect
+      camera.position.x = 0 + x * parallaxFactor;
+      camera.position.y = 0 + y * parallaxFactor;
+      camera.lookAt(0, 0, 0);
 
-        // Rotation: Start facing front (0, 0, 0), rotate to side (0, Math.PI / 2, 0)
-        modelRef.current.rotation.y = progress * (Math.PI / 2);
-
-        // Translation: Start at center (0), move to left (-3) for full transition
-        modelRef.current.position.x = -progress * 3;
-
-        // Subtle up movement on scroll
-        modelRef.current.position.y = progress * 0.5;
-      }
-
+      // Render the scene each frame
       renderer.render(scene, camera);
     };
 
@@ -154,6 +197,10 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
     return () => {
       trigger.kill();
       window.removeEventListener("resize", handleResize);
+      // Remove fallback scroll listener
+      cleanupScrollListener();
+      // Remove mouse move listener
+      cleanupMouseListener();
       if (containerRef.current && rendererRef.current) {
         containerRef.current.removeChild(rendererRef.current.domElement);
       }

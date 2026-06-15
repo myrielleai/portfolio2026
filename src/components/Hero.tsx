@@ -10,20 +10,18 @@ export default function Hero() {
   const [keywordIdx, setKeywordIdx] = useState(0);
 
   useEffect(() => {
-    // Title scroll animation – moves the fixed title wrapper out of view
+    // Updated title scroll animation – title exits on first scroll up
     gsap.registerPlugin(ScrollTrigger);
-    const titleWrapper = document.getElementById('title-wrapper');
-    if (titleWrapper) {
-      gsap.to(titleWrapper, {
-        y: -200,
-        scrollTrigger: {
-          trigger: '#hero-section',
-          start: 'top top',
-          end: '+=200',
-          scrub: true,
-        },
-      });
-    }
+    // Animate the title wrapper out of the viewport on the first scroll down
+    ScrollTrigger.create({
+      trigger: '#hero-section',
+      start: 'top top',
+      end: '+=1', // minimal scroll distance to trigger
+      onLeave: () => {
+        gsap.to('#title-wrapper', { y: -200, duration: 0.5, ease: 'power2.out' });
+      },
+      once: true, // ensure it runs only once
+    });
 
     const timer = setInterval(() => {
       setKeywordIdx((prev) => (prev + 1) % keywords.length);

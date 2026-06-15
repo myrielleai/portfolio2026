@@ -4,10 +4,11 @@ import { portfolioData } from "../data/portfolioData";
 
 export default function Projects() {
   const projects = portfolioData.projects;
+  console.log('Projects component loaded, count:', projects.length);
+
 
   return (
     <section id="projects" className="grid grid-cols-1 lg:grid-cols-12 border-b border-zinc-900 items-stretch">
-      
       {/* Left Column (4 cols) */}
       <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-zinc-900 py-24 lg:py-36 px-8 lg:px-16 bg-black/20 flex flex-col justify-start">
         <span className="font-mono text-xs text-zinc-500 tracking-widest block sticky top-28 reveal">03 // SELECTED WORK</span>
@@ -70,7 +71,6 @@ export default function Projects() {
                   </span>
                 ))}
               </div>
-
             </div>
           ))}
         </div>
