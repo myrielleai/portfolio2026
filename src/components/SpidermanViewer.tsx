@@ -142,7 +142,7 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
         modelRef.current = model;
         // GSAP tween to drive model animation based on scroll progress
         gsap.to(model, {
-          rotation: { y: Math.PI / 2 },
+          rotationY: Math.PI / 2,
           x: -3,
           y: 0.5,
           ease: "none",
@@ -167,7 +167,7 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
       // Apply mouse parallax to camera position
       const { x, y } = mouseRef.current;
       // Slight offset factor for subtle effect
-      const offsetFactor = 0.5; // adjust for heaviness
+
       const parallaxFactor = .5; // heavier parallax effect
       camera.position.x = 0 + x * parallaxFactor;
       camera.position.y = 0 + y * parallaxFactor;

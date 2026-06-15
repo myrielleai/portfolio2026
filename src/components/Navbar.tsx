@@ -1,29 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { portfolioData } from "../data/portfolioData";
+
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [showLogo, setShowLogo] = useState(true);
 
   // Hide logo after Projects section appears
-  useEffect(() => {
-    const handleScroll = () => {
-      const proj = document.getElementById('projects');
-      if (proj) {
-        const rect = proj.getBoundingClientRect();
-        setShowLogo(rect.top > 0);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-  const { name, email } = portfolioData;
 
-  const logoText = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
 
   const navLinks = [
     { label: "About", href: "#showcase" },
@@ -39,7 +22,6 @@ export default function Navbar() {
           {/* Left side: centered logo */}
           {/* Placeholder to retain left spacing */}
           <div className="flex-1"></div>
-          {/* Navigation remains on the right */}
 
           {/* Right: vertical ABOUT, WORK, CONTACT navigation */}
           <nav className="hidden md:flex flex-col items-end gap-4 mt-28">

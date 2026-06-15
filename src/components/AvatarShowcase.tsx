@@ -1,42 +1,13 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import SpidermanViewer from "./SpidermanViewer";
 
 export default function AvatarShowcase() {
-  // Custom mouse cursor position state
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-  const [myrielleVisible, setMyrielleVisible] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
-
-  // Hide myrielle link once Projects section enters view
-  useEffect(() => {
-    const proj = document.getElementById('projects');
-    if (proj) {
-      const rect = proj.getBoundingClientRect();
-      // Show link only while the Projects section is still above the top of the viewport
-      setMyrielleVisible(rect.top > 0);
-    }
-  }, [scrollProgress]);
-
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-  };
 
   return (
     <section
       id="showcase"
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className="relative w-full min-h-[300vh] flex flex-col justify-center bg-black px-6 sm:px-12 lg:px-20 py-10 lg:py-16 select-none"
     >
       <a
