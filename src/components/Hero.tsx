@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowDownRight } from "lucide-react";
 import { portfolioData } from "../data/portfolioData";
 
@@ -8,6 +10,21 @@ export default function Hero() {
   const [keywordIdx, setKeywordIdx] = useState(0);
 
   useEffect(() => {
+    // Title scroll animation – moves the fixed title wrapper out of view
+    gsap.registerPlugin(ScrollTrigger);
+    const titleWrapper = document.getElementById('title-wrapper');
+    if (titleWrapper) {
+      gsap.to(titleWrapper, {
+        y: -200,
+        scrollTrigger: {
+          trigger: '#hero-section',
+          start: 'top top',
+          end: '+=200',
+          scrub: true,
+        },
+      });
+    }
+
     const timer = setInterval(() => {
       setKeywordIdx((prev) => (prev + 1) % keywords.length);
     }, 3000);
@@ -36,7 +53,18 @@ export default function Hero() {
   };
 
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-12 border-b border-zinc-900 min-h-[calc(100vh-5rem)] items-stretch">
+    {/* Fixed title wrapper */}
+    <div id="title-wrapper" style={{position: "fixed", top: 0, left: 0, width: "100%", zIndex: 10, pointerEvents: "none", textAlign: "center"}}>
+      <motion.h1
+        id="title"
+        variants={itemVariants}
+        className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.05]"
+        style={{margin: "0 auto"}}
+      >
+        {headline}
+      </motion.h1>
+    </div>
+    <section id="hero-section" className="grid grid-cols-1 lg:grid-cols-12 border-b border-zinc-900 min-h-[calc(100vh-5rem)] items-stretch">
       
       {/* Left Column - Section Indicator (4 Cols) */}
       <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-zinc-900 p-8 lg:p-12 flex flex-col justify-between bg-black/20">
@@ -75,12 +103,7 @@ export default function Hero() {
           </div>
 
           {/* Main Headline */}
-          <motion.h1 
-            variants={itemVariants} 
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.05]"
-          >
-            {headline}
-          </motion.h1>
+          {/* Title moved to fixed wrapper */}
         </div>
 
         {/* Short bio */}

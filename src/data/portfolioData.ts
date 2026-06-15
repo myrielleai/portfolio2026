@@ -48,7 +48,7 @@ export interface PortfolioData {
 export const portfolioData: PortfolioData = {
   name: "Myrielle",
   role: "AI Engineer & Full-Stack Developer",
-  email: "myrielle.work@gmail.com",
+  email: "myrielle@gmail.com",
   resumeUrl: "#",
   githubUrl: "https://github.com",
   linkedinUrl: "https://linkedin.com",
@@ -87,9 +87,9 @@ export const portfolioData: PortfolioData = {
   },
   experience: [
     {
-      company: "Vortex Labs",
-      role: "Lead UI Engineer",
-      duration: "2024 - Present",
+      company: "UChannel",
+      role: "Designer & Social Media Manager",
+      duration: "2025 - 2025",
       points: [
         "Architected an open-source React component library used by 45+ product teams, decreasing page load times by 40%.",
         "Pioneered Framer Motion dynamic layout groups to transition visual states smoothly, achieving a 95% user satisfaction rate.",
@@ -97,57 +97,36 @@ export const portfolioData: PortfolioData = {
       ],
       skills: ["React", "TypeScript", "Tailwind CSS", "Framer Motion", "Vite"]
     },
-    {
-      company: "Aether AI",
-      role: "Senior Frontend Engineer",
-      duration: "2022 - 2024",
-      points: [
-        "Led the frontend team in shipping a real-time collaborative workspace editor with offline-first synchronization using CRDTs.",
-        "Maintained and optimized Next.js App Router applications, implementing strict static generation to boost Lighthouse SEO scores.",
-        "Established automated Web Content Accessibility Guidelines (WCAG) testing into CI/CD pipelines, ensuring full keyboard navigable interfaces."
-      ],
-      skills: ["Next.js", "React", "TypeScript", "Node.js", "Tailwind CSS", "Playwright"]
-    },
-    {
-      company: "ByteDesign",
-      role: "Frontend Developer",
-      duration: "2020 - 2022",
-      points: [
-        "Developed custom high-performance data visualizations with SVG and D3.js for interactive analytics dashboards.",
-        "Collaborated with product designers to implement a unified Figma-to-Code design token automation pipeline.",
-        "Migrated legacy codebase from React Class Components to React Hooks, reducing bundle size by 20%."
-      ],
-      skills: ["React", "JavaScript", "D3.js", "SASS", "Vite"]
-    }
+
   ],
   projects: [
     {
-      title: "SyncFlow Core",
-      description: "A developer-first state container with fine-grained reactivity, built-in timeline tracking, and hot module replacement support.",
-      tags: ["TypeScript", "Reactivity", "NPM Package", "Vite"],
-      demoUrl: "https://github.com",
-      githubUrl: "https://github.com"
+      title: "Makati Human Milk Bank System",
+      description: "Designed and deployed a cloud-based PostgreSQL database using Render, including schema design, relational modeling, and SQL query implementation. Ensured proper data structure and integration support for the system’s backend.",
+      tags: ["PostgreSQL", "Render", "SQL"],
+      demoUrl: "https://hmbms-server.onrender.com/",
+      githubUrl: "https://github.com/KadenYohan/MilkBank-Group-Seven"
     },
     {
-      title: "Linear-Style Task Engine",
+      title: "ReliefSync: Disaster Logistics Engine",
       description: "An ultra-fast, keyboard-driven task tracking app. Features instant local-first state, optimistic updates, and complex command menu palettes.",
       tags: ["React", "Tailwind CSS", "LocalForage", "Framer Motion"],
-      demoUrl: "https://github.com",
-      githubUrl: "https://github.com"
+      demoUrl: "https://relief-sync-one.vercel.app/",
+      githubUrl: "https://github.com/myrielleai/ReliefSync"
     },
     {
-      title: "Aura Motion Lab",
+      title: "UChannel Website",
       description: "Interactive visual environment for testing physical layouts, physics spring configurations, and gesture interactions in the browser.",
       tags: ["React", "Three.js", "TypeScript", "Tailwind CSS"],
       demoUrl: "https://github.com",
       githubUrl: "https://github.com"
     },
     {
-      title: "Neolithic Grid Editor",
+      title: "Endlezz Market Website",
       description: "A brutalist CSS Grid and layout builder that exports clean, production-ready, hand-coded Vanilla CSS and Tailwind styles.",
       tags: ["React", "CSS Grid", "TypeScript", "Vite"],
-      demoUrl: "https://github.com",
-      githubUrl: "https://github.com"
+      demoUrl: "https://endlezz-market.vercel.app/",
+      githubUrl: "https://github.com/myrielleai/EndlezzMarket"
     }
   ],
   skills: [
