@@ -23,6 +23,8 @@ export default function Navbar() {
           {/* Placeholder to retain left spacing */}
           <div className="flex-1"></div>
 
+          
+
           {/* Right: vertical ABOUT, WORK, CONTACT navigation */}
           <nav className="hidden md:flex flex-col items-end gap-4 mt-28">
             {navLinks.map((link) => (

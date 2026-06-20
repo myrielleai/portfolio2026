@@ -12,7 +12,7 @@ export default function AvatarShowcase() {
     >
       <a
         href="#"
-        className="fixed top-1/2 left-4 z-30 transform -translate-y-1/2 text-[33px] cursor-pointer hover:text-white transition-colors"
+        className="fixed top-1/2 left-4 z-30 transform -translate-y-1/2 text-[24px] cursor-pointer hover:text-white transition-colors"
         style={{
           fontFamily: "'Clash Grotesk', sans-serif",
           display: "block",

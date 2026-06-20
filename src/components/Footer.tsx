@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { portfolioData } from "../data/portfolioData";
 
 export default function Footer() {
-  const { name, email, linkedinUrl } = portfolioData;
+  const { name, email, linkedinUrl, instagramUrl } = portfolioData;
   const [time, setTime] = useState("");
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function Footer() {
             </span>
             <div className="space-y-1">
               <a
-                href="https://instagram.com"
+                href={instagramUrl || "https://instagram.com"}
                 target="_blank"
                 rel="noreferrer"
                 className="block text-white font-switzer text-base sm:text-lg font-bold hover:text-purple-400 transition-colors"

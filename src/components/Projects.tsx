@@ -18,10 +18,11 @@ export default function Projects() {
       <div className="lg:col-span-8 py-24 lg:py-36 px-8 lg:px-16">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {projects.map((proj, idx) => (
-            <div
+            <a href={proj.demoUrl ?? proj.githubUrl} target="_blank" rel="noreferrer"
               key={idx}
               className="group border border-zinc-900 bg-zinc-950/10 p-8 flex flex-col justify-between min-h-[280px] hover:border-zinc-850 transition-all duration-500 reveal"
             >
+                {proj.image && (<img src={proj.image} alt={proj.title} className="w-full h-48 object-cover mb-4 rounded" />)}
               <div>
                 {/* Header: Title and Outbound Links */}
                 <div className="flex items-start justify-between gap-4">
@@ -71,7 +72,7 @@ export default function Projects() {
                   </span>
                 ))}
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>

@@ -1,7 +1,8 @@
 import { portfolioData } from "../data/portfolioData";
+import type { Experience } from "../data/portfolioData";
 
 export default function Experience() {
-  const experiences = portfolioData.experience;
+  const experiences: Experience[] = portfolioData.experience;
 
   return (
     <section id="experience" className="grid grid-cols-1 lg:grid-cols-12 border-b border-zinc-900 items-stretch">
@@ -14,7 +15,7 @@ export default function Experience() {
       {/* Right Column (8 cols) */}
       <div className="lg:col-span-8 py-24 lg:py-36 px-8 lg:px-16">
         <div className="relative border-l border-zinc-900 ml-4 md:ml-6 pl-8 md:pl-12 py-4 space-y-20">
-          {experiences.map((exp, index) => (
+          {experiences.map((exp: Experience, index: number) => (
             <div
               key={index}
               className="relative group reveal"
@@ -41,7 +42,7 @@ export default function Experience() {
 
               {/* Achievement Bullet Points */}
               <ul className="mt-5 space-y-3.5 list-none text-zinc-400 text-xs sm:text-sm leading-relaxed">
-                {exp.points.map((point, ptIdx) => (
+                {exp.points.map((point: string, ptIdx: number) => (
                   <li key={ptIdx} className="relative pl-5 before:content-['—'] before:absolute before:left-0 before:text-zinc-700 text-zinc-400">
                     {point}
                   </li>
@@ -50,7 +51,7 @@ export default function Experience() {
 
               {/* Skill capsules/tags used in this role */}
               <div className="mt-6 flex flex-wrap gap-2">
-                {exp.skills.map((skill, skillIdx) => (
+                {exp.skills.map((skill: string, skillIdx: number) => (
                   <span
                     key={skillIdx}
                     className="font-mono text-[9px] text-zinc-500 bg-zinc-950 border border-zinc-900 px-2 py-0.5 rounded-sm hover:border-zinc-750 transition-colors duration-300"

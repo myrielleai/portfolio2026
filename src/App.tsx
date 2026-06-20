@@ -2,13 +2,16 @@ import { useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
+
 import Navbar from "./components/Navbar";
 import AvatarShowcase from "./components/AvatarShowcase";
+import Education from "./components/Education";
 import Experience from "./components/Experience";
 import Projects from "./components/Projects";
 import Marquee from "./components/Marquee";
 import Footer from "./components/Footer";
 import Preloader from "./components/Preloader";
+
 
 export default function App() {
   const [loadingComplete, setLoadingComplete] = useState(false);
@@ -74,6 +77,7 @@ export default function App() {
         {/* Core Layout Sections */}
         <main className="flex-grow">
           <AvatarShowcase />
+          <Education />
           <Experience />
           <Projects />
           <Marquee />
