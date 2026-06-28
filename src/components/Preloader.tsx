@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { portfolioData } from "../data/portfolioData";
 
 interface PreloaderProps {
   onComplete: () => void;
@@ -8,29 +9,70 @@ interface PreloaderProps {
 export default function Preloader({ onComplete }: PreloaderProps) {
   const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [weatherTemp, setWeatherTemp] = useState<string>("--°");
 
   useEffect(() => {
     let current = 0;
-    
-    // Count up progress smoothly with random steps to feel realistic
-    const interval = setInterval(() => {
-      const increment = Math.floor(Math.random() * 6) + 2; // Steps of 2-7%
-      current = Math.min(current + increment, 100);
-      setProgress(current);
-      
-      if (current === 100) {
-        clearInterval(interval);
-        // Wait briefly after reaching 100% to let the user see the complete state
-        const timeout = setTimeout(() => {
-          setIsComplete(true);
-          onComplete();
-        }, 650);
-        return () => clearTimeout(timeout);
-      }
-    }, 60);
+    let timer: ReturnType<typeof setInterval> | null = null;
 
-    return () => clearInterval(interval);
+    const startInterval = () => {
+      timer = setInterval(() => {
+        const increment = Math.floor(Math.random() * 5) + 3;
+        let next = current + increment;
+
+        // Handle exact pause at 67%
+        if (current < 67 && next >= 67) {
+          current = 67;
+          setProgress(67);
+          if (timer) clearInterval(timer);
+
+          // Brief pause at 67%
+          setTimeout(() => {
+            startInterval();
+          }, 600);
+          return;
+        }
+
+        current = Math.min(next, 100);
+        setProgress(current);
+
+        if (current === 100) {
+          if (timer) clearInterval(timer);
+          const timeout = setTimeout(() => {
+            setIsComplete(true);
+            onComplete();
+          }, 600);
+          return () => clearTimeout(timeout);
+        }
+      }, 40);
+    };
+
+    startInterval();
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
   }, [onComplete]);
+
+  // Fetch live weather for Makati City with fallback to "--°"
+  useEffect(() => {
+    async function fetchMakatiWeather() {
+      try {
+        const res = await fetch(
+          "https://api.open-meteo.com/v1/forecast?latitude=14.5547&longitude=121.0244&current_weather=true"
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.current_weather?.temperature !== undefined) {
+            setWeatherTemp(`${Math.round(data.current_weather.temperature)}°`);
+          }
+        }
+      } catch {
+        // Fallback to initial "--°"
+      }
+    }
+    fetchMakatiWeather();
+  }, []);
 
   // Lock and unlock scrolling on main content during loading
   useEffect(() => {
@@ -51,42 +93,40 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           initial={{ y: 0 }}
           exit={{ y: "-100%" }}
           transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
-          className="fixed inset-0 z-50 bg-zinc-100 flex items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-50 bg-[var(--bg)] text-[var(--heading)] flex flex-col justify-between p-6 sm:p-10 lg:p-12 pointer-events-auto select-none transition-colors duration-300"
         >
-          {/* Background: Massive horizontal scrolling ticker */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0 opacity-15">
-            <div className="animate-marquee flex gap-12 whitespace-nowrap">
-              <span className="text-[12vw] font-black uppercase text-zinc-400 tracking-tighter">
-                AI ENGINEER // FULL STACK DEVELOPER // CREATIVE TECHNOLOGIST //
+          {/* Top layout spanning the screen in two columns */}
+          <div className="w-full flex justify-between items-start">
+            {/* Left Column: Logo & MAKATI CITY */}
+            <div className="flex flex-col items-start gap-1">
+              <div className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[var(--heading)]">
+                {portfolioData.name.toLowerCase()}
+                <span className="text-[var(--accent)]">.</span>
+              </div>
+              <span className="font-mono text-xs tracking-[0.2em] text-[var(--text-muted)] uppercase font-medium">
+                MAKATI CITY
               </span>
-              <span className="text-[12vw] font-black uppercase text-zinc-400 tracking-tighter">
-                AI ENGINEER // FULL STACK DEVELOPER // CREATIVE TECHNOLOGIST //
+            </div>
+
+            {/* Right Column: Loading counter & Weather */}
+            <div className="flex flex-col items-end gap-1">
+              <div className="font-mono text-4xl sm:text-6xl md:text-7xl font-light tracking-tight text-[var(--heading)] tabular-nums">
+                {progress}%
+              </div>
+              <span className="font-mono text-xs sm:text-sm tracking-widest text-[var(--text-muted)] uppercase font-medium">
+                {weatherTemp}
               </span>
             </div>
           </div>
 
-          {/* Central floating capsule with drop shadow and purple border glow */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.5, type: "spring" }}
-            className="flex items-center gap-5 px-8 py-4 bg-black rounded-full shadow-2xl shadow-purple-500/10 border border-purple-500/30 relative z-10"
-          >
-            {/* Left: Loading text */}
-            <span className="font-mono text-xs tracking-[0.2em] text-zinc-400 font-bold uppercase">
-              LOADING
-            </span>
-            
-            {/* Separator line */}
-            <div className="w-[1px] h-4 bg-zinc-800" />
-            
-            {/* Right: Monospace counter */}
-            <span className="font-mono text-xs sm:text-sm font-semibold text-white w-10 text-right">
-              {progress}%
-            </span>
-          </motion.div>
+          {/* Bottom minimal aesthetic status indicator */}
+          <div className="w-full flex justify-between items-end font-mono text-[11px] text-[var(--text-muted)] tracking-widest uppercase opacity-60">
+            <span>PORTFOLIO / 2026</span>
+            <span>SYSTEM INITIALIZING</span>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
+
