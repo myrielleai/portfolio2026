@@ -5,12 +5,13 @@ import Lenis from "lenis";
 
 import Navbar from "./components/Navbar";
 import AvatarShowcase from "./components/AvatarShowcase";
-import Education from "./components/Education";
-import Experience from "./components/Experience";
+
 import Projects from "./components/Projects";
+import Capabilities from "./components/Capabilities";
 import Marquee from "./components/Marquee";
 import Footer from "./components/Footer";
 import Preloader from "./components/Preloader";
+
 
 
 export default function App() {
@@ -64,28 +65,30 @@ export default function App() {
   }, [loadingComplete]);
 
   return (
-    <div className="min-h-screen bg-black text-zinc-400 font-sans selection:bg-white selection:text-black antialiased">
+    <div
+      className="min-h-screen font-sans selection:bg-[var(--accent)] selection:text-white antialiased"
+      style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
+    >
       {/* Entry preloader screen */}
       <Preloader onComplete={() => setLoadingComplete(true)} />
-      
+
       {/* Structural full-width container */}
-      <div className="w-full min-h-screen flex flex-col bg-zinc-950/10">
-        
+      <div className="w-full min-h-screen flex flex-col">
+
         {/* Sticky Header - hidden during preload */}
         {loadingComplete && <Navbar />}
 
         {/* Core Layout Sections */}
         <main className="flex-grow">
           <AvatarShowcase />
-          <Education />
-          <Experience />
           <Projects />
+          <Capabilities />
           <Marquee />
         </main>
 
         {/* Footer containing Contact section */}
         <Footer />
-        
+
       </div>
     </div>
   );

@@ -8,19 +8,22 @@ export interface Project {
 }
 
 export interface Experience {
-  company: string;
   role: string;
+  company: string;
   duration: string;
   points: string[];
   skills: string[];
 }
 
 export interface Education {
-  university: string;
   degree: string;
+  university: string;
   duration: string;
   highlights: string[];
 }
+
+
+
 export interface PortfolioData {
   name: string;
   role: string;
@@ -48,6 +51,7 @@ export interface PortfolioData {
     sidebarTitle: string;
     sidebarItems: { label: string; value: string }[];
   };
+
   education: Education[];
   experience: Experience[];
   projects: Project[];
@@ -97,32 +101,41 @@ export const portfolioData: PortfolioData = {
   },
   education: [
     {
-      university: "Mapua University",
-      degree: "BS Computer Science",
-      duration: "",
-      highlights: ["Strong academic performance in core CS and IT subjects"]
-    },
-    {
-      university: "University of Santo Tomas",
-      degree: "BS Architecture",
-      duration: "",
-      highlights: ["Dean’s List (First Semester and Second Semester, Year 1)", "Class President"]
+      degree: "BS Information Technology",
+      university: "Polytechnic University of the Philippines",
+      duration: "2023 — 2027",
+      highlights: [
+        "Specializing in web development and AI integration",
+        "Dean's Lister — consistent academic excellence",
+        "Led multiple full-stack capstone and research projects"
+      ]
     }
   ],
   experience: [
     {
-      company: "UChannel",
-      role: "Designer & Social Media Manager",
-      duration: "2025 - 2025",
+      role: "AI & Full-Stack Developer",
+      company: "Freelance",
+      duration: "2024 — Present",
       points: [
-        "Architected an open-source React component library used by 45+ product teams, decreasing page load times by 40%.",
-        "Pioneered Framer Motion dynamic layout groups to transition visual states smoothly, achieving a 95% user satisfaction rate.",
-        "Refactored state-management systems using lightweight signals, cutting memory footprints by 35% on low-end mobile devices."
+        "Built intelligent web applications using React, TypeScript, and Node.js with AI-powered features",
+        "Designed and deployed cloud-based PostgreSQL databases with relational modeling and schema design",
+        "Developed responsive, motion-rich frontends with Tailwind CSS, Framer Motion, and GSAP"
       ],
-      skills: ["React", "TypeScript", "Tailwind CSS", "Framer Motion", "Vite"]
+      skills: ["React", "TypeScript", "Node.js", "PostgreSQL", "Tailwind CSS", "GSAP"]
     },
-
+    {
+      role: "Frontend Developer",
+      company: "UChannel",
+      duration: "2025",
+      points: [
+        "Built interactive UI components with React and Three.js for an immersive web experience",
+        "Implemented smooth scroll animations and responsive layouts with modern CSS techniques",
+        "Collaborated with designers to translate Figma mockups into pixel-perfect interfaces"
+      ],
+      skills: ["React", "Three.js", "TypeScript", "Tailwind CSS", "Figma"]
+    }
   ],
+
   projects: [
     {
       title: "Makati Human Milk Bank System",

@@ -27,38 +27,51 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer id="contact" className="w-full bg-black pt-32 pb-8 px-8 lg:px-16 reveal flex flex-col justify-end">
+    <footer id="contact" className="w-full bg-[var(--bg)] pt-32 pb-8 px-8 lg:px-16 reveal flex flex-col justify-end transition-colors duration-300 border-t border-[var(--border)]">
 
-      {/* 1. Large Top Headline - Darker Grotesque in refined bold/tracking */}
+      {/* 1. Large Top Headline */}
       <div className="mb-24 md:col-span-7 md:ml-[41.6667%]">
-        <h2 className="text-white font-switzer text-[40px] tracking-[-0.03em] leading-[0.95]"><strong className="font-bold">With intention</strong> and purpose.</h2>
+        <h2 className="text-[var(--heading)] font-switzer text-[36px] sm:text-[44px] tracking-[-0.03em] leading-[1.05]">
+          <strong className="font-bold">With intention</strong> and purpose.
+        </h2>
       </div>
 
-      {/* 2. Directory Layout with restricted Horizontal Line */}
+      {/* 2. Directory Layout */}
       <div className="pt-8 pb-16 grid grid-cols-1 md:grid-cols-12 gap-8">
-
-        {/* Left padding offset to align exactly with the Figma mockup columns */}
         <div className="hidden md:block md:col-span-5" />
 
-        {/* Directory Columns with top border only */}
-        <div className="md:col-span-7 border-t border-zinc-850 pt-8 grid grid-cols-12 gap-6">
+        <div className="md:col-span-7 border-t border-[var(--border)] pt-8 grid grid-cols-12 gap-6">
 
-          {/* Column 1: Get to know me (span 3) */}
+          {/* Column 1: Navigation */}
           <div className="col-span-12 sm:col-span-3 space-y-2">
-            <span className="block font-switzer text-[9px] text-zinc-500 tracking-wider uppercase">
-              Get to know me
+            <span className="block font-mono text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
+              Navigation
             </span>
-            <a
-              href="#showcase"
-              className="block text-white font-switzer text-base sm:text-lg font-bold hover:text-purple-400 transition-colors"
-            >
-              About
-            </a>
+            <div className="space-y-1">
+              <a
+                href="#showcase"
+                className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
+              >
+                Showcase
+              </a>
+              <a
+                href="#projects"
+                className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
+              >
+                Selected Work
+              </a>
+              <a
+                href="#capabilities"
+                className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
+              >
+                Capabilities
+              </a>
+            </div>
           </div>
 
-          {/* Column 2: Socials (span 3) */}
+          {/* Column 2: Socials */}
           <div className="col-span-12 sm:col-span-3 space-y-2">
-            <span className="block font-switzer text-[9px] text-zinc-500 tracking-wider uppercase">
+            <span className="block font-mono text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
               Socials
             </span>
             <div className="space-y-1">
@@ -66,7 +79,7 @@ export default function Footer() {
                 href={instagramUrl || "https://instagram.com"}
                 target="_blank"
                 rel="noreferrer"
-                className="block text-white font-switzer text-base sm:text-lg font-bold hover:text-purple-400 transition-colors"
+                className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
               >
                 Instagram
               </a>
@@ -74,21 +87,21 @@ export default function Footer() {
                 href={linkedinUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="block text-white font-switzer text-base sm:text-lg font-bold hover:text-purple-400 transition-colors"
+                className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
               >
                 LinkedIn
               </a>
             </div>
           </div>
 
-          {/* Column 3: Contact (span 6) */}
+          {/* Column 3: Contact */}
           <div className="col-span-12 sm:col-span-6 space-y-2">
-            <span className="block font-switzer text-[9px] text-zinc-500 tracking-wider uppercase">
+            <span className="block font-mono text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
               Contact
             </span>
             <a
               href={`mailto:${email}`}
-              className="block text-white font-switzer text-base sm:text-lg font-bold hover:text-purple-400 transition-colors break-all"
+              className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors break-all"
             >
               {email}
             </a>
@@ -98,52 +111,45 @@ export default function Footer() {
 
       </div>
 
-      {/* 3. Massive decorative name "myrielle" - Space Grotesk light weight with tight tracking.
-          Pushed down precisely using negative margins so baseline sits on border-t and 'y' crosses it. */}
-      <div className="w-full overflow-visible select-none relative z-0">
-        <div className="text-[16vw] sm:text-[18vw] lg:text-[21vw] font-space font-light text-white text-right leading-[0.75] tracking-[-0.05em]">
+      {/* 3. Massive decorative brand name */}
+      <div className="w-full overflow-hidden select-none relative z-0">
+        <div className="text-[16vw] sm:text-[18vw] lg:text-[21vw] font-space font-light text-[var(--heading)] text-right leading-[0.75] tracking-[-0.05em] opacity-90">
           {name.toLowerCase()}
         </div>
       </div>
-      {/* 4. Sub-Footer divided by border-t - layered explicitly in front (z-10) to render on top of branding.
-          Horizontal columns align vertically with the directories above. */}
-      <div className="border-t border-zinc-850 pt-8 pb-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-start relative z-10 bg-transparent">
 
-        {/* Left padding offset to align exactly with the Figma mockup columns */}
+      {/* 4. Sub-Footer */}
+      <div className="border-t border-[var(--border)] pt-8 pb-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-start relative z-10 bg-transparent">
         <div className="hidden md:block md:col-span-5" />
 
-        {/* Sub-Footer Columns aligned with the directories above */}
         <div className="md:col-span-7 grid grid-cols-12 gap-6">
 
-          {/* Column 1 (Left): Copyright */}
           <div className="col-span-12 sm:col-span-3 space-y-0.5">
-            <div className="text-[8.5px] text-zinc-500 font-mono tracking-wider uppercase">
+            <div className="text-[9px] text-[var(--text-muted)] font-mono tracking-wider uppercase">
               © 2026 // {name.toUpperCase()}
             </div>
-            <div className="text-[8.5px] text-zinc-605 font-mono tracking-wider uppercase">
+            <div className="text-[9px] text-[var(--text-muted)]/70 font-mono tracking-wider uppercase">
               ALL RIGHTS RESERVED
             </div>
           </div>
 
-          {/* Column 2 (Center): Makati City */}
           <div className="col-span-12 sm:col-span-3 space-y-0.5">
-            <div className="text-[8.5px] text-zinc-500 font-mono tracking-wider uppercase">
+            <div className="text-[9px] text-[var(--text-muted)] font-mono tracking-wider uppercase">
               MAKATI CITY, PH
             </div>
-            <div className="text-[8.5px] text-zinc-350 font-mono tracking-wider uppercase">
+            <div className="text-[9px] text-[var(--heading)] font-mono tracking-wider uppercase">
               {time}
             </div>
           </div>
 
-          {/* Column 3 (Right): Monospace tagline - left aligned under Contact column */}
-          <div className="col-span-12 sm:col-span-6 text-left space-y-0.5 font-mono text-[8.5px] text-zinc-500 tracking-tight leading-relaxed">
-            <div>IT'S A LEAP OF FAITH. THAT'S ALL IT IS. A LEAP OF FAITH//////////</div>
-            <div>/////////////////////////////////////////////////////////////////</div>
+          <div className="col-span-12 sm:col-span-6 text-left space-y-0.5 font-mono text-[9px] text-[var(--text-muted)] tracking-tight leading-relaxed">
+            <div>INTELLIGENT SYSTEMS & PREMIUM INTERFACES /////////</div>
           </div>
 
         </div>
 
       </div>
     </footer>
+
   );
 }

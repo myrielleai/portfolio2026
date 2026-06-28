@@ -22,9 +22,9 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Scene setup
+    // Scene setup — no background color set, so the canvas stays transparent
+    // and the page's theme background (light or dark) shows through behind it.
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
     sceneRef.current = scene;
 
     // Camera setup
@@ -34,12 +34,11 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
       0.1,
       1000
     );
-    // Position camera to nicely frame the model
     camera.position.set(0, 0, 2.5);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    // Renderer setup
+    // Renderer setup — alpha true + no scene.background = transparent canvas
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(
       containerRef.current.clientWidth,
@@ -84,7 +83,6 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
       }
     });
 
-    // Fallback scroll listener for progress updates if ScrollTrigger does not fire
     const handleWindowScroll = () => {
       const docHeight = document.body.scrollHeight - window.innerHeight;
       const scrollTop = window.scrollY;
@@ -92,16 +90,14 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
       scrollProgressRef.current = progress;
     };
     window.addEventListener('scroll', handleWindowScroll);
-    // Ensure cleanup removes listener
     const cleanupScrollListener = () => {
       window.removeEventListener('scroll', handleWindowScroll);
     };
 
-    // Mouse move handling for parallax
     const handleMouseMove = (event: MouseEvent) => {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const x = (event.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+      const x = (event.clientX - rect.left) / rect.width - 0.5;
       const y = (event.clientY - rect.top) / rect.height - 0.5;
       mouseRef.current = { x, y };
     };
@@ -110,37 +106,28 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
       window.removeEventListener('mousemove', handleMouseMove);
     };
 
-    // Load model
     const loader = new GLTFLoader();
     loader.load(
       modelUrl,
       (gltf: GLTF) => {
         const model = gltf.scene;
-        // Center the model
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         model.position.sub(center);
 
-        // Scale appropriately
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        // Scale so the model roughly fills the height of the viewport (adjust multiplier as needed)
         const scale = 4 / maxDim;
         model.scale.multiplyScalar(scale);
-        // Keep model vertically centered
         model.position.y = 0;
 
-        // Position model centered in view
-        model.position.z = -0.5; // bring model forward
-        model.position.y = 0.2; // slight upward offset for better fit
+        model.position.z = -0.5;
+        model.position.y = 0.2;
         model.rotation.y = .5;
         model.rotation.x = .2;
 
-        // Removed redundant dummy GSAP animation – the existing animation loop uses scrollProgressRef to drive rotation and translation
-
         scene.add(model);
         modelRef.current = model;
-        // GSAP tween to drive model animation based on scroll progress
         gsap.to(model, {
           rotationY: Math.PI / 2,
           x: -3,
@@ -160,26 +147,20 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
       }
     );
 
-    // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // Apply mouse parallax to camera position
       const { x, y } = mouseRef.current;
-      // Slight offset factor for subtle effect
-
-      const parallaxFactor = .5; // heavier parallax effect
+      const parallaxFactor = .5;
       camera.position.x = 0 + x * parallaxFactor;
       camera.position.y = 0 + y * parallaxFactor;
       camera.lookAt(0, 0, 0);
 
-      // Render the scene each frame
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // Handle resize
     const handleResize = () => {
       if (!containerRef.current || !cameraRef.current || !rendererRef.current) {
         return;
@@ -193,13 +174,10 @@ export default function SpidermanViewer({ modelUrl, onScrollProgress }: Spiderma
 
     window.addEventListener("resize", handleResize);
 
-    // Cleanup
     return () => {
       trigger.kill();
       window.removeEventListener("resize", handleResize);
-      // Remove fallback scroll listener
       cleanupScrollListener();
-      // Remove mouse move listener
       cleanupMouseListener();
       if (containerRef.current && rendererRef.current) {
         containerRef.current.removeChild(rendererRef.current.domElement);

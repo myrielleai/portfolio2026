@@ -1,13 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Clash+Grotesk:wght@400;500;600;700&display=swap');
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Switzer:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
 @theme {
   --font-sans: 'Darker Grotesque', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --font-display: 'Darker Grotesque', sans-serif;
-  --font-space: 'Space Grotesk', sans-serif;
+}
+
+/* ----------------------------------------------------------------
+   Theme tokens. Light is the default (:root). Dark overrides apply
+   when <html> has the .dark class, toggled via ThemeContext.
+   ---------------------------------------------------------------- */
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f7f7f8;
+  --surface: #ffffff;
+  --surface-muted: #f2f2f3;
+  --text: #27272a;       /* zinc-800, body copy */
+  --text-muted: #71717a; /* zinc-500, secondary copy */
+  --heading: #0a0a0a;
+  --border: #e4e4e7;      /* zinc-200 */
+  --border-strong: #d4d4d8; /* zinc-300 */
+  --accent: #9333ea;      /* purple-600 */
+  --scrim: rgba(255, 255, 255, 0.55);
+}
+
+.dark {
+  --bg: #000000;
+  --bg-secondary: #09090b;
+  --surface: #09090b;
+  --surface-muted: #18181b;
+  --text: #a1a1aa;       /* zinc-400 */
+  --text-muted: #71717a; /* zinc-500 */
+  --heading: #ffffff;
+  --border: #18181b;      /* zinc-900 */
+  --border-strong: #27272a; /* zinc-800 */
+  --accent: #c084fc;      /* purple-400 */
+  --scrim: rgba(0, 0, 0, 0.55);
 }
 
 /* Custom CSS Scrollbar */
@@ -17,23 +47,22 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #18181b; /* zinc-900 */
+  background: var(--border-strong);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #27272a; /* zinc-800 */
+  background: var(--text-muted);
 }
 
-/* Editorial Body Typography */
 html {
   scroll-behavior: smooth;
-  background-color: #000000;
-  color: #a1a1aa; /* zinc-400 */
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 body {
@@ -41,22 +70,23 @@ body {
   padding: 0;
   min-height: 100vh;
   overflow-x: hidden;
-  font-size: 13.5px;
-  letter-spacing: 0.05em;
-  line-height: 1.8;
+  font-size: 16px;
+  letter-spacing: normal;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Switzer:wght@400;500;600;700&display=swap');
 
 .font-switzer { font-family: 'Switzer', sans-serif; }
 
-/* Editorial Heading Overrides */
+/* Editorial heading overrides — heavier weight for presence on both themes */
 h1, h2, h3, .heading-editorial {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 700;
   letter-spacing: -0.01em;
-  color: #ffffff;
+  color: var(--heading);
 }
 
 /* Custom animations and utilities */
