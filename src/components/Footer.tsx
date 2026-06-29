@@ -1,9 +1,20 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { portfolioData } from "../data/portfolioData";
 
 export default function Footer() {
   const { name, email, linkedinUrl, instagramUrl } = portfolioData;
   const [time, setTime] = useState("");
+
+  const words = ["build", "create", "craft", "design", "make"];
+  const [wordIndex, setWordIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % words.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const updateTime = () => {
@@ -27,12 +38,33 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer id="contact" className="w-full bg-[var(--bg)] pt-32 pb-8 px-8 lg:px-16 reveal flex flex-col justify-end transition-colors duration-300 border-t border-[var(--border)]">
+    <footer id="contact" className="w-full bg-[var(--bg)] pt-32 pb-2 px-8 lg:px-16 reveal flex flex-col justify-end transition-colors duration-300 border-t border-[var(--border)]">
 
       {/* 1. Large Top Headline */}
-      <div className="mb-24 md:col-span-7 md:ml-[41.6667%]">
-        <h2 className="text-[var(--heading)] font-switzer text-[36px] sm:text-[44px] tracking-[-0.03em] leading-[1.05]">
-          <strong className="font-bold">With intention</strong> and purpose.
+      <div className="mb-4 md:col-span-7 md:ml-[41.6667%]">
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <h2 className="text-[var(--heading)] font-switzer text-[36px] sm:text-[44px] tracking-[-0.03em] leading-[1.2]">
+          Let's{" "}
+          <span className="relative inline-block overflow-hidden h-[1.1em] align-bottom min-w-[3.5em]">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={words[wordIndex]}
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: "0%", opacity: 1 }}
+                exit={{ y: "-100%", opacity: 0 }}
+                transition={{ duration: 0.5, ease: [0.215, 0.61, 0.355, 1] }}
+                className="absolute left-0 bottom-0 text-[var(--accent)] font-bold"
+              >
+                {words[wordIndex]}
+              </motion.span>
+            </AnimatePresence>
+          </span>
+          <br />
+          with intention and purpose.
         </h2>
       </div>
 
@@ -113,13 +145,13 @@ export default function Footer() {
 
       {/* 3. Massive decorative brand name */}
       <div className="w-full overflow-hidden select-none relative z-0">
-        <div className="text-[16vw] sm:text-[18vw] lg:text-[21vw] font-space font-light text-[var(--heading)] text-right leading-[0.75] tracking-[-0.05em] opacity-90">
+        <div className="text-[16vw] sm:text-[18vw] lg:text-[21vw] font-display font-bold text-[var(--heading)] text-right leading-[0.75] tracking-tight opacity-90">
           {name.toLowerCase()}
         </div>
       </div>
 
       {/* 4. Sub-Footer */}
-      <div className="border-t border-[var(--border)] pt-8 pb-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-start relative z-10 bg-transparent">
+      <div className="border-t border-[var(--border)] pt-8 pb-2 grid grid-cols-1 md:grid-cols-12 gap-6 items-start relative z-10 bg-transparent">
         <div className="hidden md:block md:col-span-5" />
 
         <div className="md:col-span-7 grid grid-cols-12 gap-6">

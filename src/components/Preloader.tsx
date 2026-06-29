@@ -18,7 +18,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     const startInterval = () => {
       timer = setInterval(() => {
         const increment = Math.floor(Math.random() * 5) + 3;
-        let next = current + increment;
+        const next = current + increment;
 
         // Handle exact pause at 67%
         if (current < 67 && next >= 67) {
@@ -110,7 +110,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
             {/* Right Column: Loading counter & Weather */}
             <div className="flex flex-col items-end gap-1">
-              <div className="font-mono text-4xl sm:text-6xl md:text-7xl font-light tracking-tight text-[var(--heading)] tabular-nums">
+              <div className="font-mono text-4xl sm:text-6xl md:text-7xl font-medium tracking-tight text-[var(--heading)] tabular-nums">
                 {progress}%
               </div>
               <span className="font-mono text-xs sm:text-sm tracking-widest text-[var(--text-muted)] uppercase font-medium">

@@ -171,19 +171,10 @@ export const portfolioData: PortfolioData = {
     }
   ],
   skills: [
-    "REACT",
-    "TYPESCRIPT",
-    "TAILWIND CSS",
-    "NEXT.JS",
-    "FRAMER MOTION",
-    "VITE",
-    "NODE.JS",
     "POSTGRESQL",
     "THREE.JS",
     "D3.JS",
     "GIT",
-    "AESTHETICS",
-    "ACCESSIBILITY",
-    "PERFORMANCE"
+    "AESTHETICS"
   ]
 };
