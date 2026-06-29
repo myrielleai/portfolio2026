@@ -13,6 +13,28 @@ export default function LabWorkspace({ onExitLab }: LabWorkspaceProps) {
   const [amplitude, setAmplitude] = useState<number>(30);
   const [noise, setNoise] = useState<number>(4);
   const [sweepSpeed, setSweepSpeed] = useState<number>(4);
+
+  // Use refs inside animation loop to prevent rebuilding canvas loop during user slider drags
+  const frequencyRef = useRef(frequency);
+  const amplitudeRef = useRef(amplitude);
+  const noiseRef = useRef(noise);
+  const sweepSpeedRef = useRef(sweepSpeed);
+
+  useEffect(() => {
+    frequencyRef.current = frequency;
+  }, [frequency]);
+
+  useEffect(() => {
+    amplitudeRef.current = amplitude;
+  }, [amplitude]);
+
+  useEffect(() => {
+    noiseRef.current = noise;
+  }, [noise]);
+
+  useEffect(() => {
+    sweepSpeedRef.current = sweepSpeed;
+  }, [sweepSpeed]);
   
   // Terminal system logs state
   const [logs, setLogs] = useState<string[]>(() => {
@@ -79,14 +101,14 @@ export default function LabWorkspace({ onExitLab }: LabWorkspaceProps) {
     playClickSound(0.03);
   };
 
-  // Canvas drawing routine
+  // Canvas drawing routine - runs once on mount and reads slider variables via refs
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     // Set high pixel density support
     const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
+    let rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     
@@ -151,21 +173,26 @@ export default function LabWorkspace({ onExitLab }: LabWorkspaceProps) {
       ctx.beginPath();
 
       const step = 1.5;
+      const currentFreq = frequencyRef.current;
+      const currentAmp = amplitudeRef.current;
+      const currentNoise = noiseRef.current;
+      const currentSweep = sweepSpeedRef.current;
+
       for (let x = 0; x < w; x += step) {
         // Core sine wave with parameterized frequency and phase
-        const angle = (x * (frequency / 250)) + phase;
-        let y = Math.sin(angle) * amplitude;
+        const angle = (x * (currentFreq / 250)) + phase;
+        let y = Math.sin(angle) * currentAmp;
 
         // Overlay complex harmonic distortion for retro-signal imperfection
-        y += Math.cos(angle * 2.3 - phase) * (amplitude * 0.2);
+        y += Math.cos(angle * 2.3 - phase) * (currentAmp * 0.2);
         
         // Add random voltage noise spikes
-        if (noise > 0) {
+        if (currentNoise > 0) {
           const spikeChance = 0.15;
           if (Math.random() < spikeChance) {
-            y += (Math.random() - 0.5) * noise * 3.5;
+            y += (Math.random() - 0.5) * currentNoise * 3.5;
           } else {
-            y += (Math.random() - 0.5) * noise * 0.3;
+            y += (Math.random() - 0.5) * currentNoise * 0.3;
           }
         }
 
@@ -182,16 +209,25 @@ export default function LabWorkspace({ onExitLab }: LabWorkspaceProps) {
       ctx.shadowBlur = 0;
 
       // Increment phase using sweepSpeed slider
-      phase += (sweepSpeed / 80);
+      phase += (currentSweep / 80);
       animId = requestAnimationFrame(draw);
     };
 
     draw();
 
+    const handleResize = () => {
+      rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+    };
+    window.addEventListener("resize", handleResize, { passive: true });
+
     return () => {
       cancelAnimationFrame(animId);
+      window.removeEventListener("resize", handleResize);
     };
-  }, [frequency, amplitude, noise, sweepSpeed]);
+  }, []);
 
   // Scroll terminal logs to bottom automatically
   useEffect(() => {

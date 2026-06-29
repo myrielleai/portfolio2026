@@ -11,10 +11,6 @@ interface WordProps {
 
 function Word({ children, progress, range }: WordProps) {
   const opacity = useTransform(progress, range, [0.18, 1]);
-  const filter = useTransform(progress, range, [
-    "grayscale(100%) blur(1px)",
-    "grayscale(0%) blur(0px)",
-  ]);
   const color = useTransform(progress, range, [
     "var(--text-muted)",
     "var(--heading)",
@@ -23,7 +19,7 @@ function Word({ children, progress, range }: WordProps) {
   return (
     <span className="relative inline-block mx-[0.2em] my-[0.08em]">
       <motion.span
-        style={{ opacity, filter, color }}
+        style={{ opacity, color }}
         className="inline-block transition-colors duration-150 select-none font-display font-bold tracking-tight"
       >
         {children}

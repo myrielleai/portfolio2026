@@ -45,9 +45,8 @@ function ProjectCard({ project, index, total }: ProjectCardProps) {
       backgroundColor: "var(--surface)",
       boxShadow: "0 20px 45px -15px var(--accent-glow, rgba(147, 51, 234, 0.15))",
       transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15
+        duration: 0.45,
+        ease: "easeOut"
       }
     }
   } as const;
@@ -74,13 +73,13 @@ function ProjectCard({ project, index, total }: ProjectCardProps) {
   const imageVariants = {
     inactive: {
       scale: 1,
-      filter: "grayscale(100%) contrast(1.1) brightness(0.85)",
+      opacity: 0.75,
     },
     active: {
-      scale: 1.05,
-      filter: "grayscale(0%) contrast(1) brightness(1)",
+      scale: 1.04,
+      opacity: 1,
       transition: {
-        duration: 0.6,
+        duration: 0.5,
         ease: "easeOut"
       }
     }
