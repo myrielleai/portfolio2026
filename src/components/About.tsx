@@ -93,7 +93,7 @@ export default function About() {
 
               {/* The Bio Paragraph */}
               <p className="text-base sm:text-lg text-[var(--text)] leading-relaxed font-sans">
-                I am an <strong className="text-[var(--heading)] font-semibold">{portfolioData.role}</strong> dedicated to architecting intelligent digital solutions. My current focus centers on building next-generation web applications by combining smart AI reasoning models with clean, modular backend architectures and motion-rich frontend interfaces.
+                I am a <strong className="text-[var(--heading)] font-semibold">Full-Stack Developer and Designer</strong> dedicated to architecting intelligent digital solutions. Currently intersecting robust backend infrastructure with spatial logic, I am actively evolving my practice into applied AI engineering to build smarter, systems-driven user experiences.
               </p>
             </div>
 
@@ -118,12 +118,10 @@ export default function About() {
             {/* Right Column: Paragraph 2 */}
             <div className="reveal space-y-6">
               <p className="text-base sm:text-lg text-[var(--text)] leading-relaxed font-sans">
-                I also come from a background in architecture and design, which continues to shape the way I approach structure, interaction, and visual storytelling.
-              </p>
+                I also bring a background in architecture and design, which fundamentally shapes how I approach user interaction, and visual storytelling.              </p>
 
               <p className="text-base sm:text-lg text-[var(--text)] leading-relaxed font-sans">
-                My focus right now is creating digital experiences that merge intelligent systems with thoughtful design.
-              </p>
+                My focus right now is creating digital experiences that seamlessly merge intelligent systems with intentional, thoughtful design.              </p>
             </div>
 
           </div>
