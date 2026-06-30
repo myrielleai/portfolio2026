@@ -157,7 +157,7 @@ export const portfolioData: PortfolioData = {
       title: "UChannel Website",
       description: "Interactive visual environment for testing physical layouts, physics spring configurations, and gesture interactions in the browser.",
       tags: ["React", "Three.js", "TypeScript", "Tailwind CSS"],
-      demoUrl: "https://github.com",
+      demoUrl: "https://uchannel-tau.vercel.app/",
       githubUrl: "https://github.com",
       image: "/project3.png"
     },
