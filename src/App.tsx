@@ -7,7 +7,6 @@ import Navbar from "./components/Navbar";
 import AvatarShowcase from "./components/AvatarShowcase";
 import About from "./components/About";
 import Projects from "./components/Projects";
-import LabTeaser from "./components/LabTeaser";
 import LabWorkspace from "./components/LabWorkspace";
 import Capabilities from "./components/Capabilities";
 import Footer from "./components/Footer";
@@ -117,7 +116,16 @@ export default function App() {
               <AvatarShowcase />
               <About />
               <Projects />
-              <LabTeaser onEnterLab={() => window.history.pushState({}, "", "/lab")} />
+              <LabWorkspace
+                onExitLab={() => {
+                  const capabilitiesSection = document.getElementById("capabilities");
+                  if (capabilitiesSection) {
+                    capabilitiesSection.scrollIntoView({ behavior: "smooth" });
+                  } else {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }}
+              />
               <Capabilities />
             </main>
 

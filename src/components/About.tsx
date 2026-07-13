@@ -11,9 +11,13 @@ interface WordProps {
 
 function Word({ children, progress, range }: WordProps) {
   const opacity = useTransform(progress, range, [0.18, 1]);
+  
+  // Clean punctuation to match the word "intention" precisely
+  const isPurple = children.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") === "intention";
+  
   const color = useTransform(progress, range, [
     "var(--text-muted)",
-    "var(--heading)",
+    isPurple ? "var(--accent)" : "var(--heading)",
   ]);
 
   return (

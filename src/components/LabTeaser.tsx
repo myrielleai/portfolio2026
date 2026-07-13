@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { playClickSound, playToggleSound } from "../utils/audio";
+import TapeCorner from "./TapeCorner";
 
 interface LabTeaserProps {
   onEnterLab: () => void;
@@ -199,18 +200,15 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Dark background
-      ctx.fillStyle = "#030303";
-      ctx.fillRect(0, 0, width, height);
-
-      const gridSpacing = 60;
+      // Transparent background so cutting-mat class shows through
+      const gridSpacing = 120; // Align with major 120px cutting mat grids
       
       // Dynamic scanning speed multiplier during power up
       const pRatio = progressRef.current / 100;
       const scanlineSpeed = 1.2 + pRatio * 15;
 
-      // Draw grid lines (slightly glowing white when powering up)
-      ctx.strokeStyle = `rgba(255, 255, 255, ${0.015 + pRatio * 0.045})`;
+      // Draw subtle grid overlay lines (glowing orange when powering up)
+      ctx.strokeStyle = `rgba(255, 138, 30, ${0.015 + pRatio * 0.045})`;
       ctx.lineWidth = 1;
       for (let x = 0; x < width; x += gridSpacing) {
         ctx.beginPath();
@@ -244,15 +242,15 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
         }
       }
 
-      // Draw sweep line glow
+      // Draw sweep line laser glow (orange)
       const grad = ctx.createLinearGradient(0, scanlineY - 40, 0, scanlineY + 40);
-      grad.addColorStop(0, "rgba(255, 255, 255, 0)");
-      grad.addColorStop(0.5, `rgba(255, 255, 255, ${0.03 + pRatio * 0.08})`);
-      grad.addColorStop(1, "rgba(255, 255, 255, 0)");
+      grad.addColorStop(0, "rgba(255, 138, 30, 0)");
+      grad.addColorStop(0.5, `rgba(255, 138, 30, ${0.04 + pRatio * 0.1})`);
+      grad.addColorStop(1, "rgba(255, 138, 30, 0)");
       ctx.fillStyle = grad;
       ctx.fillRect(0, scanlineY - 40, width, 80);
 
-      ctx.strokeStyle = `rgba(255, 255, 255, ${0.08 + pRatio * 0.25})`;
+      ctx.strokeStyle = `rgba(255, 138, 30, ${0.12 + pRatio * 0.3})`;
       ctx.beginPath();
       ctx.moveTo(0, scanlineY);
       ctx.lineTo(width, scanlineY);
@@ -267,13 +265,13 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
 
           if (dist < 150) {
             const glowAlpha = (1 - dist / 150) * 0.4;
-            ctx.fillStyle = `rgba(255, 255, 255, ${0.12 + glowAlpha + pRatio * 0.3})`;
+            ctx.fillStyle = `rgba(255, 138, 30, ${0.15 + glowAlpha + pRatio * 0.35})`;
             ctx.beginPath();
-            ctx.arc(x, y, 1.4, 0, Math.PI * 2);
+            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
             ctx.fill();
 
             if (dist < 100 && Math.random() < 0.06) {
-              ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - dist / 100) * 0.04})`;
+              ctx.strokeStyle = `rgba(255, 138, 30, ${(1 - dist / 100) * 0.06})`;
               ctx.setLineDash([2, 4]);
               ctx.beginPath();
               ctx.moveTo(x, y);
@@ -282,7 +280,7 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
               ctx.setLineDash([]);
             }
           } else {
-            ctx.fillStyle = `rgba(255, 255, 255, ${0.06 + pRatio * 0.15})`;
+            ctx.fillStyle = `rgba(255, 138, 30, ${0.07 + pRatio * 0.15})`;
             ctx.beginPath();
             ctx.arc(x, y, 0.8, 0, Math.PI * 2);
             ctx.fill();
@@ -407,9 +405,9 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
         return { x: px, y: py };
       });
 
-      // Draw edges
-      ctx.strokeStyle = isHovered ? "rgba(255, 255, 255, 0.45)" : "rgba(255, 255, 255, 0.15)";
-      ctx.lineWidth = 1.2;
+      // Draw edges in blueprint blue
+      ctx.strokeStyle = isHovered ? "rgba(37, 99, 235, 0.85)" : "rgba(37, 99, 235, 0.4)";
+      ctx.lineWidth = 1.3;
       edges.forEach(edge => {
         const p1 = proj[edge[0]];
         const p2 = proj[edge[1]];
@@ -419,8 +417,8 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
         ctx.stroke();
       });
 
-      // Draw vertex dots
-      ctx.fillStyle = isHovered ? "#ffffff" : "rgba(255, 255, 255, 0.5)";
+      // Draw vertex dots in dark slate
+      ctx.fillStyle = isHovered ? "#1e293b" : "rgba(30, 41, 59, 0.6)";
       proj.forEach(p => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
@@ -581,22 +579,25 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeaveContainer}
-      className={`w-full h-[100vh] bg-[#030303] text-white font-mono relative overflow-hidden flex flex-col justify-between p-8 sm:p-12 md:p-16 select-none crt-scanlines crt-reflection border-t border-white/5 transition-all duration-300 ${
+      className={`w-full h-[100vh] bg-cutting-mat text-white font-mono relative overflow-hidden flex flex-col justify-between p-8 sm:p-12 md:p-16 select-none crt-scanlines crt-reflection border-t border-[#FF8A1E]/10 transition-all duration-300 ${
         isPoweringUp ? "opacity-30 scale-95 duration-500" : ""
       }`}
     >
-      {/* Background Canvas Grid */}
+      {/* Background Canvas Grid Overlay */}
       <canvas
         ref={gridCanvasRef}
         className="absolute inset-0 w-full h-full z-0 pointer-events-none"
       />
 
+      {/* Spotlight Radial Vignette Depth Overlay */}
+      <div className="mat-vignette pointer-events-none" />
+
       {/* 1. Header Metadata Strip */}
-      <div className="w-full flex items-center justify-between text-[10px] tracking-[0.2em] text-zinc-500 border-b border-white/5 pb-4 z-20 relative">
+      <div className="w-full flex items-center justify-between text-[10px] tracking-[0.2em] text-[#FF8A1E]/60 border-b border-[#FF8A1E]/10 pb-4 z-20 relative">
         <div>SYS_REF // A08-PORTFOLIO-MONO</div>
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
-            <span className={`w-1.5 h-1.5 rounded-full ${isActivating ? "bg-white animate-pulse" : "bg-white/20"}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${isActivating ? "bg-[#FF8A1E] animate-pulse" : "bg-[#FF8A1E]/20"}`} />
             {isPoweringUp ? "SYS_STATE: ENGAGING" : isActivating ? "SYS_STATE: INTENSIFYING" : "SYS_STATE: STANDBY"}
           </span>
           <span className="hidden sm:inline">CH_04 // PORTFOLIO_LATTICE</span>
@@ -612,24 +613,27 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
             onMouseEnter={handleTerminalMouseEnter}
             onMouseLeave={handleTerminalMouseLeave}
             style={getParallaxStyle(0.6, -1)}
-            className={`w-72 bg-[#09090b]/80 backdrop-blur-md border ${
-              hoveredPanel === "terminal" ? "border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "border-white/10"
-            } rounded-lg p-4 transition-all duration-300 relative cursor-crosshair`}
+            className={`w-72 bg-[#faf7f0] border ${
+              hoveredPanel === "terminal" ? "border-gray-400 shadow-xl" : "border-[#dcd7cb]"
+            } rounded-sm p-5 transition-all duration-300 relative cursor-crosshair`}
           >
-            <div className="flex justify-between items-center text-[9px] mb-3 text-zinc-500 border-b border-white/5 pb-1 font-bold">
+            {/* Washi tape holding down the card */}
+            <TapeCorner color="cream" position="top-left" />
+
+            <div className="flex justify-between items-center text-[9px] mb-3 text-[#FF8A1E] border-b border-gray-200 pb-1.5 font-bold font-mono">
               <span>SYS_KERNEL_STREAM</span>
-              <span className="animate-pulse">● LIVE</span>
+              <span className="animate-pulse text-red-600">● LIVE</span>
             </div>
             
-            <div className="h-28 overflow-hidden space-y-1.5 leading-relaxed text-[8.5px] font-mono text-zinc-400">
+            <div className="h-28 overflow-hidden space-y-1.5 leading-relaxed text-[8.5px] font-mono text-gray-700">
               {logs.map((log, idx) => (
-                <div key={idx} className={idx === logs.length - 1 ? "text-white" : ""}>
+                <div key={idx} className={idx === logs.length - 1 ? "text-blue-700 font-bold" : ""}>
                   {log}
                 </div>
               ))}
             </div>
             
-            <div className="mt-3 flex justify-between text-[8px] text-zinc-600 border-t border-white/5 pt-2">
+            <div className="mt-3 flex justify-between text-[8px] text-gray-500 border-t border-dashed border-gray-200 pt-2 font-mono">
               <div>BUFFER_STREAM: ENGAGED</div>
               <div>SEC_LEVEL: 0x04</div>
             </div>
@@ -638,7 +642,7 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
 
         {/* CENTER HEADLINE: HUD Composition */}
         <div className="md:col-span-4 text-center py-6 flex flex-col items-center justify-center">
-          <div className="text-[10px] uppercase tracking-[0.35em] text-zinc-500 mb-2">
+          <div className="text-[10px] uppercase tracking-[0.35em] text-[#FF8A1E]/80 mb-2 font-mono">
             [ DEPT_EXPERIMENT_VAULT ]
           </div>
           
@@ -646,11 +650,11 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
             <span className="inline-block tracking-[-0.04em]">L</span>
             <span className="inline-block tracking-[-0.04em]">A</span>
             <span className="inline-block tracking-[-0.04em]">B</span>
-            <span className="inline-block opacity-40 px-1 font-mono font-medium text-4xl transform translate-y-[-8px]">//</span>
-            <span className="inline-block font-mono tracking-tighter text-4xl sm:text-5xl translate-y-[2px] text-zinc-500">04</span>
+            <span className="inline-block opacity-40 px-1 font-mono font-medium text-4xl transform translate-y-[-8px] text-[#FF8A1E]">//</span>
+            <span className="inline-block font-mono tracking-tighter text-4xl sm:text-5xl translate-y-[2px] text-white/50">04</span>
           </h2>
 
-          <div className="text-[9px] text-zinc-500 mt-4 max-w-[280px] leading-relaxed uppercase border-t border-white/5 pt-4">
+          <div className="text-[9px] text-[#FF8A1E]/70 mt-4 max-w-[280px] leading-relaxed uppercase border-t border-[#FF8A1E]/15 pt-4 font-mono">
             INTELLIGENT SYSTEMS CALIBRATION & PROJECT TELEMETRY ACCESS CHAMBER
           </div>
         </div>
@@ -661,25 +665,35 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
             onMouseEnter={() => handlePanelEnter("hypercube")}
             onMouseLeave={handlePanelLeave}
             style={getParallaxStyle(0.6, 1)}
-            className={`w-72 bg-[#09090b]/80 backdrop-blur-md border ${
-              hoveredPanel === "hypercube" ? "border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "border-white/10"
-            } rounded-lg p-4 transition-all duration-300 relative`}
+            className={`w-72 bg-[#fcfbf9] border ${
+              hoveredPanel === "hypercube" ? "border-gray-400 shadow-xl" : "border-[#dcd7cb]"
+            } rounded-sm p-5 transition-all duration-300 relative`}
           >
-            <div className="flex justify-between items-center text-[9px] mb-3 text-zinc-500 border-b border-white/5 pb-1 font-bold">
+            {/* Washi tape holding down the card */}
+            <TapeCorner color="yellow" position="top-right" />
+
+            <div className="flex justify-between items-center text-[9px] mb-3 text-[#FF8A1E] border-b border-gray-200 pb-1.5 font-bold font-mono">
               <span>STRUCTURAL_LATTICE</span>
               <span>TESSERACT_4D</span>
             </div>
 
-            <div className="w-full h-28 bg-[#030303]/60 rounded border border-white/5 flex items-center justify-center overflow-hidden">
+            <div className="w-full h-28 bg-[#fbf9f3] rounded border border-[#e5dfc5] flex items-center justify-center overflow-hidden relative">
+              <div 
+                className="absolute inset-0 opacity-15"
+                style={{
+                  backgroundImage: "linear-gradient(rgba(14, 165, 233, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(14, 165, 233, 0.2) 1px, transparent 1px)",
+                  backgroundSize: "8px 8px",
+                }}
+              />
               <canvas
                 ref={hypercubeCanvasRef}
                 width="240"
                 height="112"
-                className="w-full h-full"
+                className="w-full h-full relative z-10"
               />
             </div>
 
-            <div className="mt-3 flex justify-between items-center text-[8px] text-zinc-600 border-t border-white/5 pt-2">
+            <div className="mt-3 flex justify-between items-center text-[8px] text-gray-500 border-t border-dashed border-gray-200 pt-2 font-mono">
               <div>RENDER: CANVAS_2D</div>
               <div>NODES: 16 // EDGES: 32</div>
             </div>
@@ -689,27 +703,27 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
       </div>
 
       {/* 3. Footer Control Box & Biometric Touch Activator */}
-      <div className="w-full flex flex-col md:flex-row items-center justify-between gap-6 z-20 border-t border-white/5 pt-6 relative">
+      <div className="w-full flex flex-col md:flex-row items-center justify-between gap-6 z-20 border-t border-[#FF8A1E]/10 pt-6 relative">
         
         {/* Left: Active indicator */}
         <div className="text-[10px] text-zinc-500 flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
-          <div className="border border-white/10 bg-[#09090b] px-3 py-1.5 rounded uppercase font-bold tracking-wider">
+          <div className="border border-[#FF8A1E]/20 bg-[#faf7f0] text-gray-800 px-3 py-1.5 rounded uppercase font-bold tracking-wider font-mono text-[9px] shadow-sm">
             VAULT [04] // PROTO_ACTIVE
           </div>
-          <div className="hidden md:inline border border-dashed border-white/5 bg-transparent px-2.5 py-1.5 rounded text-zinc-600 uppercase">
+          <div className="hidden md:inline border border-dashed border-[#FF8A1E]/25 bg-transparent px-2.5 py-1.5 rounded text-[#FF8A1E]/70 uppercase font-mono">
             LATENT_SPACE: ENGAGED
           </div>
         </div>
 
         {/* Center: Capacitive scanner touch activation */}
         <div className="w-full md:w-auto flex justify-center flex-col items-center">
-          <div className="flex flex-col items-center justify-center p-3 border border-white/10 bg-[#09090b]/80 backdrop-blur-md rounded-xl max-w-sm w-72 relative overflow-hidden group shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+          <div className="flex flex-col items-center justify-center p-3 border border-[#d3cbb3] bg-[#faf7f0] rounded-xl max-w-sm w-72 relative overflow-hidden group shadow-lg">
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-[#FF8A1E]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out animate-pulse-dot" />
             
             <div className="flex items-center gap-4 w-full justify-between">
               <div className="text-left pl-2">
-                <div className="text-[7px] text-zinc-500 tracking-wider">SECURE CONNECTION ACCESS</div>
-                <div className="text-[10px] font-bold tracking-widest text-white leading-none mt-1">
+                <div className="text-[7px] text-gray-500 tracking-wider font-mono">SECURE CONNECTION ACCESS</div>
+                <div className="text-[10px] font-bold tracking-widest text-gray-800 leading-none mt-1 font-mono uppercase">
                   {isPoweringUp 
                     ? "SYS_REDIRECT" 
                     : isActivating 
@@ -724,16 +738,16 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
                 onMouseLeave={cancelActivation}
                 onTouchStart={startActivation}
                 onTouchEnd={cancelActivation}
-                className={`w-12 h-12 rounded-full bg-black border border-white/15 hover:border-white/35 active:border-white flex items-center justify-center cursor-pointer transition-all duration-300 relative select-none ${
+                className={`w-12 h-12 rounded-full bg-[#1e293b] border border-gray-400 hover:border-gray-600 active:border-gray-800 flex items-center justify-center cursor-pointer transition-all duration-300 relative select-none ${
                   isPoweringUp ? "cursor-not-allowed opacity-80" : ""
                 }`}
               >
                 {/* Fingerprint icon */}
-                <svg className="w-5 h-5 text-white/50 group-hover:text-white transition-colors duration-300 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11a15 15 0 00-7-3M6.7 1.9a9 9 0 0110.6 0M19 13v.01M19 17v.01M19 21v.01M16.5 11.608a8.97 8.97 0 00-3.493-1.397m-2.188-.13a9.005 9.005 0 018.18 5.166m-1.259-2.044a11.91 11.91 0 01-.18 9.57M12 2v.01" />
+                <svg className="w-5 h-5 text-white/50 group-hover:text-white transition-colors duration-300 relative z-10" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11a15 15 0 00-7-3M6.7 1.9a9 9 0 0110.6 0M19 13v.01M19 17v.01M19 21v.01M16.5 11.608a8.97 8.97 0 00-3.493-1.397m-2.188-.13a9.005 9.005 0 018.18 5.166m-1.259-2.044a11.91 11.91 0 01-.18 9.57M12 2v.01" />
                 </svg>
 
-                <div className="absolute inset-0 rounded-full border border-white/30 opacity-0 group-hover:opacity-100 group-hover:scale-95 transition-all duration-700 animate-ping pointer-events-none" />
+                <div className="absolute inset-0 rounded-full border border-[#FF8A1E]/30 opacity-0 group-hover:opacity-100 group-hover:scale-95 transition-all duration-700 animate-ping pointer-events-none" />
 
                 {/* SVG Circular Progress Bar */}
                 <svg className="absolute inset-0 w-full h-full transform -rotate-90">
@@ -750,7 +764,7 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
                     cx="24"
                     cy="24"
                     r="22"
-                    className="text-white transition-all duration-75"
+                    className="text-[#FF8A1E] transition-all duration-75"
                     strokeWidth="2"
                     strokeDasharray={2 * Math.PI * 22}
                     strokeDashoffset={2 * Math.PI * 22 * (1 - progress / 100)}
@@ -764,7 +778,7 @@ export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
         </div>
 
         {/* Right: Technical Warning note */}
-        <div className="text-[8px] text-zinc-600 text-center md:text-right leading-relaxed max-w-[200px] uppercase w-full md:w-auto">
+        <div className="text-[8px] text-[#FF8A1E]/60 text-center md:text-right leading-relaxed max-w-[200px] uppercase w-full md:w-auto font-mono">
           NOTICE: EXPERIMENTAL SCHEMA SUBJECT TO EVOLVE WITHOUT FORWARD RETROACTIVE WARNS.
         </div>
 

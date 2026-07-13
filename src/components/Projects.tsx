@@ -1,244 +1,172 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { GithubIcon } from "./Icons";
 import { portfolioData, type Project } from "../data/portfolioData";
+
+const EASE_CUBIC = [0.22, 1, 0.36, 1] as [number, number, number, number];
 
 interface ProjectCardProps {
   project: Project;
   index: number;
   total: number;
+  progress: MotionValue<number>;
 }
 
-function ProjectCard({ project, index, total }: ProjectCardProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Track scroll relative to the card's containing wrapper
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  });
-
-  // Calculate the scale and y displacement for the stacked scroll reveal effect.
-  // The last card scales down less as nothing stacks on top of it.
-  const targetScale = index === total - 1 ? 0.95 : 0.9 - (total - index - 1) * 0.015;
-  const scale = useTransform(scrollYProgress, [0, 1], [1, targetScale]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, -35]);
-  
-  // Apply a smooth, slightly physical spring easing to the values
-  const springConfig = { stiffness: 70, damping: 18, mass: 0.6 };
-  const springScale = useSpring(scale, springConfig);
-  const springY = useSpring(y, springConfig);
-
-  const isFirst = index === 0;
+function ProjectCard({ project, index, total, progress }: ProjectCardProps) {
   const targetUrl = project.demoUrl || project.githubUrl;
 
-  // Variants for the first project card (scroll-triggered variant transition)
-  const cardVariants = {
-    inactive: {
-      borderColor: "var(--border)",
-      backgroundColor: "var(--surface)",
-      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-    },
-    active: {
-      borderColor: "var(--accent)",
-      backgroundColor: "var(--surface)",
-      boxShadow: "0 20px 45px -15px var(--accent-glow, rgba(147, 51, 234, 0.15))",
-      transition: {
-        duration: 0.45,
-        ease: "easeOut"
-      }
-    }
-  } as const;
+  const isLast = index === total - 1;
+  
+  // Calculate when this card starts scaling down (staggered activation range)
+  const startRange = index / total;
+  
+  // Stacking effect calculations: earlier cards scale down and dim as we scroll through the deck
+  const scale = useTransform(progress, [startRange, 1], [1, 1 - (total - 1 - index) * 0.035]);
+  const opacity = useTransform(progress, [startRange, 1], [1, 0.7]);
+  const overlayOpacity = useTransform(progress, [startRange, 1], [0, 0.45]);
 
-  const badgeVariants = {
-    inactive: {
-      opacity: 0,
-      y: -10,
-      scale: 0.9
-    },
-    active: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 120,
-        damping: 10,
-        delay: 0.1
-      }
-    }
-  } as const;
-
-  const imageVariants = {
-    inactive: {
-      scale: 1,
-      opacity: 0.75,
-    },
-    active: {
-      scale: 1.04,
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
-      }
-    }
-  } as const;
-
-  const titleVariants = {
-    inactive: {
-      color: "var(--heading)",
-    },
-    active: {
-      color: "var(--accent)",
-      transition: {
-        duration: 0.3
-      }
-    }
-  } as const;
+  // Design board rotations for a tactile stacked layout
+  const rotations = [-1.8, 1.2, -1.0, 1.6];
+  const rotation = rotations[index % rotations.length];
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full h-[65vh] sm:h-[75vh] min-h-[500px] sm:min-h-[580px] flex items-start justify-center"
+    <motion.div
       style={{
-        zIndex: index + 1
+        scale: isLast ? 1 : scale,
+        opacity: isLast ? 1 : opacity,
+        rotate: rotation,
+        // All cards stack at dynamic offsets to create a layered deck look
+        top: `calc(108px + ${index * 24}px)`,
+        zIndex: index + 1,
       }}
-    >
-      <motion.div
-        style={{
-          scale: springScale,
-          y: springY,
-          top: `calc(90px + ${index * 28}px)`,
-        }}
-        tabIndex={0}
-        role="button"
-        aria-label={`View ${project.title}`}
-        className="sticky w-full flex flex-col md:flex-row border border-[var(--border)] bg-[var(--surface)] rounded-2xl overflow-hidden hover:border-[var(--border-strong)] transition-all duration-300 hover:shadow-2xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent)] group"
-        onClick={() => {
-          if (targetUrl) {
-            window.open(targetUrl, "_blank", "noopener,noreferrer");
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.15 }}
+      variants={{
+        hidden: {},
+        visible: {
+          transition: {
+            staggerChildren: 0.12,
           }
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
+        }
+      }}
+      className="sticky w-full max-w-4xl mx-auto rounded-2xl border-2 border-[var(--border-strong)] bg-[var(--surface)] p-5 sm:p-7 md:p-8 shadow-[0_30px_70px_rgba(0,0,0,0.06)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.5)] transition-shadow duration-500 overflow-hidden flex flex-col gap-5 md:gap-6 h-auto"
+    >
+      {/* Subtle overlay to simulate depth as it stacks under other cards */}
+      {!isLast && (
+        <motion.div 
+          style={{ opacity: overlayOpacity }}
+          className="absolute inset-0 bg-black/10 dark:bg-black/50 pointer-events-none z-30 transition-opacity duration-300"
+        />
+      )}
+      
+      {/* Top Section: Interactive Image Showcase */}
+      {project.image && (
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE_CUBIC } }
+          }}
+          className="w-full aspect-[16/10] sm:aspect-[21/9] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] cursor-pointer group/img relative z-20"
+          onClick={() => {
             if (targetUrl) {
               window.open(targetUrl, "_blank", "noopener,noreferrer");
             }
-          }
+          }}
+        >
+          <img
+            src={project.image}
+            alt={project.title}
+            className="w-full h-full object-cover object-top group-hover/img:scale-[1.02] transition-transform duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" />
+        </motion.div>
+      )}
+
+      {/* Bottom Section: Info Content */}
+      <motion.div 
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE_CUBIC } }
         }}
-        {...(isFirst
-          ? {
-              variants: cardVariants,
-              initial: "inactive",
-              whileInView: "active",
-              viewport: { once: false, amount: 0.4 },
-            }
-          : {})}
+        className="w-full flex flex-col gap-4 z-20"
       >
-        {/* Left/Image Column */}
-        {project.image && (
-          <div className="w-full md:w-[45%] h-48 sm:h-56 md:h-auto md:self-stretch overflow-hidden bg-black/40 relative shrink-0">
-            {isFirst ? (
-              <motion.img
-                variants={imageVariants}
-                src={project.image}
-                alt={project.title}
-                className="w-full h-full object-cover object-top"
-              />
-            ) : (
-              <img
-                src={project.image}
-                alt={project.title}
-                className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out"
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface)] via-transparent to-transparent opacity-60 md:hidden" />
-          </div>
-        )}
-
-        {/* Right/Content Column */}
-        <div className="w-full flex-grow p-6 sm:p-8 md:p-10 flex flex-col justify-between space-y-6">
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-2">
-                {isFirst && (
-                  <motion.div
-                    variants={badgeVariants}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 font-mono text-[9px] text-[var(--accent)] font-semibold tracking-wider w-fit"
-                  >
-                    <span className="w-1 h-1 rounded-full bg-[var(--accent)] animate-pulse" />
-                    FEATURED WORK
-                  </motion.div>
-                )}
-                {isFirst ? (
-                  <motion.h3
-                    variants={titleVariants}
-                    className="font-display text-2xl sm:text-3xl font-bold tracking-tight"
-                  >
-                    {project.title}
-                  </motion.h3>
-                ) : (
-                  <h3 className="text-[var(--heading)] font-display text-2xl sm:text-3xl font-bold tracking-tight hover:text-[var(--accent)] transition-colors duration-300">
-                    {project.title}
-                  </h3>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2 shrink-0 relative z-10">
-                {project.githubUrl && (
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[var(--text-muted)] hover:text-[var(--heading)] p-2 rounded-lg border border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--surface-muted)] transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                    aria-label={`GitHub Repository for ${project.title}`}
-                  >
-                    <GithubIcon className="w-4 h-4" />
-                  </a>
-                )}
-                {project.demoUrl && (
-                  <a
-                    href={project.demoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[var(--text-muted)] hover:text-[var(--heading)] p-2 rounded-lg border border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--surface-muted)] transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                    aria-label={`Live Demo for ${project.title}`}
-                  >
-                    <ArrowUpRight className="w-4 h-4" />
-                  </a>
-                )}
-              </div>
-            </div>
-
-            <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed font-sans">
-              {project.description}
-            </p>
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div className="space-y-1.5">
+            <span className="font-mono text-[9px] tracking-wider text-[var(--accent)] uppercase font-semibold block">
+              Project {String(index + 1).padStart(2, '0')} // {project.tags[0] || "Showcase"}
+            </span>
+            <h3 
+              className="font-display text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-[var(--heading)] cursor-pointer hover:text-[var(--accent)] transition-colors duration-300"
+              onClick={() => {
+                if (targetUrl) {
+                  window.open(targetUrl, "_blank", "noopener,noreferrer");
+                }
+              }}
+            >
+              {project.title}
+            </h3>
           </div>
 
-          {/* Footer / Tech Tags */}
-          <div className="flex flex-wrap gap-2 pt-4 border-t border-[var(--border)]/60">
-            {project.tags.map((tag, tagIdx) => (
-              <span
-                key={tagIdx}
-                className="font-mono text-[10px] text-[var(--text)] bg-[var(--surface-muted)] border border-[var(--border)] px-2.5 py-1 rounded-md"
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            {project.githubUrl && (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[var(--text-muted)] hover:text-[var(--heading)] p-2 rounded-xl border border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--surface-muted)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                onClick={(e) => e.stopPropagation()}
+                aria-label={`GitHub Repository for ${project.title}`}
               >
-                {tag}
-              </span>
-            ))}
+                <GithubIcon className="w-4 h-4" />
+              </a>
+            )}
+            {project.demoUrl && (
+              <a
+                href={project.demoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[var(--text-muted)] hover:text-[var(--heading)] p-2 rounded-xl border border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--surface-muted)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                onClick={(e) => e.stopPropagation()}
+                aria-label={`Live Demo for ${project.title}`}
+              >
+                <ArrowUpRight className="w-4 h-4" />
+              </a>
+            )}
           </div>
         </div>
+
+        <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed font-sans max-w-3xl">
+          {project.description}
+        </p>
+
+        {/* Tech Tags */}
+        <div className="flex flex-wrap gap-2 pt-3 border-t border-[var(--border)]/60">
+          {project.tags.map((tag, tagIdx) => (
+            <span
+              key={tagIdx}
+              className="font-mono text-[9px] tracking-wider text-[var(--text)] bg-[var(--surface-muted)] border border-[var(--border)] px-2.5 py-1 rounded-md"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 
 export default function Projects() {
   const projects = portfolioData.projects;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Track scroll progress of the entire projects list container
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
 
   return (
     <section id="projects" className="w-full py-24 lg:py-32 border-b border-[var(--border)] bg-[var(--bg)] transition-colors duration-300">
@@ -259,14 +187,15 @@ export default function Projects() {
           </p>
         </div>
 
-        {/* Projects Stack */}
-        <div className="relative flex flex-col items-center">
+        {/* Projects List: Sticky Stacked Cards Deck */}
+        <div ref={containerRef} className="relative flex flex-col gap-16 md:gap-24 w-full pb-[10vh]">
           {projects.map((proj, idx) => (
             <ProjectCard
               key={idx}
               project={proj}
               index={idx}
               total={projects.length}
+              progress={scrollYProgress}
             />
           ))}
         </div>
@@ -277,7 +206,7 @@ export default function Projects() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ type: "spring", stiffness: 100, damping: 15 }}
-          className="mt-16 sm:mt-24 flex justify-center"
+          className="mt-20 sm:mt-28 flex justify-center"
         >
           <a
             href={portfolioData.githubUrl}
