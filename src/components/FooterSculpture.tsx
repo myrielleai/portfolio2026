@@ -282,9 +282,10 @@ export default function FooterSculpture() {
     window.addEventListener("resize", handleResize);
 
     // --- Animation Loop ---
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
     const clock = new THREE.Clock();
     let frameCount = 0;
+    let isIntersecting = false;
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -363,12 +364,34 @@ export default function FooterSculpture() {
       renderer.render(scene, camera);
     };
 
-    animate();
+    // Use IntersectionObserver to start/stop the loop when visible
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isIntersecting = entry.isIntersecting;
+        if (isIntersecting) {
+          if (!animationFrameId) {
+            clock.start();
+            animate();
+          }
+        } else {
+          if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+            clock.stop();
+          }
+        }
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(container);
 
     return () => {
+      observer.disconnect();
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
 
       boxMaterial.dispose();
       lineMaterial.dispose();
