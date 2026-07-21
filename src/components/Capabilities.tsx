@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Cpu, Layout, Layers, Sparkles } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export default function Capabilities() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -36,40 +38,36 @@ export default function Capabilities() {
   ];
 
   useEffect(() => {
-    const observers: IntersectionObserver[] = [];
+    gsap.registerPlugin(ScrollTrigger);
 
-    cardRefs.current.forEach((card, index) => {
-      if (!card) return;
+    const cards = cardRefs.current.filter((card): card is HTMLDivElement => card !== null);
+    if (cards.length === 0) return;
 
-      // Reset to hidden state initially
-      card.style.opacity = "0";
-      card.style.transform = "translateY(40px)";
-      card.style.transition = "none";
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setTimeout(() => {
-                if (card) {
-                  card.style.transition =
-                    "opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)";
-                  card.style.opacity = "1";
-                  card.style.transform = "translateY(0)";
-                }
-              }, index * 120); // 120ms stagger between each card
-              observer.disconnect();
-            }
-          });
-        },
-        { threshold: 0.15 }
-      );
-
-      observer.observe(card);
-      observers.push(observer);
+    // Set initial 3D rotation state
+    gsap.set(cards, { 
+      rotationY: -90, 
+      opacity: 0,
+      transformPerspective: 1000,
+      transformOrigin: "center center"
     });
 
-    return () => observers.forEach((obs) => obs.disconnect());
+    const anim = gsap.to(cards, {
+      rotationY: 0,
+      opacity: 1,
+      duration: 1.2,
+      stagger: 0.25, // Reveal cards one by one with a stagger
+      ease: "back.out(1.5)", // Beautiful overshoot/bounce effect for the 3D flip
+      scrollTrigger: {
+        trigger: "#capabilities",
+        start: "top 75%", // Triggers when the section comes into view
+        toggleActions: "play none none none",
+        once: true,
+      },
+    });
+
+    return () => {
+      anim.kill();
+    };
   }, []);
 
   return (
@@ -102,8 +100,8 @@ export default function Capabilities() {
               <div
                 key={index}
                 ref={(el) => { cardRefs.current[index] = el; }}
-                className="group p-8 rounded-xl border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--accent)] transition-all duration-300 flex flex-col justify-between space-y-6 reveal"
-                style={{ opacity: 0, transform: "translateY(40px)" }}
+                className="group p-8 rounded-xl border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--accent)] transition-all duration-300 flex flex-col justify-between space-y-6"
+                style={{ opacity: 0 }}
               >
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
