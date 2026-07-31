@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -8,6 +8,7 @@ import AvatarShowcase from "./components/AvatarShowcase";
 import About from "./components/About";
 import Projects from "./components/Projects";
 import LabWorkspace from "./components/LabWorkspace";
+import LabTeaser from "./components/LabTeaser";
 import Capabilities from "./components/Capabilities";
 import Footer from "./components/Footer";
 import Preloader from "./components/Preloader";
@@ -15,6 +16,7 @@ import Preloader from "./components/Preloader";
 export default function App() {
   const [loadingComplete, setLoadingComplete] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const isInitialMount = useRef(true);
 
   // Custom client-side path router
   useEffect(() => {
@@ -37,8 +39,12 @@ export default function App() {
     };
   }, []);
 
-  // Scroll to top on navigation to clear scroll offset
+  // Scroll to top on navigation to clear scroll offset (bypass on initial refresh)
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     window.scrollTo(0, 0);
   }, [currentPath]);
 
@@ -59,7 +65,7 @@ export default function App() {
     };
 
     gsap.ticker.add(updateTicker);
-    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.lagSmoothing(500, 33);
 
     // GSAP Scroll Reveal Animation for elements with class '.reveal'
     const revealElements = gsap.utils.toArray(".reveal");
@@ -83,7 +89,14 @@ export default function App() {
       );
     });
 
+    // Refresh ScrollTrigger so all registered triggers calculate correct dimensions with Lenis & loaded layout
+    ScrollTrigger.refresh();
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 150);
+
     return () => {
+      clearTimeout(refreshTimer);
       gsap.ticker.remove(updateTicker);
       lenis.destroy();
       ScrollTrigger.getAll().forEach(t => t.kill());
@@ -116,14 +129,9 @@ export default function App() {
               <AvatarShowcase />
               <About />
               <Projects />
-              <LabWorkspace
-                onExitLab={() => {
-                  const capabilitiesSection = document.getElementById("capabilities");
-                  if (capabilitiesSection) {
-                    capabilitiesSection.scrollIntoView({ behavior: "smooth" });
-                  } else {
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }
+              <LabTeaser
+                onEnterLab={() => {
+                  window.history.pushState({}, "", "/lab");
                 }}
               />
               <Capabilities />

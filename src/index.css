@@ -1,10 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;600;700&family=Rock+Salt&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-rock-salt: 'Rock Salt', cursive;
+}
+
+.font-rock-salt {
+  font-family: 'Rock Salt', cursive;
 }
 
 /* ----------------------------------------------------------------
@@ -103,6 +108,22 @@ h1, h2, h3, .heading-editorial {
     /* Faint 45° diagonal cut-guides */
     repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.012) 0px, rgba(255, 255, 255, 0.012) 1px, transparent 1px, transparent 120px);
   background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px, auto;
+}
+
+/* Photorealistic Wooden Workbench / Desk Table Background */
+.bg-wood-table {
+  background-color: #16100b;
+  background-image:
+    /* Top warmth desk lamp spotlight radial gradient */
+    radial-gradient(ellipse at 50% 35%, rgba(190, 140, 85, 0.16) 0%, rgba(26, 18, 12, 0.75) 65%, rgba(10, 7, 5, 0.96) 100%),
+    /* Vertical plank seam divider shadows */
+    repeating-linear-gradient(90deg, transparent 0px, transparent 178px, rgba(0, 0, 0, 0.65) 178px, rgba(0, 0, 0, 0.65) 180px, rgba(255, 255, 255, 0.025) 180px, rgba(255, 255, 255, 0.025) 181px),
+    /* Rich wood grain fibers (horizontal linear gradient texture) */
+    repeating-linear-gradient(0deg, rgba(44, 30, 19, 0.75) 0px, rgba(44, 30, 19, 0.75) 2px, rgba(22, 15, 9, 0.9) 2px, rgba(22, 15, 9, 0.9) 5px, rgba(54, 37, 24, 0.5) 5px, rgba(54, 37, 24, 0.5) 8px, rgba(16, 11, 7, 0.95) 8px, rgba(16, 11, 7, 0.95) 13px),
+    /* Subtle natural wood grain angle variation */
+    repeating-linear-gradient(172deg, rgba(210, 150, 90, 0.015) 0px, rgba(210, 150, 90, 0.015) 25px, transparent 25px, transparent 50px);
+  background-blend-mode: normal, normal, normal, normal;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.85);
 }
 /* Edge ruler tick marks container */
 .edge-ruler {
@@ -238,4 +259,50 @@ h1, h2, h3, .heading-editorial {
   .animate-crt-glow {
     animation: crt-glow-flicker 0.15s infinite;
   }
+}
+
+/* ----------------------------------------------------------------
+   Dynamic Contrast Cards for Capabilities & Services
+   ---------------------------------------------------------------- */
+.card {
+  --bg-color: attr(bg-color type(<color>), #18181b);
+  background: var(--bg-color);
+  border-radius: 0.6rem;
+  box-shadow: 0 5px 15px -7px rgba(0, 0, 0, 0.3);
+  padding: 0.8rem;
+  transition: box-shadow 0.3s ease;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.card:hover {
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.4);
+}
+
+.card .card__image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  border-radius: 0.4rem;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.card:hover .card__image {
+  transform: scale(1.04);
+}
+
+.card .card__text {
+  margin-bottom: 0;
+}
+
+.card__text {
+  padding: 0.4rem;
+  color: inherit;
+}
+
+.card h3 {
+  color: inherit;
 }

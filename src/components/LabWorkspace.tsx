@@ -1,5 +1,5 @@
 // src/components/LabWorkspace.tsx
-import React, { useState } from "react";
+import { useState, useRef } from "react";
 import CuttingMatSurface from "./CuttingMatSurface";
 import EdgeRuler from "./EdgeRuler";
 import IntroCard from "./IntroCard";
@@ -11,9 +11,10 @@ import CursorGhost from "./CursorGhost";
 import StickyLabel from "./StickyLabel";
 import StampMark from "./StampMark";
 import AnnotationArrow from "./AnnotationArrow";
-import { playToggleSound } from "../utils/audio";
+import { playToggleSound, playClickSound } from "../utils/audio";
+import { ArrowLeft } from "lucide-react";
 
-export default function LabWorkspace({ onExitLab }: { onExitLab: () => void }) {
+export default function LabWorkspace({ onExitLab }: { onExitLab?: () => void }) {
   // Tool selection state
   const [activeTool, setActiveTool] = useState<"pencil" | "marker" | "eraser" | "stamp">("pencil");
   const [color, setColor] = useState<string>("#1e293b");
@@ -26,12 +27,12 @@ export default function LabWorkspace({ onExitLab }: { onExitLab: () => void }) {
     setIsShuttingDown(true);
     playToggleSound(true);
     setTimeout(() => {
-      onExitLab();
-    }, 500);
+      onExitLab?.();
+    }, 400);
   };
 
   // Canvas reference and clear helper
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -44,10 +45,24 @@ export default function LabWorkspace({ onExitLab }: { onExitLab: () => void }) {
 
   return (
     <div 
-      className="relative w-full h-screen bg-[#243527] text-[#FF8A1E] font-mono overflow-hidden cursor-none"
+      className="relative w-full h-screen bg-wood-table text-[#FF8A1E] font-mono overflow-hidden cursor-none"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Top Left Return to Surface Bar Button */}
+      <div className="absolute top-6 right-6 z-50">
+        <button
+          onClick={() => {
+            playClickSound();
+            onExitLab?.();
+          }}
+          className="px-4 py-2 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 shadow-2xl backdrop-blur-md transition-all cursor-pointer hover:scale-105 active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Surface</span>
+        </button>
+      </div>
+
       {/* Background surface (layered grid) */}
       <CuttingMatSurface />
 

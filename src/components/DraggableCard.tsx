@@ -118,7 +118,7 @@ export default function DraggableCard({
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [isDragging, position]);
+  }, [isDragging]);
 
   return (
     <div

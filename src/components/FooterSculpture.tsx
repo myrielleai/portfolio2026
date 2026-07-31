@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useTheme } from "./ThemeContext";
 
@@ -64,13 +64,10 @@ export default function FooterSculpture() {
   const targetMouse = useRef({ x: 0, y: 0 });
   const currentMouse = useRef({ x: 0, y: 0 });
 
-  // HUD stats overlay states
-  const [hudStats, setHudStats] = useState({
-    rotation: "0.08",
-    activeNodes: "12/12",
-    alignment: "99.9%",
-    scanLevel: "0.00"
-  });
+  // DOM refs for HUD stats overlay to avoid React re-renders during WebGL rendering
+  const hudRotRef = useRef<HTMLDivElement>(null);
+  const hudAlignRef = useRef<HTMLDivElement>(null);
+  const hudScanRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -122,14 +119,11 @@ export default function FooterSculpture() {
     scene.add(sculptureGroup);
     sculptureGroupRef.current = sculptureGroup;
 
-    // Materials
-    const boxMaterial = new THREE.MeshPhysicalMaterial({
+    // Materials - MeshStandardMaterial without heavy transmission framebuffer pass
+    const boxMaterial = new THREE.MeshStandardMaterial({
       color: meshColorVal,
-      roughness: 0.1,
+      roughness: 0.25,
       metalness: 0.1,
-      transmission: 0.8,
-      ior: 1.5,
-      thickness: 0.4,
       transparent: true,
       opacity: isDark ? 0.6 : 0.4,
       depthWrite: false
@@ -351,14 +345,11 @@ export default function FooterSculpture() {
       camera.position.y = currentMouse.current.y * parallaxAmount;
       camera.lookAt(0, 0, 0);
 
-      // 6. Update HUD readings
-      if (frameCount % 10 === 0) {
-        setHudStats({
-          rotation: (0.08).toFixed(3),
-          activeNodes: "12/12",
-          alignment: (99.8 + Math.sin(time * 2) * 0.15).toFixed(2) + "%",
-          scanLevel: Math.abs(scanRing ? scanRing.position.y : 0).toFixed(3)
-        });
+      // 6. Update HUD readings directly via DOM refs to avoid React re-renders
+      if (frameCount % 6 === 0) {
+        if (hudRotRef.current) hudRotRef.current.textContent = `ROT_SPD: 0.080 rad/s`;
+        if (hudAlignRef.current) hudAlignRef.current.textContent = `ALIGN: ${(99.8 + Math.sin(time * 2) * 0.15).toFixed(2)}%`;
+        if (hudScanRef.current) hudScanRef.current.textContent = `SCAN_LVL: ${Math.abs(scanRing ? scanRing.position.y : 0).toFixed(3)}`;
       }
 
       renderer.render(scene, camera);
@@ -437,13 +428,13 @@ export default function FooterSculpture() {
           <span className="w-1 h-1 rounded-full bg-[var(--accent)] animate-ping" />
           <span>SYS.SUBSEC: FOOTER_GEOM</span>
         </div>
-        <div>ROT_SPD: {hudStats.rotation} rad/s</div>
-        <div>ALIGN: {hudStats.alignment}</div>
-        <div>SCAN_LVL: {hudStats.scanLevel}</div>
+        <div ref={hudRotRef}>ROT_SPD: 0.080 rad/s</div>
+        <div ref={hudAlignRef}>ALIGN: 99.90%</div>
+        <div ref={hudScanRef}>SCAN_LVL: 0.000</div>
       </div>
 
       <div className="absolute bottom-4 right-4 z-10 font-mono text-[8px] text-[var(--text-muted)] tracking-wider pointer-events-none select-none uppercase opacity-80 text-right">
-        <div>NODES: {hudStats.activeNodes}</div>
+        <div>NODES: 12/12</div>
         <div>STATUS: STABLE_MONITOR</div>
       </div>
 

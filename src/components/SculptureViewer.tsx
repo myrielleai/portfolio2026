@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -77,14 +77,14 @@ export default function SculptureViewer() {
   // Scroll progress ref to drive the deconstruction effect
   const scrollProgressRef = useRef(0);
 
-  // States to drive real-time technical HUD readings in HTML overlay
-  const [hudStats, setHudStats] = useState({
-    rotationSpeed: "0.12",
-    deconstructProgress: "0.00",
-    activeModules: "14/14",
-    gridAlignment: "99.8%",
-    coords: { x: "0.00", y: "0.00", z: "0.00" }
-  });
+  // DOM refs to drive real-time technical HUD readings without React component re-renders
+  const hudDeconstructRef = useRef<HTMLDivElement>(null);
+  const hudRotRef = useRef<HTMLDivElement>(null);
+  const hudAlignRef = useRef<HTMLDivElement>(null);
+  const hudCoordsXRef = useRef<HTMLDivElement>(null);
+  const hudCoordsYRef = useRef<HTMLDivElement>(null);
+  const hudCoordsZRef = useRef<HTMLDivElement>(null);
+  const hudModulesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current || !wrapperRef.current) return;
@@ -140,14 +140,11 @@ export default function SculptureViewer() {
     scene.add(sculptureGroup);
     sculptureGroupRef.current = sculptureGroup;
 
-    // Materials
-    const boxMaterial = new THREE.MeshPhysicalMaterial({
+    // Materials - MeshStandardMaterial without heavy transmission framebuffer passes
+    const boxMaterial = new THREE.MeshStandardMaterial({
       color: meshColorVal,
-      roughness: 0.15,
+      roughness: 0.25,
       metalness: 0.1,
-      transmission: 0.7,
-      ior: 1.5,
-      thickness: 0.5,
       transparent: true,
       opacity: isDark ? 0.55 : 0.35,
       depthWrite: false,
@@ -285,23 +282,40 @@ export default function SculptureViewer() {
     scanRingRef.current = scanRing;
 
     // --- ScrollTrigger Integration ---
+    const updateVisibilityAndProgress = (progress: number) => {
+      scrollProgressRef.current = progress;
+      if (wrapper) {
+        // Stay fully visible, then fade out cleanly over the final part of scroll
+        const exitFade = Math.max(0, Math.min(1, (1 - progress) * 12));
+        wrapper.style.opacity = exitFade.toString();
+        wrapper.style.visibility = progress >= 0.99 ? "hidden" : "visible";
+      }
+    };
+
     const trigger = ScrollTrigger.create({
       trigger: "#showcase",
       start: "top top",
       end: "bottom bottom",
       scrub: true,
       onUpdate: (self) => {
-        const progress = self.progress;
-        scrollProgressRef.current = progress;
-
-        // Fade out whole wrapper (canvas + HUD overlays) toward the end of the scroll trigger
+        updateVisibilityAndProgress(self.progress);
+      },
+      onEnter: () => {
+        if (wrapper) wrapper.style.visibility = "visible";
+      },
+      onLeave: () => {
         if (wrapper) {
-          // Stay fully visible, then fade out cleanly over the final 5% of scroll
-          const exitFade = Math.max(0, Math.min(1, (1 - progress) * 20));
-          wrapper.style.opacity = exitFade.toString();
-          wrapper.style.display = progress >= 0.99 ? "none" : "block";
+          wrapper.style.opacity = "0";
+          wrapper.style.visibility = "hidden";
         }
-      }
+      },
+      onEnterBack: (self) => {
+        if (wrapper) wrapper.style.visibility = "visible";
+        updateVisibilityAndProgress(self.progress);
+      },
+      onLeaveBack: () => {
+        updateVisibilityAndProgress(0);
+      },
     });
 
     // --- Mouse Move Parallax Listener ---
@@ -404,25 +418,22 @@ export default function SculptureViewer() {
       camera.position.y = currentMouse.current.y * parallaxAmount;
       camera.lookAt(0, 0, 0);
 
-      // 6. Update HUD Stats
-      if (frameCount % 8 === 0) {
-        setHudStats({
-          rotationSpeed: (0.12 + progress * 0.2).toFixed(3),
-          deconstructProgress: progress.toFixed(4),
-          activeModules: `${14 - Math.floor(progress * 4)}/14`,
-          gridAlignment: (99.8 - progress * 1.2).toFixed(1) + "%",
-          coords: {
-            x: camera.position.x.toFixed(3),
-            y: camera.position.y.toFixed(3),
-            z: camera.position.z.toFixed(3)
-          }
-        });
+      // 6. Update HUD Stats directly via DOM refs to avoid React re-renders
+      if (frameCount % 6 === 0) {
+        if (hudDeconstructRef.current) hudDeconstructRef.current.textContent = `DECONSTRUCT_VAL: ${progress.toFixed(4)}`;
+        if (hudRotRef.current) hudRotRef.current.textContent = `ROT_VELOCITY: ${(0.12 + progress * 0.2).toFixed(3)} rad/s`;
+        if (hudAlignRef.current) hudAlignRef.current.textContent = `SYS_GRID_ALIGN: ${(99.8 - progress * 1.2).toFixed(1)}%`;
+        if (hudCoordsXRef.current) hudCoordsXRef.current.textContent = `COORDS_X: ${camera.position.x.toFixed(3)}`;
+        if (hudCoordsYRef.current) hudCoordsYRef.current.textContent = `COORDS_Y: ${camera.position.y.toFixed(3)}`;
+        if (hudCoordsZRef.current) hudCoordsZRef.current.textContent = `COORDS_Z: ${camera.position.z.toFixed(3)}`;
+        if (hudModulesRef.current) hudModulesRef.current.textContent = `UNITS_ASSEMBLED: ${14 - Math.floor(progress * 4)}/14`;
       }
 
       renderer.render(scene, camera);
     };
 
-    // Use IntersectionObserver to start/stop the loop when visible
+    // Use IntersectionObserver to start/stop the loop when hero section is in view
+    const showcaseElem = document.getElementById("showcase") || container;
     const observer = new IntersectionObserver(
       ([entry]) => {
         isIntersecting = entry.isIntersecting;
@@ -441,7 +452,7 @@ export default function SculptureViewer() {
       },
       { threshold: 0.01 }
     );
-    observer.observe(container);
+    observer.observe(showcaseElem);
 
     // Clean up
     return () => {
@@ -499,18 +510,18 @@ export default function SculptureViewer() {
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
           <span>SYS.MONITOR: COMP-SCULPT</span>
         </div>
-        <div>DECONSTRUCT_VAL: {hudStats.deconstructProgress}</div>
-        <div>ROT_VELOCITY: {hudStats.rotationSpeed} rad/s</div>
-        <div>SYS_GRID_ALIGN: {hudStats.gridAlignment}</div>
+        <div ref={hudDeconstructRef}>DECONSTRUCT_VAL: 0.0000</div>
+        <div ref={hudRotRef}>ROT_VELOCITY: 0.120 rad/s</div>
+        <div ref={hudAlignRef}>SYS_GRID_ALIGN: 99.8%</div>
       </div>
 
       {/* Futuristic Technical HUD Overlay - Bottom Right */}
       <div className="fixed bottom-12 right-6 sm:right-10 lg:right-12 z-10 font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] tracking-[0.15em] leading-[1.7] uppercase text-right opacity-75 hidden sm:block">
-        <div>COORDS_X: {hudStats.coords.x}</div>
-        <div>COORDS_Y: {hudStats.coords.y}</div>
-        <div>COORDS_Z: {hudStats.coords.z}</div>
-        <div className="border-t border-[var(--border)]/40 pt-1 mt-1 text-[var(--heading)]">
-          UNITS_ASSEMBLED: {hudStats.activeModules}
+        <div ref={hudCoordsXRef}>COORDS_X: 0.000</div>
+        <div ref={hudCoordsYRef}>COORDS_Y: 0.000</div>
+        <div ref={hudCoordsZRef}>COORDS_Z: 3.200</div>
+        <div ref={hudModulesRef} className="border-t border-[var(--border)]/40 pt-1 mt-1 text-[var(--heading)]">
+          UNITS_ASSEMBLED: 14/14
         </div>
       </div>
 

@@ -122,3 +122,42 @@ export function playToggleSound(isOn = true) {
     // Autoplay protections or context initialization errors fail silently
   }
 }
+
+/**
+ * Synthesizes a soft, subtle tick for hover interactions.
+ */
+export function playHoverSound(volume = 0.02) {
+  if (typeof window === "undefined") return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  try {
+    if (!audioCtx) {
+      const Win = window as unknown as { AudioContext: typeof AudioContext; webkitAudioContext: typeof AudioContext };
+      audioCtx = new (Win.AudioContext || Win.webkitAudioContext)();
+    }
+
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(800, now);
+    osc.frequency.exponentialRampToValueAtTime(400, now + 0.008);
+
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.008);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.01);
+  } catch {
+    // ignore
+  }
+}
+

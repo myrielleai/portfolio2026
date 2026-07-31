@@ -20,10 +20,12 @@ const DrawingCanvas = React.forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
       const ctx = cnv.getContext("2d");
       if (!ctx) return;
 
-      // Set canvas size to fill parent exactly
+      // Set canvas size to fill parent exactly without unnecessarily resetting dimensions
       const resize = () => {
-        cnv.width = cnv.offsetWidth;
-        cnv.height = cnv.offsetHeight;
+        if (cnv.width !== cnv.offsetWidth || cnv.height !== cnv.offsetHeight) {
+          cnv.width = cnv.offsetWidth;
+          cnv.height = cnv.offsetHeight;
+        }
       };
       resize();
       window.addEventListener("resize", resize);

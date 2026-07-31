@@ -28,7 +28,7 @@ export default function EdgeRuler() {
   }
 
   return (
-    <div className="absolute inset-0 pointer-events-none select-none z-10">
+    <div className="absolute inset-2 sm:inset-4 md:inset-6 pointer-events-none select-none z-10 overflow-hidden rounded-xl md:rounded-2xl">
       {/* Top Edge Ruler */}
       <div 
         className="absolute top-0 left-0 right-0 h-6 border-b border-white/5"
