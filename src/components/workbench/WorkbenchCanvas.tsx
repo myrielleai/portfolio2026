@@ -149,6 +149,10 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       pencil: handles.pencilGroup,
       stickyNotes: handles.stickyNotesGroup,
       earbuds: handles.earbudsGroup,
+      airpods: handles.earbudsGroup,
+      airpod: handles.earbudsGroup,
+      headphone: handles.earbudsGroup,
+      headphones: handles.earbudsGroup,
       scissors: handles.scissorsGroup,
       scissor: handles.scissorsGroup,
       plant: handles.plantGroup,
@@ -156,6 +160,8 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       lamp: handles.lampGroup,
       rubiksCube: handles.rubiksCubeGroup,
       pictureFrame: handles.pictureFrameGroup,
+      frame: handles.pictureFrameGroup,
+      photoFrame: handles.pictureFrameGroup,
       chess: handles.chessGroup,
       chessPieces: handles.chessGroup,
       pawn: handles.chessGroup,
@@ -193,7 +199,52 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
     const defaultZMap: Record<string, number> = {
       journal: 0.45,
       pictureFrame: 0.04,
+      frame: 0.04,
+      photoFrame: 0.04,
       rubiksCube: 0.38,
+      macbook: 0.05,
+      keyboard: 0.05,
+      phone: 0.05,
+      ipad: 0.05,
+      tablet: 0.05,
+      coffeeMug: 0.05,
+      matcha: 0.05,
+      matchaMug: 0.05,
+      mug: 0.05,
+      cup: 0.05,
+      earbuds: 0.05,
+      airpods: 0.05,
+      airpod: 0.05,
+      headphone: 0.05,
+      headphones: 0.05,
+      scissors: 0.05,
+      scissor: 0.05,
+      pencil: 0.05,
+      stickyNotes: 0.05,
+      plant: 0.05,
+      deskLamp: 0.05,
+      lamp: 0.05,
+      chess: 0.05,
+      chessPieces: 0.05,
+      pawn: 0.05,
+      knight: 0.05,
+      queen: 0.05,
+      globe: 0.05,
+      globeSphere: 0.05,
+      cat: 0.05,
+      orangeCat: 0.05,
+      tabbyCat: 0.05,
+      orangeTabby: 0.05,
+      jewelry: 0.05,
+      silverJewelry: 0.05,
+      jewelries: 0.05,
+      rings: 0.05,
+      necklace: 0.05,
+      miata: 0.05,
+      miataCar: 0.05,
+      toyMiata: 0.05,
+      toyCar: 0.05,
+      car: 0.05
     };
 
     // Helper: Convert pointer NDC to desk world space (X, Y)
@@ -363,7 +414,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         setIsBlueprintActive(true);
       } else if (objName === "stickyNotes") {
         setIsEasterEggOpen(true);
-      } else if (objName === "earbuds") {
+      } else if (objName === "earbuds" || objName === "airpods" || objName === "airpod") {
         setIsEarbudsOpen(true);
       } else if (objName === "scissors" || objName === "scissor") {
         setIsScissorsOpen(true);
@@ -372,7 +423,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         isLampOnRef.current = nextState;
         setIsLampOn(nextState);
         playToggleSound(nextState);
-      } else if (objName === "pictureFrame") {
+      } else if (objName === "pictureFrame" || objName === "frame" || objName === "photoFrame") {
         setIsPictureFrameOpen(true);
       } else if (objName === "chess" || objName === "chessPieces" || objName === "pawn" || objName === "knight" || objName === "queen") {
         setIsChessOpen(true);
@@ -467,14 +518,13 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         handles.journalGroup.position.z += (targetJournalZ - handles.journalGroup.position.z) * 0.1;
       }
 
-      // Mechanical Pencil Roll ONLY on hover
+      // Staedtler Blue Pencil Hover Lift & Float Animation
       const isPencilHovered = hoveredObj === "pencil";
-      const targetPencilZ = 0.05;
+      const targetPencilZ = isPencilHovered ? 0.28 : 0.05;
+      const targetPencilRotZ = isPencilHovered ? -0.06 : -0.14;
       if (!isDragging || draggedObjectName !== "pencil") {
         handles.pencilGroup.position.z += (targetPencilZ - handles.pencilGroup.position.z) * 0.1;
-        if (isPencilHovered && !isDragging) {
-          handles.pencilGroup.rotation.z += 0.02;
-        }
+        handles.pencilGroup.rotation.z += (targetPencilRotZ - handles.pencilGroup.rotation.z) * 0.1;
       }
 
       // Smartphone / iPad: Screen lights up & scales ONLY on hover
@@ -494,10 +544,33 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         (isIpadHovered ? 1.4 : 0.2) - handles.phoneScreenMat.emissiveIntensity
       ) * 0.1;
 
-      // Earbuds Hover Animation
-      const targetEarbudsZ = 0.05;
-      if (!isDragging || draggedObjectName !== "earbuds") {
+      // AirPods / Earbuds Hover Animation & Soft Drop Shadow
+      const isAirpodsHovered = hoveredObj === "earbuds" || hoveredObj === "airpods" || hoveredObj === "airpod";
+      const targetEarbudsZ = isAirpodsHovered ? 0.38 : 0.05;
+      const targetEarbudsScale = isAirpodsHovered ? 1.05 : 1.0;
+      const targetEarbudsRotZ = isAirpodsHovered ? -0.22 : -0.3;
+
+      if (!isDragging || (draggedObjectName !== "earbuds" && draggedObjectName !== "airpods" && draggedObjectName !== "airpod")) {
         handles.earbudsGroup.position.z += (targetEarbudsZ - handles.earbudsGroup.position.z) * 0.1;
+        handles.earbudsGroup.rotation.z += (targetEarbudsRotZ - handles.earbudsGroup.rotation.z) * 0.1;
+        const curS = handles.earbudsGroup.scale.x;
+        const nxtS = curS + (targetEarbudsScale - curS) * 0.1;
+        handles.earbudsGroup.scale.set(nxtS, nxtS, nxtS);
+      }
+
+      if (handles.earbudsShadowMesh) {
+        const targetShadowScale = isAirpodsHovered ? 1.45 : 1.0;
+        const targetShadowOpacity = isAirpodsHovered ? 0.25 : 0.55;
+        const targetShadowOffX = isAirpodsHovered ? -0.18 : 0;
+        const targetShadowOffY = isAirpodsHovered ? -0.14 : 0;
+
+        handles.earbudsShadowMesh.scale.x += (targetShadowScale - handles.earbudsShadowMesh.scale.x) * 0.1;
+        handles.earbudsShadowMesh.scale.y += (targetShadowScale - handles.earbudsShadowMesh.scale.y) * 0.1;
+        handles.earbudsShadowMesh.position.x += (targetShadowOffX - handles.earbudsShadowMesh.position.x) * 0.1;
+        handles.earbudsShadowMesh.position.y += (targetShadowOffY - handles.earbudsShadowMesh.position.y) * 0.1;
+
+        const mat = handles.earbudsShadowMesh.material as THREE.MeshBasicMaterial;
+        mat.opacity += (targetShadowOpacity - mat.opacity) * 0.1;
       }
 
       // Scissors: Blades open ONLY on hover
@@ -510,11 +583,34 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       handles.scissorBlade1.rotation.z += (targetBladeAngle - handles.scissorBlade1.rotation.z) * 0.1;
       handles.scissorBlade2.rotation.z += (-targetBladeAngle - handles.scissorBlade2.rotation.z) * 0.1;
 
-      // Coffee Mug & Steam: Steam appears & rises ONLY on hover
-      const isMugHovered = hoveredObj === "coffeeMug";
-      const targetMugZ = 0.05;
-      if (!isDragging || draggedObjectName !== "coffeeMug") {
+      // Matcha Mug, Swirling Liquid & Steam Particles (ONLY on hover)
+      const isMugHovered =
+        hoveredObj === "coffeeMug" ||
+        hoveredObj === "matcha" ||
+        hoveredObj === "matchaMug" ||
+        hoveredObj === "mug" ||
+        hoveredObj === "cup";
+
+      const targetMugZ = isMugHovered ? 0.25 : 0.05;
+      const targetMugScale = isMugHovered ? 1.04 : 1.0;
+      if (
+        !isDragging ||
+        (draggedObjectName !== "coffeeMug" &&
+          draggedObjectName !== "matcha" &&
+          draggedObjectName !== "matchaMug" &&
+          draggedObjectName !== "mug" &&
+          draggedObjectName !== "cup")
+      ) {
         handles.mugGroup.position.z += (targetMugZ - handles.mugGroup.position.z) * 0.1;
+        const currentMugScale = handles.mugGroup.scale.x;
+        const nextMugScale = currentMugScale + (targetMugScale - currentMugScale) * 0.1;
+        handles.mugGroup.scale.set(nextMugScale, nextMugScale, nextMugScale);
+      }
+
+      // Matcha Liquid Surface Swirl Motion on Hover
+      if (handles.mugLiquid) {
+        const targetSwirlSpeed = isMugHovered ? 0.035 : 0.003;
+        handles.mugLiquid.rotation.z += targetSwirlSpeed;
       }
 
       const steamMat = handles.steamParticles.material as THREE.PointsMaterial;
@@ -525,10 +621,16 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         const steamPos = handles.steamParticles.geometry.attributes.position.array as Float32Array;
         for (let i = 0; i < steamPos.length; i += 3) {
           steamPos[i + 2] += 0.008; // Rise upward
-          steamPos[i] += Math.sin(time * 2 + i) * 0.002; // Drift wave
+          const swirlRadius = Math.hypot(steamPos[i], steamPos[i + 1]);
+          const angle = Math.atan2(steamPos[i + 1], steamPos[i]) + (isMugHovered ? 0.04 : 0.01);
+          steamPos[i] = Math.cos(angle) * swirlRadius + Math.sin(time * 2 + i) * 0.001;
+          steamPos[i + 1] = Math.sin(angle) * swirlRadius;
           if (steamPos[i + 2] > 2.0) {
             steamPos[i + 2] = 0.6;
-            steamPos[i] = (Math.random() - 0.5) * 0.5;
+            const r = Math.random() * 0.25;
+            const a = Math.random() * Math.PI * 2;
+            steamPos[i] = Math.cos(a) * r;
+            steamPos[i + 1] = Math.sin(a) * r;
           }
         }
         handles.steamParticles.geometry.attributes.position.needsUpdate = true;
@@ -581,19 +683,65 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         }
       }
 
-      // Picture Frame Hover Elevation Animation
+      // Picture Frame Hover Elevation Animation & Soft Drop Shadow
       if (handles.pictureFrameGroup) {
-        const targetFrameZ = 0.04;
-        if (!isDragging || draggedObjectName !== "pictureFrame") {
+        const isFrameHovered = hoveredObj === "pictureFrame" || hoveredObj === "frame" || hoveredObj === "photoFrame";
+        const targetFrameZ = isFrameHovered ? 0.42 : 0.04;
+        const targetFrameScale = isFrameHovered ? 1.05 : 1.0;
+        const targetFrameRotZ = isFrameHovered ? 0.08 : 0.04;
+
+        if (!isDragging || (draggedObjectName !== "pictureFrame" && draggedObjectName !== "frame")) {
           handles.pictureFrameGroup.position.z += (targetFrameZ - handles.pictureFrameGroup.position.z) * 0.1;
+          handles.pictureFrameGroup.rotation.z += (targetFrameRotZ - handles.pictureFrameGroup.rotation.z) * 0.1;
+          const curS = handles.pictureFrameGroup.scale.x;
+          const nxtS = curS + (targetFrameScale - curS) * 0.1;
+          handles.pictureFrameGroup.scale.set(nxtS, nxtS, nxtS);
+        }
+
+        if (handles.frameShadowMesh) {
+          const targetShadowScale = isFrameHovered ? 1.48 : 1.0;
+          const targetShadowOpacity = isFrameHovered ? 0.22 : 0.55;
+          const targetShadowOffX = isFrameHovered ? -0.22 : 0;
+          const targetShadowOffY = isFrameHovered ? -0.16 : 0;
+
+          handles.frameShadowMesh.scale.x += (targetShadowScale - handles.frameShadowMesh.scale.x) * 0.1;
+          handles.frameShadowMesh.scale.y += (targetShadowScale - handles.frameShadowMesh.scale.y) * 0.1;
+          handles.frameShadowMesh.position.x += (targetShadowOffX - handles.frameShadowMesh.position.x) * 0.1;
+          handles.frameShadowMesh.position.y += (targetShadowOffY - handles.frameShadowMesh.position.y) * 0.1;
+
+          const mat = handles.frameShadowMesh.material as THREE.MeshBasicMaterial;
+          mat.opacity += (targetShadowOpacity - mat.opacity) * 0.1;
         }
       }
 
-      // Chess Pieces Hover Elevation Animation
+      // Chess Pieces Hover Elevation Animation & Soft Drop Shadow
       if (handles.chessGroup) {
-        const targetChessZ = 0.05;
+        const isChessHovered = hoveredObj === "chess" || hoveredObj === "chessPieces" || hoveredObj === "pawn" || hoveredObj === "knight" || hoveredObj === "queen";
+        const targetChessZ = isChessHovered ? 0.42 : 0.05;
+        const targetChessScale = isChessHovered ? 1.06 : 1.0;
+        const targetChessRotZ = isChessHovered ? -0.05 : -0.15;
+
         if (!isDragging || (draggedObjectName !== "chess" && draggedObjectName !== "pawn" && draggedObjectName !== "knight" && draggedObjectName !== "queen")) {
           handles.chessGroup.position.z += (targetChessZ - handles.chessGroup.position.z) * 0.1;
+          handles.chessGroup.rotation.z += (targetChessRotZ - handles.chessGroup.rotation.z) * 0.1;
+          const curS = handles.chessGroup.scale.x;
+          const nxtS = curS + (targetChessScale - curS) * 0.1;
+          handles.chessGroup.scale.set(nxtS, nxtS, nxtS);
+        }
+
+        if (handles.chessShadowMesh) {
+          const targetShadowScale = isChessHovered ? 1.48 : 1.0;
+          const targetShadowOpacity = isChessHovered ? 0.22 : 0.55;
+          const targetShadowOffX = isChessHovered ? -0.20 : 0;
+          const targetShadowOffY = isChessHovered ? -0.15 : 0;
+
+          handles.chessShadowMesh.scale.x += (targetShadowScale - handles.chessShadowMesh.scale.x) * 0.1;
+          handles.chessShadowMesh.scale.y += (targetShadowScale - handles.chessShadowMesh.scale.y) * 0.1;
+          handles.chessShadowMesh.position.x += (targetShadowOffX - handles.chessShadowMesh.position.x) * 0.1;
+          handles.chessShadowMesh.position.y += (targetShadowOffY - handles.chessShadowMesh.position.y) * 0.1;
+
+          const mat = handles.chessShadowMesh.material as THREE.MeshBasicMaterial;
+          mat.opacity += (targetShadowOpacity - mat.opacity) * 0.1;
         }
       }
 
@@ -620,7 +768,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         }
       }
 
-      // Sterling Silver Jewelry Hover Elevation Animation
+      // Sterling Silver Jewelry Hover Elevation & Sparkle Dazzle Animation
       if (handles.jewelryGroup) {
         const isJewelryHovered = hoveredObj === "jewelry" || hoveredObj === "silverJewelry" || hoveredObj === "jewelries" || hoveredObj === "rings" || hoveredObj === "necklace";
         const targetJewelryZ = 0.05;
@@ -629,6 +777,27 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
           if (isJewelryHovered) {
             handles.jewelryGroup.rotation.z += 0.008;
           }
+        }
+
+        // Animate Specular Light intensity boost on hover
+        if (handles.jewelryLight) {
+          const targetLightIntensity = isJewelryHovered ? 9.0 : 5.2;
+          handles.jewelryLight.intensity += (targetLightIntensity - handles.jewelryLight.intensity) * 0.1;
+        }
+
+        // Animate Sparkle Stars (Continuous shimmer, rotation & scale pulsing)
+        if (handles.jewelrySparkles) {
+          handles.jewelrySparkles.children.forEach((sparkle, idx) => {
+            sparkle.rotation.z += (isJewelryHovered ? 0.04 : 0.015) + idx * 0.003;
+            const pulseSpeed = isJewelryHovered ? 6 : 3;
+            const scaleWave = (isJewelryHovered ? 1.15 : 0.85) + Math.sin(time * pulseSpeed + idx * 1.4) * 0.3;
+            sparkle.scale.set(scaleWave, scaleWave, scaleWave);
+
+            if (sparkle instanceof THREE.Mesh && sparkle.material) {
+              const mat = sparkle.material as THREE.MeshBasicMaterial;
+              mat.opacity = (isJewelryHovered ? 0.95 : 0.7) + Math.sin(time * pulseSpeed * 1.2 + idx * 1.8) * 0.25;
+            }
+          });
         }
       }
 
@@ -707,15 +876,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         }`} 
       />
 
-      {/* Header Overlay HUD */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10 pointer-events-none flex flex-col items-center text-center space-y-2 max-w-xl w-full px-4">
-        <h2 
-          className="text-2xl md:text-4xl font-extrabold !text-white font-sans tracking-tight drop-shadow-lg"
-          style={{ color: "#ffffff" }}
-        >
-          Myrielle's Workbench
-        </h2>
-      </div>
+
 
 
       {/* Blur Overlay on initial load */}

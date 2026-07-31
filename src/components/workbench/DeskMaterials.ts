@@ -616,10 +616,18 @@ export function createSmartphoneTexture(): THREE.CanvasTexture {
   // 7. High-Contrast Glassmorphic Lockscreen Notifications Stack
   const notifications = [
     {
+      app: "Messages",
+      title: "baba",
+      sub: '"dont forget to take a break"',
+      time: "now",
+      iconBg: "#34c759",
+      iconText: "💬"
+    },
+    {
       app: "GitHub",
       title: "Myrielle Jerusalem",
       sub: "@myrielle • 42 Repositories Starred",
-      time: "now",
+      time: "2m ago",
       iconBg: "#1f2937",
       iconText: "GH"
     },
@@ -627,17 +635,9 @@ export function createSmartphoneTexture(): THREE.CanvasTexture {
       app: "LinkedIn",
       title: "Professional Profile",
       sub: "Full-Stack Engineer & Architect",
-      time: "2m ago",
+      time: "5m ago",
       iconBg: "#0a66c2",
       iconText: "in"
-    },
-    {
-      app: "Music",
-      title: "Streetcar — Daniel Caesar",
-      sub: "Playing on AirPods Pro • 2:45 / 4:12",
-      time: "now",
-      iconBg: "#ec4899",
-      iconText: "🎵"
     }
   ];
 
@@ -746,13 +746,13 @@ export function createSmartphoneTexture(): THREE.CanvasTexture {
 
 
 // 6. Sticky Note Texture with To-Do List
-export function createStickyNoteTexture(text?: string, color: string = "#fef08a"): THREE.CanvasTexture {
+export function createStickyNoteTexture(text?: string, color: string = "#fef3c7"): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
   canvas.height = 512;
   const ctx = canvas.getContext("2d")!;
 
-  // Sticky note yellow base
+  // Sticky note warm ivory base
   ctx.fillStyle = color;
   ctx.fillRect(0, 0, 512, 512);
 
@@ -1186,23 +1186,23 @@ export function createFeltPadTexture(): THREE.CanvasTexture {
   canvas.height = 512;
   const ctx = canvas.getContext("2d")!;
 
-  // Deep matte red felt base
-  ctx.fillStyle = "#5c1010";
+  // Deep matte dark charcoal slate felt base
+  ctx.fillStyle = "#1c1c20";
   ctx.fillRect(0, 0, 512, 512);
 
   // Soft wool fiber noise
   const imgData = ctx.getImageData(0, 0, 512, 512);
   const data = imgData.data;
   for (let i = 0; i < data.length; i += 4) {
-    const val = (Math.random() - 0.5) * 22;
+    const val = (Math.random() - 0.5) * 16;
     data[i] = Math.min(255, Math.max(0, data[i] + val));
-    data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + val * 0.4));
-    data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + val * 0.4));
+    data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + val));
+    data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + val * 1.2));
   }
   ctx.putImageData(imgData, 0, 0);
 
-  // Warm perimeter saddle-stitch line
-  ctx.strokeStyle = "rgba(220, 80, 80, 0.45)";
+  // Warm perimeter golden amber saddle-stitch line
+  ctx.strokeStyle = "rgba(217, 119, 6, 0.40)";
   ctx.lineWidth = 3;
   ctx.setLineDash([10, 8]);
   ctx.strokeRect(16, 16, 480, 480);
@@ -1817,7 +1817,130 @@ export function createGlobeTexture(): THREE.CanvasTexture {
   return texture;
 }
 
+// 18. Soft Radial Drop Shadow Texture for Workbench Objects
+export function createSoftShadowTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d")!;
 
+  const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grad.addColorStop(0, "rgba(0, 0, 0, 0.85)");
+  grad.addColorStop(0.35, "rgba(0, 0, 0, 0.5)");
+  grad.addColorStop(0.7, "rgba(0, 0, 0, 0.15)");
+  grad.addColorStop(1, "rgba(0, 0, 0, 0.0)");
 
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 256, 256);
 
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+// 19. Staedtler Mars Lumograph Pencil Texture (Iconic Royal Blue with Silver Hot-Stamp Text)
+export function createStaedtlerPencilTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 1024;
+  const ctx = canvas.getContext("2d")!;
+
+  // Staedtler Royal Blue Enamel Gradient
+  const bgGrad = ctx.createLinearGradient(0, 0, 512, 0);
+  bgGrad.addColorStop(0, "#002357");
+  bgGrad.addColorStop(0.2, "#003e99");
+  bgGrad.addColorStop(0.5, "#0047ab");
+  bgGrad.addColorStop(0.8, "#003380");
+  bgGrad.addColorStop(1, "#001a40");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, 512, 1024);
+
+  // Facet seam lines for 6-sided hexagonal profile U wrapping
+  const facetW = 512 / 6;
+  for (let i = 0; i <= 6; i++) {
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(i * facetW, 0);
+    ctx.lineTo(i * facetW, 1024);
+    ctx.stroke();
+  }
+
+  // Hot-stamped Silver Foil Branding along face 2 (U center = 1.5 * facetW)
+  ctx.save();
+  const faceCenterX = facetW * 1.5;
+  ctx.translate(faceCenterX, 512);
+  ctx.rotate(-Math.PI / 2);
+
+  // Silver text style
+  ctx.fillStyle = "#f1f5f9";
+  ctx.shadowColor = "rgba(255, 255, 255, 0.9)";
+  ctx.shadowBlur = 6;
+
+  ctx.font = "900 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("STAEDTLER", -180, 8);
+
+  ctx.font = "italic 22px Georgia, 'Times New Roman', serif";
+  ctx.fillText("Mars Lumograph", 40, 7);
+
+  // 2B Grade Box Stamp
+  ctx.strokeStyle = "#f1f5f9";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(210, -14, 48, 28);
+  ctx.font = "bold 20px sans-serif";
+  ctx.fillText("2B", 234, 6);
+
+  ctx.restore();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+// 20. Staedtler Noris 120 Pencil Texture (Iconic Yellow & Black Hexagonal Stripes)
+export function createStaedtlerNorisTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 1024;
+  const ctx = canvas.getContext("2d")!;
+
+  const facetW = 512 / 6;
+
+  // Alternating Yellow and Black Hexagonal Facet Stripes
+  const colors = ["#facc15", "#18181b", "#facc15", "#18181b", "#facc15", "#18181b"];
+  for (let i = 0; i < 6; i++) {
+    ctx.fillStyle = colors[i];
+    ctx.fillRect(i * facetW, 0, facetW, 1024);
+
+    // Facet edge shading
+    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+    ctx.fillRect(i * facetW, 0, 3, 1024);
+  }
+
+  // Silver/Black Foil Branding on main Yellow Face 2
+  ctx.save();
+  const faceCenterX = facetW * 2.5;
+  ctx.translate(faceCenterX, 512);
+  ctx.rotate(-Math.PI / 2);
+
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "900 26px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("STAEDTLER", -160, 7);
+
+  ctx.font = "bold 22px sans-serif";
+  ctx.fillText("Noris", 30, 7);
+
+  ctx.strokeStyle = "#0f172a";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(140, -14, 48, 28);
+  ctx.fillText("2B", 164, 6);
+
+  ctx.restore();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
 

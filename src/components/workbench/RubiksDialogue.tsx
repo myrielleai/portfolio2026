@@ -20,7 +20,7 @@ export default function RubiksDialogue({ isOpen, onClose }: RubiksDialogueProps)
       {isOpen && (
         <div 
           onClick={onClose}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 pointer-events-auto cursor-pointer select-none text-center px-4"
+          className="absolute bottom-28 sm:bottom-36 left-1/2 -translate-x-1/2 z-20 pointer-events-auto cursor-pointer select-none text-center px-4"
         >
           <motion.p
             initial={{ opacity: 0, y: 12, scale: 0.96 }}

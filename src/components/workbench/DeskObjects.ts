@@ -14,7 +14,10 @@ import {
   createPictureFramePhotoTexture,
   createPhotostripTexture1,
   createPhotostripTexture2,
-  createGlobeTexture
+  createGlobeTexture,
+  createSoftShadowTexture,
+  createStaedtlerPencilTexture,
+  createStaedtlerNorisTexture
 } from "./DeskMaterials";
 
 export interface WorkbenchObjectHandles {
@@ -52,7 +55,12 @@ export interface WorkbenchObjectHandles {
   catGroup: THREE.Group;
   catTailMesh?: THREE.Mesh;
   jewelryGroup: THREE.Group;
+  jewelrySparkles?: THREE.Group;
+  jewelryLight?: THREE.PointLight;
   miataGroup: THREE.Group;
+  frameShadowMesh?: THREE.Mesh;
+  chessShadowMesh?: THREE.Mesh;
+  earbudsShadowMesh?: THREE.Mesh;
 }
 
 function createAppleLogoShape(): { body: THREE.Shape; leaf: THREE.Shape } {
@@ -237,7 +245,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // 4. Black Leather Journal & Cozy Hardcover Book Stack
   // ----------------------------------------------------
   const bookStackGroup = new THREE.Group();
-  bookStackGroup.position.set(-5.4, 0.5, 0.02);
+  bookStackGroup.position.set(-5.4, 0.4, 0.02);
   deskGroup.add(bookStackGroup);
 
   // Bottom Terracotta Book
@@ -267,7 +275,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   bookStackGroup.add(book2Mesh);
 
   const journalGroup = new THREE.Group();
-  journalGroup.position.set(-5.35, 0.52, 0.45);
+  journalGroup.position.set(-5.35, 0.42, 0.45);
   journalGroup.name = "journal";
   deskGroup.add(journalGroup);
 
@@ -330,7 +338,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
 
   // --- Ballpoint Pen ---
   const journalPenGroup = new THREE.Group();
-  journalPenGroup.position.set(-3.76, 0.08, 0.05);
+  journalPenGroup.position.set(-3.75, -0.1, 0.05);
   journalPenGroup.rotation.z = -0.10; // resting parallel next to pencil
   deskGroup.add(journalPenGroup);
 
@@ -362,12 +370,12 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   penBandMesh.position.set(0, -0.55, 0);
   journalPenGroup.add(penBandMesh);
 
-  // Blue ink tip cone (points in +Y direction)
+  // Silver/slate ink tip cone (points in +Y direction)
   const penTipGeom = new THREE.ConeGeometry(0.042, 0.28, 12);
   const penTipMat = new THREE.MeshStandardMaterial({
-    color: 0x1d4ed8,
-    roughness: 0.35,
-    metalness: 0.2
+    color: 0x475569,
+    roughness: 0.25,
+    metalness: 0.7
   });
   const penTipMesh = new THREE.Mesh(penTipGeom, penTipMat);
   penTipMesh.position.set(0, 1.54, 0); // at +Y end (tip)
@@ -379,72 +387,73 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   penCapMesh.position.set(0, -1.44, 0);
   journalPenGroup.add(penCapMesh);
 
-  // --- Classic Wooden Pencil ---
+  // --- Staedtler Noris 120 Wooden Pencil ---
   const journalPencilGroup = new THREE.Group();
-  journalPencilGroup.position.set(-3.52, 0.05, 0.05);
+  journalPencilGroup.position.set(-3.5, -0.1, 0.05);
   journalPencilGroup.rotation.z = -0.12; // slight lean parallel to pen
   deskGroup.add(journalPencilGroup);
 
-  // Hexagonal yellow body along Y axis
-  const woodPencilBodyGeom = new THREE.CylinderGeometry(0.05, 0.05, 2.6, 6);
+  // Iconic Yellow & Black Striped Hexagonal Body along Y axis
+  const woodPencilBodyGeom = new THREE.CylinderGeometry(0.048, 0.048, 2.3, 6);
+  const norisTex = createStaedtlerNorisTexture();
   const woodPencilMat = new THREE.MeshStandardMaterial({
-    color: 0xf5c518,
-    roughness: 0.6,
-    metalness: 0.0
+    map: norisTex,
+    roughness: 0.35,
+    metalness: 0.05
   });
   const woodPencilMesh = new THREE.Mesh(woodPencilBodyGeom, woodPencilMat);
+  woodPencilMesh.position.set(0, -0.05, 0);
   woodPencilMesh.castShadow = true;
   journalPencilGroup.add(woodPencilMesh);
 
-  // Warm pine wood sharpened cone at +Y end
-  const woodConeGeom = new THREE.ConeGeometry(0.05, 0.22, 6);
-  const woodConeMat = new THREE.MeshStandardMaterial({
-    color: 0xc8a26e,
-    roughness: 0.8,
+  // Staedtler Black Dip Crown Cap at -Y end
+  const norisCapGeom = new THREE.CylinderGeometry(0.048, 0.048, 0.22, 6);
+  const norisCapMat = new THREE.MeshStandardMaterial({
+    color: 0x111827,
+    roughness: 0.2,
+    metalness: 0.1
+  });
+  const norisCapMesh = new THREE.Mesh(norisCapGeom, norisCapMat);
+  norisCapMesh.position.set(0, -1.25, 0);
+  journalPencilGroup.add(norisCapMesh);
+
+  // Red Ring Accent on Crown Top
+  const norisRingGeom = new THREE.CylinderGeometry(0.049, 0.049, 0.03, 16);
+  const norisRingMat = new THREE.MeshStandardMaterial({
+    color: 0xef4444,
+    roughness: 0.2
+  });
+  const norisRingMesh = new THREE.Mesh(norisRingGeom, norisRingMat);
+  norisRingMesh.position.set(0, -1.13, 0);
+  journalPencilGroup.add(norisRingMesh);
+
+  // Warm cedar wood sharpened cone at +Y end
+  const norisWoodConeGeom = new THREE.ConeGeometry(0.048, 0.28, 6);
+  const norisWoodConeMat = new THREE.MeshStandardMaterial({
+    color: 0xd4a373,
+    roughness: 0.75,
     metalness: 0.0
   });
-  const woodConeMesh = new THREE.Mesh(woodConeGeom, woodConeMat);
-  woodConeMesh.position.set(0, 1.41, 0);
-  journalPencilGroup.add(woodConeMesh);
+  const norisWoodConeMesh = new THREE.Mesh(norisWoodConeGeom, norisWoodConeMat);
+  norisWoodConeMesh.position.set(0, 1.19, 0);
+  journalPencilGroup.add(norisWoodConeMesh);
 
   // Graphite tip cone at tip of wood cone
-  const graphiteTipGeom = new THREE.ConeGeometry(0.016, 0.1, 8);
-  const graphiteMat = new THREE.MeshStandardMaterial({
+  const norisGraphiteTipGeom = new THREE.ConeGeometry(0.016, 0.1, 8);
+  const norisGraphiteMat = new THREE.MeshStandardMaterial({
     color: 0x2d2d2d,
     roughness: 0.9,
     metalness: 0.05
   });
-  const graphiteTipMesh = new THREE.Mesh(graphiteTipGeom, graphiteMat);
-  graphiteTipMesh.position.set(0, 1.57, 0);
-  journalPencilGroup.add(graphiteTipMesh);
-
-  // Silver ferrule band at -Y end
-  const ferruleGeom = new THREE.CylinderGeometry(0.056, 0.056, 0.14, 16);
-  const ferruleMat = new THREE.MeshStandardMaterial({
-    color: 0xb8b8b8,
-    metalness: 0.9,
-    roughness: 0.15
-  });
-  const ferruleMesh = new THREE.Mesh(ferruleGeom, ferruleMat);
-  ferruleMesh.position.set(0, -1.33, 0);
-  journalPencilGroup.add(ferruleMesh);
-
-  // Pink eraser cap at very end
-  const eraserGeom = new THREE.CylinderGeometry(0.052, 0.052, 0.18, 12);
-  const eraserMat = new THREE.MeshStandardMaterial({
-    color: 0xf4a7b9,
-    roughness: 0.75,
-    metalness: 0.0
-  });
-  const eraserMesh = new THREE.Mesh(eraserGeom, eraserMat);
-  eraserMesh.position.set(0, -1.47, 0);
-  journalPencilGroup.add(eraserMesh);
+  const norisGraphiteTipMesh = new THREE.Mesh(norisGraphiteTipGeom, norisGraphiteMat);
+  norisGraphiteTipMesh.position.set(0, 1.38, 0);
+  journalPencilGroup.add(norisGraphiteTipMesh);
 
   // ----------------------------------------------------
   // 5. Coffee Mug on Cozy Cork Coaster with Steam Particles
   // ----------------------------------------------------
   const mugGroup = new THREE.Group();
-  mugGroup.position.set(5.5, 2.5, 0.05);
+  mugGroup.position.set(4.7, 2.7, 0.05);
   mugGroup.name = "coffeeMug";
   deskGroup.add(mugGroup);
 
@@ -553,7 +562,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // 6. Smartphone (iPhone 15 Pro)
   // ----------------------------------------------------
   const phoneGroup = new THREE.Group();
-  phoneGroup.position.set(4.2, -1.8, 0.05);
+  phoneGroup.position.set(4.3, -1.6, 0.05);
   phoneGroup.rotation.z = -0.15;
   phoneGroup.name = "phone";
   deskGroup.add(phoneGroup);
@@ -778,42 +787,101 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   phoneGroup.add(islandPillMesh);
 
   // ----------------------------------------------------
-  // 8. Mechanical Pencil
+  // 8. Staedtler Mars Lumograph Studio Pencil ✏️
   // ----------------------------------------------------
   const pencilGroup = new THREE.Group();
-  pencilGroup.position.set(2.4, 2.6, 0.05);
-  pencilGroup.rotation.z = -0.6;
+  pencilGroup.position.set(-3.25, -0.1, 0.05);
+  pencilGroup.rotation.z = -0.14;
   pencilGroup.name = "pencil";
   deskGroup.add(pencilGroup);
 
-  const pencilBodyGeom = new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6);
-  pencilBodyGeom.rotateX(Math.PI / 2);
+  // Hexagonal Staedtler Royal Blue Enamel Body with Hot-Stamped Silver Foil Branding
+  const pencilBodyGeom = new THREE.CylinderGeometry(0.048, 0.048, 2.2, 6);
+  const staedtlerTex = createStaedtlerPencilTexture();
   const pencilMat = new THREE.MeshStandardMaterial({
-    color: 0x0f172a,
-    roughness: 0.3,
-    metalness: 0.7
+    map: staedtlerTex,
+    roughness: 0.25,
+    metalness: 0.15
   });
   const pencilMesh = new THREE.Mesh(pencilBodyGeom, pencilMat);
+  pencilMesh.position.set(0, -0.05, 0);
   pencilMesh.castShadow = true;
+  pencilMesh.receiveShadow = true;
   pencilGroup.add(pencilMesh);
 
-  // Brass tip
-  const tipGeom = new THREE.ConeGeometry(0.04, 0.2, 16);
-  tipGeom.rotateX(Math.PI / 2);
-  const tipMat = new THREE.MeshStandardMaterial({
-    color: 0xd4af37,
-    metalness: 0.9,
-    roughness: 0.2
+  // Staedtler Signature White Enamel Ring Accent
+  const whiteRingGeom = new THREE.CylinderGeometry(0.049, 0.049, 0.04, 16);
+  const whiteRingMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.15,
+    metalness: 0.05
   });
-  const tipMesh = new THREE.Mesh(tipGeom, tipMat);
-  tipMesh.position.set(0, 1.4, 0);
-  pencilGroup.add(tipMesh);
+  const whiteRingMesh = new THREE.Mesh(whiteRingGeom, whiteRingMat);
+  whiteRingMesh.position.set(0, -1.07, 0);
+  pencilGroup.add(whiteRingMesh);
+
+  // Staedtler Signature Glossy Black Dip Crown Cap
+  const blackCapGeom = new THREE.CylinderGeometry(0.048, 0.048, 0.22, 6);
+  const blackCapMat = new THREE.MeshStandardMaterial({
+    color: 0x111827,
+    roughness: 0.2,
+    metalness: 0.1
+  });
+  const blackCapMesh = new THREE.Mesh(blackCapGeom, blackCapMat);
+  blackCapMesh.position.set(0, -1.20, 0);
+  pencilGroup.add(blackCapMesh);
+
+  // Crown Cap Rounded Dome End
+  const capDomeGeom = new THREE.SphereGeometry(0.048, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+  capDomeGeom.rotateX(Math.PI);
+  const capDomeMesh = new THREE.Mesh(capDomeGeom, blackCapMat);
+  capDomeMesh.position.set(0, -1.31, 0);
+  pencilGroup.add(capDomeMesh);
+
+  // Polished Silver Pocket Clip
+  const marsSilverMat = new THREE.MeshStandardMaterial({
+    color: 0xe2e8f0,
+    metalness: 0.95,
+    roughness: 0.15
+  });
+
+  const clipBandGeom = new THREE.CylinderGeometry(0.052, 0.052, 0.05, 16);
+  const clipBandMesh = new THREE.Mesh(clipBandGeom, marsSilverMat);
+  clipBandMesh.position.set(0, -1.02, 0);
+  pencilGroup.add(clipBandMesh);
+
+  const clipArmGeom = new THREE.BoxGeometry(0.016, 0.6, 0.02);
+  const clipArmMesh = new THREE.Mesh(clipArmGeom, marsSilverMat);
+  clipArmMesh.position.set(0, -0.74, 0.054);
+  pencilGroup.add(clipArmMesh);
+
+  // Sharpened Natural Cedar Wood Cone at +Y end
+  const marsWoodConeGeom = new THREE.ConeGeometry(0.048, 0.28, 6);
+  const marsWoodConeMat = new THREE.MeshStandardMaterial({
+    color: 0xd4a373,
+    roughness: 0.75,
+    metalness: 0.0
+  });
+  const marsWoodConeMesh = new THREE.Mesh(marsWoodConeGeom, marsWoodConeMat);
+  marsWoodConeMesh.position.set(0, 1.19, 0);
+  pencilGroup.add(marsWoodConeMesh);
+
+  // Graphite Core Tip Cone
+  const marsGraphiteTipGeom = new THREE.ConeGeometry(0.016, 0.1, 8);
+  const marsGraphiteMat = new THREE.MeshStandardMaterial({
+    color: 0x262626,
+    roughness: 0.85,
+    metalness: 0.1
+  });
+  const marsGraphiteTipMesh = new THREE.Mesh(marsGraphiteTipGeom, marsGraphiteMat);
+  marsGraphiteTipMesh.position.set(0, 1.38, 0);
+  pencilGroup.add(marsGraphiteTipMesh);
 
   // ----------------------------------------------------
   // 9. Sticky Notes
   // ----------------------------------------------------
   const stickyNotesGroup = new THREE.Group();
-  stickyNotesGroup.position.set(-3.5, 2.6, 0.05);
+  stickyNotesGroup.position.set(-4.1, 2.7, 0.05);
   stickyNotesGroup.rotation.z = 0.1;
   stickyNotesGroup.name = "stickyNotes";
   deskGroup.add(stickyNotesGroup);
@@ -832,10 +900,24 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // 11. Wireless AirPods & Charging Case
   // ----------------------------------------------------
   const earbudsGroup = new THREE.Group();
-  earbudsGroup.position.set(-2.6, -2.7, 0.05);
+  earbudsGroup.position.set(-2.6, -2.6, 0.05);
   earbudsGroup.rotation.z = -0.3;
   earbudsGroup.name = "earbuds";
   deskGroup.add(earbudsGroup);
+
+  const softShadowTex = createSoftShadowTexture();
+
+  // Contact / Drop Shadow Plane under AirPods
+  const earbudsShadowGeom = new THREE.PlaneGeometry(2.2, 1.3);
+  const earbudsShadowMat = new THREE.MeshBasicMaterial({
+    map: softShadowTex,
+    transparent: true,
+    opacity: 0.5,
+    depthWrite: false
+  });
+  const earbudsShadowMesh = new THREE.Mesh(earbudsShadowGeom, earbudsShadowMat);
+  earbudsShadowMesh.position.set(0, 0, -0.01);
+  earbudsGroup.add(earbudsShadowMesh);
 
   // High-gloss white plastic material for AirPods case & pods
   const airpodsMat = new THREE.MeshStandardMaterial({
@@ -976,7 +1058,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // 11b. Crafting Scissors ✂️
   // ----------------------------------------------------
   const scissorsGroup = new THREE.Group();
-  scissorsGroup.position.set(2.8, -2.5, 0.05);
+  scissorsGroup.position.set(2.6, -2.6, 0.05);
   scissorsGroup.rotation.z = -0.4;
   scissorsGroup.name = "scissors";
   deskGroup.add(scissorsGroup);
@@ -988,9 +1070,9 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   });
 
   const handleMat = new THREE.MeshStandardMaterial({
-    color: 0x2563eb, // Vibrant Blue Crafting Handle
-    roughness: 0.35,
-    metalness: 0.1
+    color: 0x1e293b, // Matte Dark Slate Studio Crafting Handle
+    roughness: 0.3,
+    metalness: 0.4
   });
 
   const screwMat = new THREE.MeshStandardMaterial({
@@ -1094,7 +1176,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // 12. Lush Potted Plant (Organic Life with Multi-Layered Leaves)
   // ----------------------------------------------------
   const plantGroup = new THREE.Group();
-  plantGroup.position.set(6.8, 3.8, 0.05);
+  plantGroup.position.set(6.6, 3.6, 0.05);
   plantGroup.name = "plant";
   deskGroup.add(plantGroup);
 
@@ -1272,7 +1354,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // 12b. Cozy Nordic Brass Desk Lamp 💡
   // ----------------------------------------------------
   const lampGroup = new THREE.Group();
-  lampGroup.position.set(-5.6, 3.2, 0.05);
+  lampGroup.position.set(-5.6, 3.3, 0.05);
   lampGroup.name = "deskLamp";
   deskGroup.add(lampGroup);
 
@@ -1328,7 +1410,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // ----------------------------------------------------
   const rubiksCubeGroup = new THREE.Group();
   // Position: between scissors and phone, slightly above desk
-  rubiksCubeGroup.position.set(-5.35, -3.2, 0.38);
+  rubiksCubeGroup.position.set(-5.4, -2.8, 0.38);
   // Casual tilt — like it was just put down
   rubiksCubeGroup.rotation.set(0.22, 0.0, 0.55);
   rubiksCubeGroup.name = "rubiksCube";
@@ -1404,12 +1486,24 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // 12d. Picture Frame (above the MacBook)
   // ----------------------------------------------------
   const pictureFrameGroup = new THREE.Group();
-  // Centered above the MacBook — MacBook is at (0, 0.2). Y=3.4 places
+  // Centered above the MacBook — MacBook is at (0, 0.2). Y=3.45 places
   // the frame in the upper-centre of the desk, clearly above the laptop.
-  pictureFrameGroup.position.set(0.2, 3.45, 0.04);
+  pictureFrameGroup.position.set(0.0, 3.45, 0.04);
   pictureFrameGroup.rotation.z = 0.04; // very slight casual tilt
   pictureFrameGroup.name = "pictureFrame";
   deskGroup.add(pictureFrameGroup);
+
+  // Contact / Drop Shadow Plane under Picture Frame
+  const frameShadowGeom = new THREE.PlaneGeometry(2.8, 2.2);
+  const frameShadowMat = new THREE.MeshBasicMaterial({
+    map: softShadowTex,
+    transparent: true,
+    opacity: 0.5,
+    depthWrite: false
+  });
+  const frameShadowMesh = new THREE.Mesh(frameShadowGeom, frameShadowMat);
+  frameShadowMesh.position.set(0, 0, -0.01);
+  pictureFrameGroup.add(frameShadowMesh);
 
   // Frame dimensions
   const fW = 2.1;  // outer frame width
@@ -1548,9 +1642,9 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   stripMesh2.receiveShadow = true;
   pictureFrameGroup.add(stripMesh2);
 
-  // Pastel Washi Tape 1 holding Strip 1
+  // Translucent Kraft Washi Tape 1 holding Strip 1
   const tapeMat1 = new THREE.MeshStandardMaterial({
-    color: 0xfbcfe8, // Soft pastel pink
+    color: 0xfef3c7, // Warm kraft parchment
     roughness: 0.6,
     transparent: true,
     opacity: 0.85
@@ -1561,9 +1655,9 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   tapeMesh1.rotation.z = -0.08;
   pictureFrameGroup.add(tapeMesh1);
 
-  // Pastel Washi Tape 2 holding Strip 2
+  // Translucent Soft Linen Washi Tape 2 holding Strip 2
   const tapeMat2 = new THREE.MeshStandardMaterial({
-    color: 0xbae6fd, // Soft pastel sky blue
+    color: 0xe7e5e4, // Soft warm linen
     roughness: 0.6,
     transparent: true,
     opacity: 0.85
@@ -1582,6 +1676,18 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   chessGroup.rotation.z = -0.15;
   chessGroup.name = "chess";
   deskGroup.add(chessGroup);
+
+  // Contact / Drop Shadow Plane under Chess Pieces
+  const chessShadowGeom = new THREE.PlaneGeometry(2.0, 1.5);
+  const chessShadowMat = new THREE.MeshBasicMaterial({
+    map: softShadowTex,
+    transparent: true,
+    opacity: 0.5,
+    depthWrite: false
+  });
+  const chessShadowMesh = new THREE.Mesh(chessShadowGeom, chessShadowMat);
+  chessShadowMesh.position.set(0, 0, -0.01);
+  chessGroup.add(chessShadowMesh);
 
   // Smooth polished ivory / white ceramic material
   const whiteChessMat = new THREE.MeshStandardMaterial({
@@ -1751,7 +1857,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // ----------------------------------------------------
   const globeGroup = new THREE.Group();
   // Placed in upper area between sticky notes and picture frame
-  globeGroup.position.set(-1.8, 3.15, 0.05);
+  globeGroup.position.set(-2.3, 3.3, 0.05);
   globeGroup.rotation.z = -0.1;
   globeGroup.name = "globe";
   deskGroup.add(globeGroup);
@@ -1847,7 +1953,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // ----------------------------------------------------
   const catGroup = new THREE.Group();
   // Positioned directly below the MacBook trackpad on the desk mat
-  catGroup.position.set(-0.25, -2.15, 0.05);
+  catGroup.position.set(0.0, -2.15, 0.05);
   catGroup.rotation.z = -0.15; // Cozy natural angled curl
   catGroup.name = "cat";
   deskGroup.add(catGroup);
@@ -1883,9 +1989,9 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   });
 
   const collarMat = new THREE.MeshStandardMaterial({
-    color: 0x0284c7, // Stylish turquoise collar
-    roughness: 0.4,
-    metalness: 0.3
+    color: 0xb45309, // Warm cognac leather collar
+    roughness: 0.5,
+    metalness: 0.1
   });
 
   const bellMat = new THREE.MeshStandardMaterial({
@@ -2078,32 +2184,51 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   // ----------------------------------------------------
   const jewelryGroup = new THREE.Group();
   // Positioned further below and to the right of the Matcha Mug
-  jewelryGroup.position.set(6.3, -0.2, 0.05);
+  jewelryGroup.position.set(6.3, 0.0, 0.05);
   jewelryGroup.rotation.z = -0.12;
   jewelryGroup.name = "jewelry";
   deskGroup.add(jewelryGroup);
 
-  // Luminous Sterling Silver Materials
-  const silverMat = new THREE.MeshStandardMaterial({
-    color: 0xf1f5f9, // Luminous bright sterling silver
-    roughness: 0.12,  // Highly reflective smooth metal
-    metalness: 0.95
+  // Dedicated Ultra-Luminous Specular Highlight Light for Silver Jewelry
+  const jewelryLight = new THREE.PointLight(0xffffff, 5.2, 8);
+  jewelryLight.position.set(6.3, 0.0, 2.2);
+  scene.add(jewelryLight);
+
+  // Ultra-Luminous Mirror Polished Sterling Silver Materials (MeshPhysicalMaterial)
+  const silverMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff, // Pure bright sterling silver
+    roughness: 0.015, // Ultra-smooth mirror finish
+    metalness: 1.0,   // Pure reflective metal
+    clearcoat: 1.0,   // High-gloss lacquer shine
+    clearcoatRoughness: 0.01,
+    reflectivity: 1.0,
+    emissive: 0xf1f5f9,
+    emissiveIntensity: 0.32
   });
 
-  const silverBrightMat = new THREE.MeshStandardMaterial({
+  const silverBrightMat = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
-    roughness: 0.05,
-    metalness: 0.98,
-    emissive: 0xe2e8f0,
-    emissiveIntensity: 0.15
+    roughness: 0.005,
+    metalness: 1.0,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.0,
+    reflectivity: 1.0,
+    emissive: 0xffffff,
+    emissiveIntensity: 0.6
   });
 
-  const crystalGemMat = new THREE.MeshStandardMaterial({
-    color: 0xe0f2fe, // Sparkling diamond / crystal ice blue clarity
-    roughness: 0.05,
-    metalness: 0.15,
+  const crystalGemMat = new THREE.MeshPhysicalMaterial({
+    color: 0xf0f9ff, // Sparkling diamond / crystal ice blue clarity
+    roughness: 0.0,
+    metalness: 0.1,
+    transmission: 0.92,
     transparent: true,
-    opacity: 0.9
+    opacity: 0.95,
+    ior: 2.4, // Diamond Index of Refraction
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.0,
+    emissive: 0xe0f2fe,
+    emissiveIntensity: 0.7
   });
 
   const velvetDishMat = new THREE.MeshStandardMaterial({
@@ -2249,12 +2374,54 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   hoop2.castShadow = true;
   jewelryGroup.add(hoop2);
 
+  // Sparkling Diamond & Silver Glints / Twinkling Star Meshes ✦✨
+  const jewelrySparkles = new THREE.Group();
+  jewelryGroup.add(jewelrySparkles);
+
+  const starShape = new THREE.Shape();
+  const starOuter = 0.075;
+  const starInner = 0.012;
+  for (let i = 0; i < 8; i++) {
+    const r = i % 2 === 0 ? starOuter : starInner;
+    const a = (i / 8) * Math.PI * 2;
+    const x = Math.cos(a) * r;
+    const y = Math.sin(a) * r;
+    if (i === 0) starShape.moveTo(x, y);
+    else starShape.lineTo(x, y);
+  }
+  starShape.closePath();
+
+  const sparkleGeom = new THREE.ShapeGeometry(starShape);
+
+  const sparklePositions = [
+    { x: -0.1, y: 0.29, z: 0.15 },    // Solitaire Diamond Gem
+    { x: 0.1, y: -0.42, z: 0.14 },    // Crescent Moon & Star Pendant
+    { x: -0.24, y: -0.18, z: 0.14 },  // Twisted Rope Silver Ring
+    { x: 0.52, y: 0.15, z: 0.14 },    // Bangle Ball Cap
+    { x: 0.36, y: -0.32, z: 0.13 },   // Silver Hoop Earring
+    { x: -0.32, y: 0.05, z: 0.14 },   // Classic Silver Band Ring
+    { x: 0.0, y: -0.05, z: 0.13 }     // Center Trinket Dish Accent
+  ];
+
+  sparklePositions.forEach((pos, i) => {
+    const spMat = new THREE.MeshBasicMaterial({
+      color: i % 2 === 0 ? 0xffffff : 0xe0f2fe,
+      transparent: true,
+      opacity: 0.9,
+      side: THREE.DoubleSide
+    });
+    const sparkleMesh = new THREE.Mesh(sparkleGeom, spMat);
+    sparkleMesh.position.set(pos.x, pos.y, pos.z);
+    sparkleMesh.rotation.z = (i * Math.PI) / 4;
+    jewelrySparkles.add(sparkleMesh);
+  });
+
   // ----------------------------------------------------
   // 12i. Iconic Toy Mazda Miata NA Roadster (Below Sterling Silver) 🚗💨
   // ----------------------------------------------------
   const miataGroup = new THREE.Group();
-  // Positioned directly below the Sterling Silver trinket dish (jewelryGroup is at (6.3, -0.2, 0.05))
-  miataGroup.position.set(6.3, -2.15, 0.05);
+  // Positioned directly below the Sterling Silver trinket dish (jewelryGroup is at (6.3, 0.0, 0.05))
+  miataGroup.position.set(6.3, -2.3, 0.05);
   miataGroup.rotation.z = -0.15; // Slightly angled roadster park position
   miataGroup.name = "miata";
   deskGroup.add(miataGroup);
@@ -2292,12 +2459,17 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
     metalness: 0.05
   });
 
-  const miataHeadlightGlassMat = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    roughness: 0.1,
-    metalness: 0.2,
-    emissive: 0xfffbeb,
-    emissiveIntensity: 0.6
+
+  const brakeDiscMat = new THREE.MeshStandardMaterial({
+    color: 0x475569,
+    roughness: 0.3,
+    metalness: 0.85
+  });
+
+  const caliperRedMat = new THREE.MeshStandardMaterial({
+    color: 0xd92626,
+    roughness: 0.2,
+    metalness: 0.3
   });
 
   const turnSignalMat = new THREE.MeshStandardMaterial({
@@ -2315,8 +2487,8 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   });
 
   const tireRubberMat = new THREE.MeshStandardMaterial({
-    color: 0x27272a,
-    roughness: 0.9,
+    color: 0x1f1f23,
+    roughness: 0.85,
     metalness: 0.05
   });
 
@@ -2360,34 +2532,17 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   rightTurnMesh.position.set(-0.70, -0.24, 0.14);
   miataGroup.add(rightTurnMesh);
 
-  // 2. Iconic Pop-up Headlights (Popped UP on hood!)
-  const popHeadlightsGroup = new THREE.Group();
-  popHeadlightsGroup.position.set(-0.48, 0, 0.26);
-  miataGroup.add(popHeadlightsGroup);
+  // 2. Closed Pop-up Headlight Covers Flush on Hood
+  const closedPopGeom = new THREE.BoxGeometry(0.18, 0.16, 0.015);
+  const leftClosedPop = new THREE.Mesh(closedPopGeom, miataRedMat);
+  leftClosedPop.position.set(-0.48, 0.20, 0.23);
+  leftClosedPop.castShadow = true;
+  miataGroup.add(leftClosedPop);
 
-  const popCoverGeom = new THREE.BoxGeometry(0.18, 0.16, 0.11);
-
-  // Left Pop-up Housing & Lens
-  const leftPopMesh = new THREE.Mesh(popCoverGeom, miataRedMat);
-  leftPopMesh.position.set(0, 0.20, 0.05);
-  leftPopMesh.castShadow = true;
-  popHeadlightsGroup.add(leftPopMesh);
-
-  const lensGeom = new THREE.CylinderGeometry(0.055, 0.055, 0.03, 16);
-  lensGeom.rotateZ(Math.PI / 2);
-  const leftLensMesh = new THREE.Mesh(lensGeom, miataHeadlightGlassMat);
-  leftLensMesh.position.set(-0.08, 0.20, 0.05);
-  popHeadlightsGroup.add(leftLensMesh);
-
-  // Right Pop-up Housing & Lens
-  const rightPopMesh = new THREE.Mesh(popCoverGeom, miataRedMat);
-  rightPopMesh.position.set(0, -0.20, 0.05);
-  rightPopMesh.castShadow = true;
-  popHeadlightsGroup.add(rightPopMesh);
-
-  const rightLensMesh = new THREE.Mesh(lensGeom, miataHeadlightGlassMat);
-  rightLensMesh.position.set(-0.08, -0.20, 0.05);
-  popHeadlightsGroup.add(rightLensMesh);
+  const rightClosedPop = new THREE.Mesh(closedPopGeom, miataRedMat);
+  rightClosedPop.position.set(-0.48, -0.20, 0.23);
+  rightClosedPop.castShadow = true;
+  miataGroup.add(rightClosedPop);
 
   // 3. Open Cockpit Interior & Bucket Seats
   const cockpitCutoutGeom = new THREE.BoxGeometry(0.52, 0.50, 0.12);
@@ -2470,31 +2625,76 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   exhaust2.position.set(0.72, -0.20, 0.08);
   miataGroup.add(exhaust2);
 
-  // 6. Wheels & Tires (4 Detailed Wheels)
+  // 6. Wheels & Tires (4 Correctly Oriented & Highly Detailed Alloy Wheels) 🛞
   const wheelPositions = [
-    { x: -0.42, y: 0.35, name: "FL" },
-    { x: -0.42, y: -0.35, name: "FR" },
-    { x: 0.42, y: 0.35, name: "RL" },
-    { x: 0.42, y: -0.35, name: "RR" }
+    { x: -0.42, y: 0.34, name: "FL" },
+    { x: -0.42, y: -0.34, name: "FR" },
+    { x: 0.42, y: 0.34, name: "RL" },
+    { x: 0.42, y: -0.34, name: "RR" }
   ];
+
+  // Geometries for wheel components (Cylinder axis along Y matches wheel axle!)
+  const tireGeom = new THREE.CylinderGeometry(0.11, 0.11, 0.08, 32);
+  const sidewallGeom = new THREE.TorusGeometry(0.102, 0.012, 12, 32);
+
+  const rimOuterGeom = new THREE.CylinderGeometry(0.078, 0.078, 0.084, 32);
+  const spokeGeom = new THREE.BoxGeometry(0.014, 0.086, 0.055);
+  const centerCapGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.09, 16);
+  const lugNutGeom = new THREE.CylinderGeometry(0.006, 0.006, 0.092, 8);
+
+  const brakeDiscGeom = new THREE.CylinderGeometry(0.06, 0.06, 0.035, 24);
+  const caliperGeom = new THREE.BoxGeometry(0.025, 0.035, 0.035);
 
   wheelPositions.forEach((pos) => {
     const wheelGroup = new THREE.Group();
-    wheelGroup.position.set(pos.x, pos.y, 0.09);
+    // Wheel center at Z = 0.11 so bottom of 0.11 radius tire sits right at Z = 0.00 (desk level)
+    wheelGroup.position.set(pos.x, pos.y, 0.11);
     miataGroup.add(wheelGroup);
 
-    // Rubber Tire
-    const tireGeom = new THREE.CylinderGeometry(0.11, 0.11, 0.08, 20);
-    tireGeom.rotateX(Math.PI / 2);
+    // 1. Main Rubber Tire (Axle naturally along Y)
     const tireMesh = new THREE.Mesh(tireGeom, tireRubberMat);
     tireMesh.castShadow = true;
     wheelGroup.add(tireMesh);
 
-    // Silver Alloy Rim Center
-    const rimGeom = new THREE.CylinderGeometry(0.075, 0.075, 0.085, 16);
-    rimGeom.rotateX(Math.PI / 2);
-    const rimMesh = new THREE.Mesh(rimGeom, rimSilverMat);
+    // Rounded Tire Sidewall Accents (Left & Right faces of tire)
+    const sidewallOuter = new THREE.Mesh(sidewallGeom, tireRubberMat);
+    sidewallOuter.position.set(0, pos.y > 0 ? 0.04 : -0.04, 0);
+    sidewallOuter.rotation.x = Math.PI / 2;
+    wheelGroup.add(sidewallOuter);
+
+    // 2. Polished Alloy Rim Outer Lip
+    const rimMesh = new THREE.Mesh(rimOuterGeom, rimSilverMat);
     wheelGroup.add(rimMesh);
+
+    // 3. 5-Spoke Star Design
+    for (let i = 0; i < 5; i++) {
+      const angle = (i / 5) * Math.PI * 2;
+      const spoke = new THREE.Mesh(spokeGeom, rimSilverMat);
+      spoke.rotation.y = angle;
+      wheelGroup.add(spoke);
+    }
+
+    // 4. Polished Center Cap & 4 Lug Nuts
+    const cap = new THREE.Mesh(centerCapGeom, rimSilverMat);
+    wheelGroup.add(cap);
+
+    for (let j = 0; j < 4; j++) {
+      const lugAngle = (j / 4) * Math.PI * 2;
+      const lugX = Math.cos(lugAngle) * 0.034;
+      const lugZ = Math.sin(lugAngle) * 0.034;
+      const lug = new THREE.Mesh(lugNutGeom, miataChromeMat);
+      lug.position.set(lugX, 0, lugZ);
+      wheelGroup.add(lug);
+    }
+
+    // 5. Inner Brake Disc & Red Brembo Caliper
+    const brakeDisc = new THREE.Mesh(brakeDiscGeom, brakeDiscMat);
+    brakeDisc.position.y = pos.y > 0 ? -0.015 : 0.015;
+    wheelGroup.add(brakeDisc);
+
+    const caliper = new THREE.Mesh(caliperGeom, caliperRedMat);
+    caliper.position.set(0, pos.y > 0 ? -0.015 : 0.015, 0.045);
+    wheelGroup.add(caliper);
   });
 
   // ----------------------------------------------------
@@ -2593,6 +2793,11 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
     catGroup,
     catTailMesh,
     jewelryGroup,
-    miataGroup
+    jewelrySparkles,
+    jewelryLight,
+    miataGroup,
+    frameShadowMesh,
+    chessShadowMesh,
+    earbudsShadowMesh
   };
 }
