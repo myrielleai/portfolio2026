@@ -187,6 +187,17 @@ export default function Projects() {
           </p>
         </div>
 
+        {/* 2026 Year Badge centered before Cards */}
+        <div className="flex items-center justify-center mb-10 sm:mb-14">
+          <div className="flex items-center gap-4">
+            <span className="h-[1px] w-12 sm:w-24 bg-gradient-to-r from-transparent via-[var(--border-strong)] to-[var(--border-strong)] opacity-60"></span>
+            <span className="font-mono text-sm sm:text-base md:text-lg tracking-[0.3em] font-semibold text-[var(--accent)] px-6 py-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface-muted)] shadow-sm">
+              2026
+            </span>
+            <span className="h-[1px] w-12 sm:w-24 bg-gradient-to-l from-transparent via-[var(--border-strong)] to-[var(--border-strong)] opacity-60"></span>
+          </div>
+        </div>
+
         {/* Projects List: Sticky Stacked Cards Deck */}
         <div ref={containerRef} className="relative flex flex-col gap-16 md:gap-24 w-full pb-[10vh]">
           {projects.map((proj, idx) => (

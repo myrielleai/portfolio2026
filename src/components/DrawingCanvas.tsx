@@ -145,7 +145,7 @@ const DrawingCanvas = React.forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
         cnv.removeEventListener("touchend", stop);
         window.removeEventListener("resize", resize);
       };
-    }, [activeTool, color]);
+    }, [activeTool, color, canvas]);
 
     return (
       <div 
@@ -162,11 +162,12 @@ const DrawingCanvas = React.forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
 
         {/* The canvas that receives the drawings */}
         <canvas
-          ref={canvas as any}
+          ref={canvas as unknown as React.RefObject<HTMLCanvasElement>}
           className="absolute inset-0 w-full h-full rounded-xs"
         />
       </div>
     );
+
   }
 );
 

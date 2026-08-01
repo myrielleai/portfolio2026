@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface BlueprintLineProps {
@@ -7,11 +7,8 @@ interface BlueprintLineProps {
 }
 
 export default function BlueprintLine({ isActive, onComplete }: BlueprintLineProps) {
-  const [key, setKey] = useState(0);
-
   useEffect(() => {
     if (isActive) {
-      setKey(prev => prev + 1);
       const timer = setTimeout(() => {
         onComplete();
       }, 1200);
@@ -27,7 +24,8 @@ export default function BlueprintLine({ isActive, onComplete }: BlueprintLinePro
         <svg className="w-full h-full">
           {/* Blueprint Guideline Dash */}
           <motion.path
-            key={`line-${key}`}
+            key="line-active"
+
             d="M 60% 20% L 30% 50% L 15% 85%"
             fill="none"
             stroke="#38bdf8"

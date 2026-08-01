@@ -1032,63 +1032,64 @@ export function createCorkTexture(): THREE.CanvasTexture {
   return texture;
 }
 
-// 11. Picture Frame Photo Texture (cozy polaroid-style photo)
+// 11. Picture Frame Photo Texture (vibrant beach vibe polaroid-style photo)
 export function createPictureFramePhotoTexture(): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
   canvas.height = 512;
   const ctx = canvas.getContext("2d")!;
 
-  // Warm sunset sky gradient background
-  const skyGrad = ctx.createLinearGradient(0, 0, 0, 512);
-  skyGrad.addColorStop(0, "#1a0833");
-  skyGrad.addColorStop(0.3, "#6b21a8");
-  skyGrad.addColorStop(0.55, "#ea580c");
-  skyGrad.addColorStop(0.75, "#fb923c");
-  skyGrad.addColorStop(1, "#fde68a");
+  // 1. Tropical Sky Gradient (Vibrant azure/cyan to warm sunset glow near horizon)
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, 320);
+  skyGrad.addColorStop(0, "#0284c7");   // Deep tropical sky blue
+  skyGrad.addColorStop(0.3, "#06b6d4"); // Electric cyan sky
+  skyGrad.addColorStop(0.65, "#38bdf8");// Soft bright sky
+  skyGrad.addColorStop(0.85, "#fdba74");// Coral warm sunset transition
+  skyGrad.addColorStop(1, "#fef08a");   // Golden horizon glow
   ctx.fillStyle = skyGrad;
-  ctx.fillRect(0, 0, 512, 512);
+  ctx.fillRect(0, 0, 512, 320);
 
-  // Sun glow orb
-  const sunGrad = ctx.createRadialGradient(256, 295, 0, 256, 295, 90);
-  sunGrad.addColorStop(0, "rgba(255, 244, 180, 1.0)");
-  sunGrad.addColorStop(0.4, "rgba(251, 191, 36, 0.85)");
-  sunGrad.addColorStop(0.8, "rgba(249, 115, 22, 0.4)");
-  sunGrad.addColorStop(1, "rgba(249, 115, 22, 0)");
-  ctx.fillStyle = sunGrad;
+  // 2. Bright Golden Tropical Sun with Soft Lens Rays
+  const sunX = 390;
+  const sunY = 90;
+  const sunGlow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 110);
+  sunGlow.addColorStop(0, "rgba(255, 254, 235, 1.0)");
+  sunGlow.addColorStop(0.3, "rgba(254, 240, 138, 0.85)");
+  sunGlow.addColorStop(0.6, "rgba(251, 146, 60, 0.4)");
+  sunGlow.addColorStop(1, "rgba(251, 146, 60, 0)");
+  ctx.fillStyle = sunGlow;
   ctx.beginPath();
-  ctx.arc(256, 295, 90, 0, Math.PI * 2);
+  ctx.arc(sunX, sunY, 110, 0, Math.PI * 2);
   ctx.fill();
 
-  // Golden sun disk
-  ctx.fillStyle = "#fef3c7";
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.arc(256, 295, 36, 0, Math.PI * 2);
+  ctx.arc(sunX, sunY, 32, 0, Math.PI * 2);
   ctx.fill();
 
-  // Subtle sun rays
+  // Subtle Diagonal Sun Rays across sky
   ctx.save();
-  ctx.translate(256, 295);
-  ctx.strokeStyle = "rgba(254, 243, 199, 0.35)";
-  ctx.lineWidth = 3;
-  for (let i = 0; i < 12; i++) {
-    ctx.rotate(Math.PI / 6);
+  ctx.translate(sunX, sunY);
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+  ctx.lineWidth = 4;
+  for (let i = 0; i < 16; i++) {
+    ctx.rotate(Math.PI / 8);
     ctx.beginPath();
-    ctx.moveTo(42, 0);
-    ctx.lineTo(75, 0);
+    ctx.moveTo(38, 0);
+    ctx.lineTo(120, 0);
     ctx.stroke();
   }
   ctx.restore();
 
-  // Cloud wisps in upper sky
+  // Fluffy Tropical Clouds
   ctx.save();
-  ctx.globalAlpha = 0.28;
-  ctx.fillStyle = "#fde68a";
+  ctx.globalAlpha = 0.45;
+  ctx.fillStyle = "#ffffff";
   [
-    [80, 100, 120, 24],
-    [200, 80, 95, 20],
-    [340, 115, 105, 22],
-    [430, 90, 80, 18]
+    [100, 70, 70, 18],
+    [130, 65, 45, 22],
+    [260, 100, 60, 16],
+    [285, 95, 40, 18]
   ].forEach(([cx, cy, rx, ry]) => {
     ctx.beginPath();
     ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
@@ -1096,83 +1097,207 @@ export function createPictureFramePhotoTexture(): THREE.CanvasTexture {
   });
   ctx.restore();
 
-  // Distant city / hill silhouette
-  ctx.fillStyle = "#1c0b2a";
+  // 3. Distant Tropical Islands / Mountain Haze on Horizon
+  ctx.fillStyle = "#0e7490";
   ctx.beginPath();
-  ctx.moveTo(0, 430);
-  // rolling hills
-  ctx.bezierCurveTo(60, 390, 110, 370, 170, 385);
-  ctx.bezierCurveTo(210, 395, 240, 380, 270, 378);
-  ctx.bezierCurveTo(305, 376, 330, 390, 370, 382);
-  ctx.bezierCurveTo(410, 374, 440, 388, 512, 395);
+  ctx.moveTo(140, 260);
+  ctx.bezierCurveTo(170, 235, 210, 230, 250, 260);
+  ctx.bezierCurveTo(280, 245, 310, 240, 340, 260);
+  ctx.closePath();
+  ctx.fill();
+
+  // Tiny Distant White Sailboat on Horizon
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.moveTo(310, 254);
+  ctx.lineTo(314, 242);
+  ctx.lineTo(318, 254);
+  ctx.fill();
+  ctx.fillRect(308, 254, 12, 2);
+
+  // 4. Crystal Turquoise & Emerald Ocean Waters (layered gradient)
+  const oceanGrad = ctx.createLinearGradient(0, 255, 0, 395);
+  oceanGrad.addColorStop(0, "#0891b2");   // Turquoise horizon
+  oceanGrad.addColorStop(0.35, "#0d9488");// Rich emerald water
+  oceanGrad.addColorStop(0.7, "#14b8a6"); // Vibrant shallow teal
+  oceanGrad.addColorStop(1, "#2dd4bf");   // Bright shore turquoise
+  ctx.fillStyle = oceanGrad;
+  ctx.fillRect(0, 255, 512, 140);
+
+  // Glistening Ocean Wave Highlights & Sunlight Reflection
+  ctx.save();
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.55)";
+  ctx.lineWidth = 2.5;
+  for (let i = 0; i < 18; i++) {
+    const wy = 265 + i * 7;
+    const wx = 120 + ((i * 47) % 280);
+    const wLen = 30 + ((i * 23) % 60);
+    ctx.beginPath();
+    ctx.moveTo(wx, wy);
+    ctx.quadraticCurveTo(wx + wLen / 2, wy - 3, wx + wLen, wy);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Foamy Shoreline Waves Breaking on Sand
+  ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+  ctx.beginPath();
+  ctx.moveTo(0, 385);
+  ctx.bezierCurveTo(90, 375, 180, 400, 270, 380);
+  ctx.bezierCurveTo(360, 365, 440, 390, 512, 378);
+  ctx.lineTo(512, 400);
+  ctx.bezierCurveTo(430, 405, 340, 385, 250, 410);
+  ctx.bezierCurveTo(160, 420, 70, 395, 0, 405);
+  ctx.closePath();
+  ctx.fill();
+
+  // 5. Warm Golden Sand Beach
+  const sandGrad = ctx.createLinearGradient(0, 385, 0, 512);
+  sandGrad.addColorStop(0, "#fef08a"); // Wet glistening sand top
+  sandGrad.addColorStop(0.3, "#fde047");// Soft golden sand
+  sandGrad.addColorStop(0.7, "#f59e0b");// Warm amber sand
+  sandGrad.addColorStop(1, "#d97706");  // Deep warm sand shadow
+  ctx.fillStyle = sandGrad;
+  ctx.beginPath();
+  ctx.moveTo(0, 395);
+  ctx.bezierCurveTo(120, 385, 240, 410, 360, 390);
+  ctx.bezierCurveTo(440, 380, 490, 395, 512, 390);
   ctx.lineTo(512, 512);
   ctx.lineTo(0, 512);
   ctx.closePath();
   ctx.fill();
 
-  // Tiny building silhouettes on the hill
-  ctx.fillStyle = "#120720";
-  const buildings = [
-    [90, 385, 18, 30],
-    [115, 375, 12, 40],
-    [135, 382, 22, 28],
-    [300, 368, 16, 36],
-    [322, 374, 10, 30],
-    [400, 376, 20, 32]
-  ];
-  buildings.forEach(([bx, by, bw, bh]) => {
-    ctx.fillRect(bx, by - bh, bw, bh);
-    // window glints
-    ctx.fillStyle = "rgba(253, 230, 138, 0.7)";
-    ctx.fillRect(bx + 4, by - bh + 8, 4, 4);
-    ctx.fillRect(bx + 10, by - bh + 8, 4, 4);
-    ctx.fillStyle = "#120720";
-  });
-
-  // Reflective water in foreground
-  const waterGrad = ctx.createLinearGradient(0, 430, 0, 512);
-  waterGrad.addColorStop(0, "rgba(180, 80, 20, 0.55)");
-  waterGrad.addColorStop(0.5, "rgba(251, 146, 60, 0.35)");
-  waterGrad.addColorStop(1, "rgba(30, 8, 50, 0.9)");
-  ctx.fillStyle = waterGrad;
-  ctx.fillRect(0, 430, 512, 82);
-
-  // Sun reflection on water
+  // Wet Sand Reflection Zone
   ctx.save();
-  ctx.globalAlpha = 0.55;
-  for (let i = 0; i < 8; i++) {
-    const wy = 440 + i * 9;
-    const ww = 40 - i * 4;
-    ctx.fillStyle = i < 3 ? "#fef3c7" : "#fb923c";
-    ctx.fillRect(256 - ww / 2, wy, ww, 4);
-  }
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = "#38bdf8";
+  ctx.fillRect(0, 390, 512, 25);
   ctx.restore();
 
-  // Subtle vignette
-  const vigGrad = ctx.createRadialGradient(256, 256, 140, 256, 256, 370);
+  // Tiny Cute Starfish on Sand (bottom right)
+  ctx.save();
+  ctx.fillStyle = "#ef4444";
+  ctx.translate(440, 450);
+  ctx.rotate(0.2);
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * 14, -Math.sin((18 + i * 72) * Math.PI / 180) * 14);
+    ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * 6, -Math.sin((54 + i * 72) * Math.PI / 180) * 6);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // 6. Iconic Tropical Palm Tree Silhouette (Leaning gracefully from left side)
+  ctx.save();
+  // Palm Trunk
+  ctx.strokeStyle = "#1c1917";
+  ctx.lineWidth = 18;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-10, 512);
+  ctx.bezierCurveTo(30, 380, 60, 240, 110, 140);
+  ctx.stroke();
+
+  // Inner highlight on trunk
+  ctx.strokeStyle = "#44403c";
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(-6, 512);
+  ctx.bezierCurveTo(32, 380, 62, 240, 112, 140);
+  ctx.stroke();
+
+  // Palm Fronds / Leaves radiating from top of trunk (110, 140)
+  const palmX = 110;
+  const palmY = 140;
+
+  const fronds = [
+    { angle: -0.8, len: 140, curve: -30 },
+    { angle: -0.3, len: 160, curve: -40 },
+    { angle: 0.1, len: 170, curve: -20 },
+    { angle: 0.6, len: 165, curve: 30 },
+    { angle: 1.1, len: 140, curve: 45 },
+    { angle: 1.7, len: 120, curve: 40 },
+    { angle: -1.4, len: 130, curve: -25 }
+  ];
+
+  fronds.forEach(({ angle, len, curve }) => {
+    ctx.save();
+    ctx.translate(palmX, palmY);
+    ctx.rotate(angle);
+
+    // Frond stem
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 4.5;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(len / 2, curve, len, 0);
+    ctx.stroke();
+
+    // Frond pinnate leaf blades
+    ctx.fillStyle = "#1e293b";
+    const numLeaves = 24;
+    for (let i = 2; i < numLeaves; i++) {
+      const t = i / numLeaves;
+      const lx = t * len;
+      const ly = (1 - t) * (t * curve);
+      const leafLen = Math.sin(t * Math.PI) * 28;
+
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, leafLen, 3.5, Math.PI / 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, leafLen, 3.5, -Math.PI / 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+  ctx.restore();
+
+  // Coconuts hanging under fronds
+  ctx.fillStyle = "#292524";
+  [
+    [104, 148, 8],
+    [118, 150, 9],
+    [112, 158, 7.5]
+  ].forEach(([cx, cy, r]) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Soaring Seagulls Silhouette in Sky
+  ctx.strokeStyle = "#0f172a";
+  ctx.lineWidth = 2.5;
+  [
+    [210, 120, 14],
+    [240, 105, 18],
+    [275, 125, 12]
+  ].forEach(([gx, gy, gSize]) => {
+    ctx.beginPath();
+    ctx.moveTo(gx - gSize, gy);
+    ctx.quadraticCurveTo(gx - gSize / 2, gy - gSize / 2, gx, gy);
+    ctx.quadraticCurveTo(gx + gSize / 2, gy - gSize / 2, gx + gSize, gy);
+    ctx.stroke();
+  });
+
+  // 7. Subtle Polaroid Vignette & Film Grain
+  const vigGrad = ctx.createRadialGradient(256, 256, 160, 256, 256, 370);
   vigGrad.addColorStop(0, "rgba(0, 0, 0, 0)");
-  vigGrad.addColorStop(1, "rgba(0, 0, 0, 0.52)");
+  vigGrad.addColorStop(1, "rgba(0, 0, 0, 0.38)");
   ctx.fillStyle = vigGrad;
   ctx.fillRect(0, 0, 512, 512);
 
-  // Film grain noise
+  // Subtle film grain
   const imgData = ctx.getImageData(0, 0, 512, 512);
   const data = imgData.data;
   for (let i = 0; i < data.length; i += 4) {
-    const noise = (Math.random() - 0.5) * 14;
+    const noise = (Math.random() - 0.5) * 10;
     data[i] = Math.min(255, Math.max(0, data[i] + noise));
     data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noise));
     data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise));
   }
   ctx.putImageData(imgData, 0, 0);
-
-  // Overlay caption at bottom
-  ctx.fillStyle = "rgba(0,0,0,0.32)";
-  ctx.fillRect(0, 460, 512, 52);
-  ctx.fillStyle = "#fde68a";
-  ctx.font = "italic bold 22px Georgia, serif";
-  ctx.textAlign = "center";
-  ctx.fillText("myrielle ✦ golden hour", 256, 492);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;

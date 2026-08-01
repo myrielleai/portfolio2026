@@ -51,20 +51,19 @@ export default function EarbudsModal({ isOpen, onClose }: EarbudsModalProps) {
 
       // Auto start music when earbuds pressed
       musicSynth.playTrack(currentTrackIdx);
-      setIsPlaying(true);
     } else {
       musicSynth.pauseTrack();
-      setIsPlaying(false);
-      setShowLyrics(false);
-      setShowQueue(false);
     }
+
+
 
     return () => {
       if (isOpen) {
         musicSynth.pauseTrack();
       }
     };
-  }, [isOpen]);
+  }, [isOpen, currentTrackIdx]);
+
 
   const handleTogglePlay = () => {
     playClickSound();
@@ -156,6 +155,7 @@ export default function EarbudsModal({ isOpen, onClose }: EarbudsModalProps) {
           exit={{ opacity: 0, scale: 0.9, y: 24 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           className="relative w-full max-w-md bg-zinc-950/90 text-white border border-white/15 rounded-[36px] shadow-[0_32px_64px_rgba(0,0,0,0.8)] p-6 md:p-7 overflow-hidden font-sans select-none cursor-default"
+          data-lenis-prevent
         >
           {/* Apple Music Dynamic Animated Fluid Mesh Glow Background */}
           <div

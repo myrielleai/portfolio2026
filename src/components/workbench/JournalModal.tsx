@@ -25,6 +25,7 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full max-w-4xl bg-[#fcfbf9] text-zinc-800 border border-zinc-200/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[82vh] cursor-default"
+            data-lenis-prevent
           >
             {/* Close Button */}
             <button

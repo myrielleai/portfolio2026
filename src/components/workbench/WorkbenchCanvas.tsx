@@ -17,6 +17,7 @@ import MatchaDialogue from "./MatchaDialogue";
 import RubiksDialogue from "./RubiksDialogue";
 import ChessDialogue from "./ChessDialogue";
 import { playClickSound, playHoverSound, playToggleSound } from "../../utils/audio";
+import { scrollToSection } from "../../utils/scrollTo";
 
 interface WorkbenchCanvasProps {
   onEnterLab?: () => void;
@@ -76,9 +77,9 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
     isAnyModalOpenRef.current = isAnyModalOpen;
     if (isAnyModalOpen) {
       hoveredObjectNameRef.current = null;
-      setHoveredObjectName(null);
     }
   }, [isAnyModalOpen]);
+
 
   // Mouse Parallax & Dragging refs
   const mouseRef = useRef({ x: 0, y: 0 });
@@ -192,8 +193,9 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
     let isDragging = false;
     let draggedObject: THREE.Object3D | null = null;
     let draggedObjectName: string | null = null;
-    let dragOffset = new THREE.Vector2();
-    let pointerDownPos = new THREE.Vector2();
+    const dragOffset = new THREE.Vector2();
+    const pointerDownPos = new THREE.Vector2();
+
 
 
     const defaultZMap: Record<string, number> = {
@@ -342,7 +344,8 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       const intersects = raycaster.intersectObjects(handles.deskGroup.children, true);
 
       let foundObject: string | null = null;
-      let foundZone: string | null = null;
+      const foundZone: string | null = null;
+
 
       if (intersects.length > 0) {
         for (const hit of intersects) {
@@ -383,8 +386,9 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
 
         // If moved less than 5px, trigger standard click action!
         if (distMoved < 5 && draggedObjectName) {
-          triggerObjectAction(draggedObjectName, hoveredZoneName);
+          triggerObjectAction(draggedObjectName, hoveredZoneNameRef.current);
         }
+
 
         isDragging = false;
         draggedObject = null;
@@ -401,7 +405,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       closeAllOverlays();
 
       if (objName === "macbook" || objName === "keyboard") {
-        document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+        scrollToSection("projects");
       } else if (objName === "journal") {
         setIsJournalOpen(true);
       } else if (objName === "coffeeMug" || objName === "matcha" || objName === "matchaMug" || objName === "mug" || objName === "cup") {
@@ -441,13 +445,13 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
 
       // Zone triggers on cutting mat
       if (zoneName === "Portfolio") {
-        document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+        scrollToSection("projects");
       } else if (zoneName === "Lab Workspace" || zoneName === "Experiments") {
         if (onEnterLab) onEnterLab();
       } else if (zoneName === "Photography") {
-        document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+        scrollToSection("about");
       } else if (zoneName === "Contact") {
-        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+        scrollToSection("contact");
       }
     };
 
@@ -906,7 +910,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         isActive={isBlueprintActive}
         onComplete={() => {
           setIsBlueprintActive(false);
-          document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+          scrollToSection("about");
         }}
       />
       <EasterEggModal isOpen={isEasterEggOpen} onClose={() => setIsEasterEggOpen(false)} />

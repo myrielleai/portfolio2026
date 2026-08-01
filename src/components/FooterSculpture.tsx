@@ -96,9 +96,13 @@ export default function FooterSculpture() {
     cameraRef.current = camera;
 
     // --- Renderer Setup ---
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance",
+    });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -253,6 +257,7 @@ export default function FooterSculpture() {
 
     // --- Mouse Move Listener restricted to footer zone ---
     const handleMouseMove = (event: MouseEvent) => {
+      if (!isIntersecting) return;
       const rect = container.getBoundingClientRect();
       if (!rect) return;
       // Parallax active within reasonable window space, centered relative to the container

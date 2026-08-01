@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
+import "lenis/dist/lenis.css";
 
 import Navbar from "./components/Navbar";
 import AvatarShowcase from "./components/AvatarShowcase";
@@ -55,10 +56,21 @@ export default function App() {
     // Register GSAP ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
 
-    // Initialize Lenis smooth scroll
-    const lenis = new Lenis();
+    // Initialize Lenis smooth scroll with optimized smooth scroll physics
+    const lenis = new Lenis({
+      duration: 1.1,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.5,
+      infinite: false,
+    });
 
-    lenis.on('scroll', ScrollTrigger.update);
+    (window as unknown as { lenis?: typeof lenis }).lenis = lenis;
+
+    lenis.on("scroll", ScrollTrigger.update);
 
     const updateTicker = (time: number) => {
       lenis.raf(time * 1000);
@@ -98,6 +110,7 @@ export default function App() {
     return () => {
       clearTimeout(refreshTimer);
       gsap.ticker.remove(updateTicker);
+      delete (window as unknown as { lenis?: typeof lenis }).lenis;
       lenis.destroy();
       ScrollTrigger.getAll().forEach(t => t.kill());
     };

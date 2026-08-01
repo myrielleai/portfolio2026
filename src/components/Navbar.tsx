@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { portfolioData } from "../data/portfolioData";
+import { scrollToSection } from "../utils/scrollTo";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +22,10 @@ export default function Navbar() {
           <div className="flex items-center gap-6">
             <a
               href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection("");
+              }}
               className="font-display text-2xl lg:text-3xl font-bold tracking-tight text-[var(--heading)] hover:text-[var(--accent)] transition-colors"
             >
               {portfolioData.name.toLowerCase()}
@@ -41,6 +46,10 @@ export default function Navbar() {
                 <a
                   key={link.href}
                   href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection(link.href);
+                  }}
                   className="font-mono text-xs font-semibold tracking-widest text-[var(--text-muted)] hover:text-[var(--heading)] transition-colors py-1 relative group"
                 >
                   {link.label}
@@ -75,7 +84,11 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsOpen(false);
+                  scrollToSection(link.href);
+                }}
                 className="font-mono text-xs font-semibold tracking-widest text-[var(--text)] hover:text-[var(--accent)] py-2 border-b border-[var(--border)]/50 transition-colors"
               >
                 {link.label}

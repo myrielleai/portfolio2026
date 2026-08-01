@@ -77,15 +77,6 @@ export default function SculptureViewer() {
   // Scroll progress ref to drive the deconstruction effect
   const scrollProgressRef = useRef(0);
 
-  // DOM refs to drive real-time technical HUD readings without React component re-renders
-  const hudDeconstructRef = useRef<HTMLDivElement>(null);
-  const hudRotRef = useRef<HTMLDivElement>(null);
-  const hudAlignRef = useRef<HTMLDivElement>(null);
-  const hudCoordsXRef = useRef<HTMLDivElement>(null);
-  const hudCoordsYRef = useRef<HTMLDivElement>(null);
-  const hudCoordsZRef = useRef<HTMLDivElement>(null);
-  const hudModulesRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (!containerRef.current || !wrapperRef.current) return;
 
@@ -116,9 +107,13 @@ export default function SculptureViewer() {
     cameraRef.current = camera;
 
     // --- Renderer Setup ---
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance",
+    });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -320,6 +315,7 @@ export default function SculptureViewer() {
 
     // --- Mouse Move Parallax Listener ---
     const handleMouseMove = (event: MouseEvent) => {
+      if (!isIntersecting) return;
       const rect = container.getBoundingClientRect();
       if (!rect) return;
       const x = (event.clientX - rect.left) / rect.width - 0.5;
@@ -341,17 +337,17 @@ export default function SculptureViewer() {
     };
     window.addEventListener("resize", handleResize);
 
-    // --- Animation Loop ---
     let animationFrameId: number | null = null;
     const clock = new THREE.Clock();
-    let frameCount = 0;
     let isIntersecting = false;
 
     const animate = () => {
+
+
       animationFrameId = requestAnimationFrame(animate);
-      frameCount++;
 
       const time = clock.getElapsedTime();
+
       const progress = scrollProgressRef.current;
 
       // 1. Update module positions: float + deconstruct (explode)
@@ -417,17 +413,6 @@ export default function SculptureViewer() {
       camera.position.x = currentMouse.current.x * parallaxAmount;
       camera.position.y = currentMouse.current.y * parallaxAmount;
       camera.lookAt(0, 0, 0);
-
-      // 6. Update HUD Stats directly via DOM refs to avoid React re-renders
-      if (frameCount % 6 === 0) {
-        if (hudDeconstructRef.current) hudDeconstructRef.current.textContent = `DECONSTRUCT_VAL: ${progress.toFixed(4)}`;
-        if (hudRotRef.current) hudRotRef.current.textContent = `ROT_VELOCITY: ${(0.12 + progress * 0.2).toFixed(3)} rad/s`;
-        if (hudAlignRef.current) hudAlignRef.current.textContent = `SYS_GRID_ALIGN: ${(99.8 - progress * 1.2).toFixed(1)}%`;
-        if (hudCoordsXRef.current) hudCoordsXRef.current.textContent = `COORDS_X: ${camera.position.x.toFixed(3)}`;
-        if (hudCoordsYRef.current) hudCoordsYRef.current.textContent = `COORDS_Y: ${camera.position.y.toFixed(3)}`;
-        if (hudCoordsZRef.current) hudCoordsZRef.current.textContent = `COORDS_Z: ${camera.position.z.toFixed(3)}`;
-        if (hudModulesRef.current) hudModulesRef.current.textContent = `UNITS_ASSEMBLED: ${14 - Math.floor(progress * 4)}/14`;
-      }
 
       renderer.render(scene, camera);
     };
@@ -504,26 +489,7 @@ export default function SculptureViewer() {
         className="w-full h-full absolute inset-0 pointer-events-none"
       />
 
-      {/* Futuristic Technical HUD Overlay - Top Left */}
-      <div className="fixed top-24 left-6 sm:left-10 lg:left-12 z-10 font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] tracking-[0.15em] leading-[1.7] uppercase opacity-75 hidden sm:block">
-        <div className="flex items-center gap-2 border-b border-[var(--border)]/40 pb-1 mb-1 text-[var(--heading)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-          <span>SYS.MONITOR: COMP-SCULPT</span>
-        </div>
-        <div ref={hudDeconstructRef}>DECONSTRUCT_VAL: 0.0000</div>
-        <div ref={hudRotRef}>ROT_VELOCITY: 0.120 rad/s</div>
-        <div ref={hudAlignRef}>SYS_GRID_ALIGN: 99.8%</div>
-      </div>
 
-      {/* Futuristic Technical HUD Overlay - Bottom Right */}
-      <div className="fixed bottom-12 right-6 sm:right-10 lg:right-12 z-10 font-mono text-[9px] sm:text-[10px] text-[var(--text-muted)] tracking-[0.15em] leading-[1.7] uppercase text-right opacity-75 hidden sm:block">
-        <div ref={hudCoordsXRef}>COORDS_X: 0.000</div>
-        <div ref={hudCoordsYRef}>COORDS_Y: 0.000</div>
-        <div ref={hudCoordsZRef}>COORDS_Z: 3.200</div>
-        <div ref={hudModulesRef} className="border-t border-[var(--border)]/40 pt-1 mt-1 text-[var(--heading)]">
-          UNITS_ASSEMBLED: 14/14
-        </div>
-      </div>
 
       {/* Abstract Design Studio grid watermark lines overlay */}
       <div className="absolute inset-0 z-0 bg-transparent border-x border-[var(--border)]/15 pointer-events-none max-w-7xl mx-auto w-full" />

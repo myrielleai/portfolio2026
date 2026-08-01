@@ -2,20 +2,22 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { portfolioData } from "../data/portfolioData";
 import FooterSculpture from "./FooterSculpture";
+import { scrollToSection } from "../utils/scrollTo";
+
+const WORDS = ["build", "create", "craft", "design", "make"];
 
 export default function Footer() {
   const { name, email, linkedinUrl, instagramUrl } = portfolioData;
   const [time, setTime] = useState("");
-
-  const words = ["build", "create", "craft", "design", "make"];
   const [wordIndex, setWordIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setWordIndex((prev) => (prev + 1) % words.length);
+      setWordIndex((prev) => (prev + 1) % WORDS.length);
     }, 2500);
     return () => clearInterval(interval);
   }, []);
+
 
   useEffect(() => {
     const updateTime = () => {
@@ -66,15 +68,16 @@ export default function Footer() {
               <span className="relative inline-block overflow-hidden h-[1.1em] align-bottom min-w-[3.5em]">
                 <AnimatePresence mode="wait">
                   <motion.span
-                    key={words[wordIndex]}
+                    key={WORDS[wordIndex]}
                     initial={{ y: "100%", opacity: 0 }}
                     animate={{ y: "0%", opacity: 1 }}
                     exit={{ y: "-100%", opacity: 0 }}
                     transition={{ duration: 0.5, ease: [0.215, 0.61, 0.355, 1] }}
                     className="absolute left-0 bottom-0 text-[var(--accent)] font-bold"
                   >
-                    {words[wordIndex]}
+                    {WORDS[wordIndex]}
                   </motion.span>
+
                 </AnimatePresence>
               </span>
               <br />
@@ -93,18 +96,30 @@ export default function Footer() {
               <div className="space-y-1">
                 <a
                   href="#showcase"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection("showcase");
+                  }}
                   className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Showcase
                 </a>
                 <a
                   href="#projects"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection("projects");
+                  }}
                   className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Selected Work
                 </a>
                 <a
                   href="#capabilities"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection("capabilities");
+                  }}
                   className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Capabilities
@@ -160,6 +175,10 @@ export default function Footer() {
       <div className="w-full overflow-hidden relative z-10">
         <a
           href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            scrollToSection("");
+          }}
           className="block text-[16vw] sm:text-[18vw] lg:text-[21vw] font-display font-bold text-[var(--heading)] hover:text-[var(--accent)] text-right leading-[0.75] tracking-tight opacity-90 transition-colors duration-300 cursor-pointer select-none"
         >
           {name.toLowerCase()}

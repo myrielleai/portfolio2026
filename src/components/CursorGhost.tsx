@@ -32,14 +32,12 @@ export default function CursorGhost({ activeTool, color, isWorkspaceHovered = tr
       const target = e.target as HTMLElement;
       if (!target) return;
 
-      const isOverInteractive = 
-        Boolean(target.closest("button")) || 
-        Boolean(target.closest("a")) || 
-        Boolean(target.closest("input")) || 
-        Boolean(target.closest("textarea")) ||
-        target.style?.cursor === "pointer";
+      const tagName = target.tagName;
+      const isInteractiveTag = tagName === "BUTTON" || tagName === "A" || tagName === "INPUT" || tagName === "TEXTAREA";
+      const isOverInteractive = isInteractiveTag || Boolean(target.closest("button, a, input, textarea"));
+      const shouldBeVisible = !isOverInteractive;
       
-      setIsVisible((prev) => (prev !== !isOverInteractive ? !isOverInteractive : prev));
+      setIsVisible((prev) => (prev !== shouldBeVisible ? shouldBeVisible : prev));
     };
 
     const handleMouseLeave = () => {
@@ -133,8 +131,9 @@ export default function CursorGhost({ activeTool, color, isWorkspaceHovered = tr
       ref={ghostRef}
       className="fixed top-0 left-0 pointer-events-none select-none z-50 will-change-transform"
       style={{
-        transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`
+        transform: "translate3d(-100px, -100px, 0)"
       }}
+
     >
       {renderCursor()}
     </div>

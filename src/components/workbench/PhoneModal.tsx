@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -23,6 +23,26 @@ interface PhoneModalProps {
 export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
   const [isFlashlightOn, setIsFlashlightOn] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formattedDate = currentTime.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  const formattedTime = currentTime.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).replace(/\s?[AP]M/i, "");
 
   const handleFlashlightToggle = () => {
     playClickSound();
@@ -53,6 +73,7 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
           exit={{ opacity: 0, scale: 0.82, y: 35 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           className="relative w-full max-w-[390px] aspect-[390/844] max-h-[88vh] bg-[#05070d] text-white border-[8px] border-[#2c2c2e] rounded-[48px] shadow-[0_32px_90px_rgba(0,0,0,0.95)] p-4 pt-2.5 flex flex-col justify-between overflow-hidden ring-1 ring-white/15 cursor-default"
+          data-lenis-prevent
         >
           {/* Camera Flash Effect Overlay */}
           {isCameraActive && (
@@ -88,8 +109,8 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
             {/* 1. iPhone 12 Top Status Bar & Classic Notch */}
             <div className="relative flex items-center justify-between px-2 pt-1 mb-1">
               {/* iOS Clock */}
-              <span className="text-[13px] font-semibold tracking-tight text-white/95 font-sans pl-1">
-                9:41
+              <span className="text-[13px] font-semibold tracking-tight text-white !text-white font-sans pl-1" style={{ color: "#ffffff" }}>
+                {formattedTime}
               </span>
 
               {/* Classic iPhone 12 Notch */}
@@ -139,11 +160,14 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
               <div className="flex justify-center mb-1">
                 <Lock className="w-4 h-4 text-white/80 drop-shadow" />
               </div>
-              <p className="text-[13px] font-medium text-white/80 tracking-wide">
-                Friday, July 31
+              <p className="text-[13px] font-medium text-white/80 tracking-wide" style={{ color: "rgba(255, 255, 255, 0.9)" }}>
+                {formattedDate}
               </p>
-              <h1 className="text-6xl font-extrabold tracking-tight text-white/95 my-0.5 font-sans drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
-                9:41
+              <h1 
+                className="text-6xl font-extrabold tracking-tight text-white !text-white my-0.5 font-sans drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]"
+                style={{ color: "#ffffff" }}
+              >
+                {formattedTime}
               </h1>
             </div>
 

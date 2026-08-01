@@ -42,29 +42,7 @@ export default function DraggableCard({
     playClickSound(0.08);
   };
 
-  const handleMove = (clientX: number, clientY: number) => {
-    if (!isDragging) return;
-    const deltaX = clientX - dragStart.current.x;
-    const deltaY = clientY - dragStart.current.y;
-    
-    // Bounds check to keep card on the board
-    if (cardRef.current && cardRef.current.parentElement) {
-      const parent = cardRef.current.parentElement;
-      const parentRect = parent.getBoundingClientRect();
-      const cardRect = cardRef.current.getBoundingClientRect();
-      
-      const newX = Math.max(0, Math.min(cardStart.current.x + deltaX, parentRect.width - cardRect.width / 2));
-      const newY = Math.max(0, Math.min(cardStart.current.y + deltaY, parentRect.height - cardRect.height / 2));
-      setPosition({ x: newX, y: newY });
-    }
-  };
 
-  const handleEnd = () => {
-    if (isDragging) {
-      setIsDragging(false);
-      playClickSound(0.04);
-    }
-  };
 
   // Mouse handlers
   const onMouseDown = (e: React.MouseEvent) => {
@@ -88,21 +66,46 @@ export default function DraggableCard({
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
-      handleMove(e.clientX, e.clientY);
+      if (!isDragging) return;
+      const deltaX = e.clientX - dragStart.current.x;
+      const deltaY = e.clientY - dragStart.current.y;
+      if (cardRef.current && cardRef.current.parentElement) {
+        const parent = cardRef.current.parentElement;
+        const parentRect = parent.getBoundingClientRect();
+        const cardRect = cardRef.current.getBoundingClientRect();
+        const newX = Math.max(0, Math.min(cardStart.current.x + deltaX, parentRect.width - cardRect.width / 2));
+        const newY = Math.max(0, Math.min(cardStart.current.y + deltaY, parentRect.height - cardRect.height / 2));
+        setPosition({ x: newX, y: newY });
+      }
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      if (!isDragging || e.touches.length === 0) return;
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - dragStart.current.x;
+      const deltaY = touch.clientY - dragStart.current.y;
+      if (cardRef.current && cardRef.current.parentElement) {
+        const parent = cardRef.current.parentElement;
+        const parentRect = parent.getBoundingClientRect();
+        const cardRect = cardRef.current.getBoundingClientRect();
+        const newX = Math.max(0, Math.min(cardStart.current.x + deltaX, parentRect.width - cardRect.width / 2));
+        const newY = Math.max(0, Math.min(cardStart.current.y + deltaY, parentRect.height - cardRect.height / 2));
+        setPosition({ x: newX, y: newY });
       }
     };
 
     const onMouseUp = () => {
-      handleEnd();
+      if (isDragging) {
+        setIsDragging(false);
+        playClickSound(0.04);
+      }
     };
 
     const onTouchEnd = () => {
-      handleEnd();
+      if (isDragging) {
+        setIsDragging(false);
+        playClickSound(0.04);
+      }
     };
 
     if (isDragging) {
@@ -119,6 +122,7 @@ export default function DraggableCard({
       window.removeEventListener("touchend", onTouchEnd);
     };
   }, [isDragging]);
+
 
   return (
     <div

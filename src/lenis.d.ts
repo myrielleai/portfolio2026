@@ -1,10 +1,7 @@
 // src/lenis.d.ts
-declare module "lenlenis" {};
-
 declare module "lenis" {
   interface LenisOptions {
-    // Add any options you use; keep generic any for now
-    [key: string]: any;
+    [key: string]: unknown;
   }
   export default class Lenis {
     constructor(options?: LenisOptions);
@@ -13,3 +10,4 @@ declare module "lenis" {
     destroy(): void;
   }
 }
+
