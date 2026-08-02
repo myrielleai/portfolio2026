@@ -19,12 +19,16 @@ function ProjectCard({ project, index, total, progress }: ProjectCardProps) {
   const isLast = index === total - 1;
   
   // Calculate when this card starts scaling down (staggered activation range)
-  const startRange = index / total;
-  
+  // Each card scales down only during the scroll window where the next card overlaps it
+  const step = 1 / (total - 1 || 1);
+  const rangeStart = Math.max(0, index * step - step * 0.2);
+  const rangeEnd = Math.min(1, (index + 1) * step);
+
   // Stacking effect calculations: earlier cards scale down and dim as we scroll through the deck
-  const scale = useTransform(progress, [startRange, 1], [1, 1 - (total - 1 - index) * 0.035]);
-  const opacity = useTransform(progress, [startRange, 1], [1, 0.7]);
-  const overlayOpacity = useTransform(progress, [startRange, 1], [0, 0.45]);
+  const targetScale = 1 - (total - 1 - index) * 0.035;
+  const scale = useTransform(progress, [rangeStart, rangeEnd], [1, targetScale]);
+  const opacity = useTransform(progress, [rangeStart, rangeEnd], [1, 0.75]);
+  const overlayOpacity = useTransform(progress, [rangeStart, rangeEnd], [0, 0.4]);
 
   // Design board rotations for a tactile stacked layout
   const rotations = [-1.8, 1.2, -1.0, 1.6];
@@ -36,9 +40,10 @@ function ProjectCard({ project, index, total, progress }: ProjectCardProps) {
         scale: isLast ? 1 : scale,
         opacity: isLast ? 1 : opacity,
         rotate: rotation,
-        // All cards stack at dynamic offsets to create a layered deck look
         top: `calc(108px + ${index * 24}px)`,
         zIndex: index + 1,
+        willChange: "transform, opacity",
+        backfaceVisibility: "hidden",
       }}
       initial="hidden"
       whileInView="visible"
@@ -51,13 +56,13 @@ function ProjectCard({ project, index, total, progress }: ProjectCardProps) {
           }
         }
       }}
-      className="sticky w-full max-w-4xl mx-auto rounded-2xl border-2 border-[var(--border-strong)] bg-[var(--surface)] p-5 sm:p-7 md:p-8 shadow-[0_30px_70px_rgba(0,0,0,0.06)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.5)] transition-shadow duration-500 overflow-hidden flex flex-col gap-5 md:gap-6 h-auto"
+      className="sticky w-full max-w-4xl mx-auto rounded-2xl border-2 border-[var(--border-strong)] bg-[var(--surface)] p-5 sm:p-7 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col gap-5 md:gap-6 h-auto transform-gpu"
     >
       {/* Subtle overlay to simulate depth as it stacks under other cards */}
       {!isLast && (
         <motion.div 
           style={{ opacity: overlayOpacity }}
-          className="absolute inset-0 bg-black/10 dark:bg-black/50 pointer-events-none z-30 transition-opacity duration-300"
+          className="absolute inset-0 bg-black/10 dark:bg-black/50 pointer-events-none z-30"
         />
       )}
       
