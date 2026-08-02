@@ -624,12 +624,12 @@ export function createSmartphoneTexture(): THREE.CanvasTexture {
       iconText: "💬"
     },
     {
-      app: "GitHub",
-      title: "Myrielle Jerusalem",
-      sub: "@myrielle • 42 Repositories Starred",
+      app: "Instagram",
+      title: "myriellej",
+      sub: "@myriellej • Photos & Updates",
       time: "2m ago",
-      iconBg: "#1f2937",
-      iconText: "GH"
+      iconBg: "#e1306c",
+      iconText: "IG"
     },
     {
       app: "LinkedIn",

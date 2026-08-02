@@ -3,9 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
   Mail,
-  Globe,
-  Share2,
-  Smartphone,
   Wifi,
   Signal,
   Camera,
@@ -13,6 +10,7 @@ import {
   MessageCircle,
   Lock
 } from "lucide-react";
+import { InstagramIcon } from "../Icons";
 import { playClickSound } from "../../utils/audio";
 
 interface PhoneModalProps {
@@ -203,71 +201,39 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
                 </div>
               </motion.div>
 
-              {/* GitHub iOS Card */}
+              {/* Instagram iOS Card */}
               <a
-                href="https://github.com"
+                href="https://www.instagram.com/myriellej/"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => playClickSound()}
                 className="group flex items-center justify-between p-3 bg-[#1c1c1e]/75 hover:bg-[#2c2c2e]/90 border border-white/10 rounded-[20px] transition-all shadow-md active:scale-[0.98] cursor-pointer backdrop-blur-md"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow">
-                    <Globe className="w-4 h-4 text-white" />
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow">
+                    <InstagramIcon className="w-4 h-4 text-white" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-bold text-white/50 uppercase tracking-wider">
-                        GITHUB
+                      <span className="text-[9px] font-bold text-pink-400/90 uppercase tracking-wider">
+                        INSTAGRAM
                       </span>
                       <span className="text-[9px] text-white/40">• 2m ago</span>
                     </div>
                     <div className="font-semibold text-white text-xs truncate">
-                      @myrielle • 42 Repositories
+                      @myriellej
                     </div>
                     <div className="text-[10px] text-zinc-400 truncate">
-                      Code, Open Source & Projects
+                      Photos & Updates
                     </div>
                   </div>
                 </div>
-                <span className="shrink-0 px-2.5 py-1 text-[10px] font-semibold bg-white/10 group-hover:bg-blue-600 group-hover:text-white text-blue-400 rounded-full border border-white/10 transition-colors">
+                <span className="shrink-0 px-2.5 py-1 text-[10px] font-semibold bg-white/10 group-hover:bg-pink-600 group-hover:text-white text-pink-400 rounded-full border border-white/10 transition-colors">
                   OPEN ↗
                 </span>
               </a>
 
-              {/* LinkedIn iOS Card */}
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => playClickSound()}
-                className="group flex items-center justify-between p-3 bg-[#1c1c1e]/75 hover:bg-[#2c2c2e]/90 border border-white/10 rounded-[20px] transition-all shadow-md active:scale-[0.98] cursor-pointer backdrop-blur-md"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow">
-                    <Share2 className="w-4 h-4 text-blue-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-bold text-blue-400/80 uppercase tracking-wider">
-                        LINKEDIN
-                      </span>
-                      <span className="text-[9px] text-white/40">• 5m ago</span>
-                    </div>
-                    <div className="font-semibold text-white text-xs truncate">
-                      Myrielle Jerusalem
-                    </div>
-                    <div className="text-[10px] text-zinc-400 truncate">
-                      Full-Stack Engineer & Architect
-                    </div>
-                  </div>
-                </div>
-                <span className="shrink-0 px-2.5 py-1 text-[10px] font-semibold bg-white/10 group-hover:bg-blue-600 group-hover:text-white text-blue-400 rounded-full border border-white/10 transition-colors">
-                  CONNECT ↗
-                </span>
-              </a>
-
-              {/* Email iOS Card */}
+              {/* Gmail iOS Card */}
               <a
                 href="mailto:myrielle.work@gmail.com"
                 onClick={() => playClickSound()}
@@ -280,7 +246,7 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="text-[9px] font-bold text-emerald-400/80 uppercase tracking-wider">
-                        MAIL
+                        GMAIL
                       </span>
                       <span className="text-[9px] text-white/40">• 10m ago</span>
                     </div>
@@ -315,12 +281,6 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
               >
                 <Zap className={`w-5 h-5 ${isFlashlightOn ? "fill-black" : ""}`} />
               </button>
-
-              {/* Device Info Badge */}
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] text-white/70 font-medium backdrop-blur-md">
-                <Smartphone className="w-3 h-3 text-white/60" />
-                <span>iPhone 12</span>
-              </div>
 
               {/* Camera Button */}
               <button
