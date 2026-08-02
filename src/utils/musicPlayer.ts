@@ -1,4 +1,4 @@
-// Web Audio API Lo-Fi Music Synthesizer for LabTeaser Earbuds
+// Web Audio API & HTML5 Audio Player for LabTeaser Earbuds
 
 export interface TrackInfo {
   id: string;
@@ -10,6 +10,8 @@ export interface TrackInfo {
   chords: number[][]; // Frequencies for chord progression
   melody: number[];   // Frequencies for melody notes
   coverGradient: string;
+  coverImage?: string;
+  audioUrl?: string;
   bgGlow: string;
   accentColor: string;
   lyrics: string[];
@@ -24,6 +26,8 @@ export const TRACKS: TrackInfo[] = [
     duration: 212,
     bpm: 72,
     coverGradient: "from-amber-600 via-orange-600 to-rose-700",
+    coverImage: "/streetcar-cover.jpg",
+    audioUrl: "/streetcar.m4a",
     bgGlow: "rgba(245, 158, 11, 0.45)",
     accentColor: "#f59e0b",
     lyrics: [
@@ -51,6 +55,8 @@ export const TRACKS: TrackInfo[] = [
     duration: 209,
     bpm: 75,
     coverGradient: "from-rose-500 via-pink-600 to-amber-500",
+    coverImage: "/streetcar-cover.jpg",
+    audioUrl: "/best-part.m4a",
     bgGlow: "rgba(244, 63, 94, 0.4)",
     accentColor: "#f43f5e",
     lyrics: [
@@ -75,6 +81,8 @@ export const TRACKS: TrackInfo[] = [
     duration: 278,
     bpm: 68,
     coverGradient: "from-violet-600 via-purple-600 to-indigo-800",
+    coverImage: "/streetcar-cover.jpg",
+    audioUrl: "/get-you.m4a",
     bgGlow: "rgba(139, 92, 246, 0.4)",
     accentColor: "#8b5cf6",
     lyrics: [
@@ -96,6 +104,7 @@ export const TRACKS: TrackInfo[] = [
 class LoFiMusicSynth {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
+  private audioElement: HTMLAudioElement | null = null;
   private isPlaying: boolean = false;
   private currentTrackIndex: number = 0;
   private volume: number = 0.7;
@@ -119,23 +128,69 @@ class LoFiMusicSynth {
   }
 
   public playTrack(trackIndex?: number) {
-    if (trackIndex !== undefined && trackIndex !== this.currentTrackIndex) {
+    const isNewTrack = trackIndex !== undefined && trackIndex !== this.currentTrackIndex;
+    if (isNewTrack) {
       this.stopTrack();
       this.currentTrackIndex = trackIndex;
       this.currentTimeSeconds = 0;
     }
 
+    const track = TRACKS[this.currentTrackIndex];
+
+    // Check if track has audio file URL
+    if (track.audioUrl) {
+      if (this.chordIntervalId) {
+        clearInterval(this.chordIntervalId);
+        this.chordIntervalId = null;
+      }
+
+      if (!this.audioElement || isNewTrack) {
+        if (this.audioElement) {
+          this.audioElement.pause();
+          this.audioElement.src = "";
+        }
+        this.audioElement = new Audio(track.audioUrl);
+        this.audioElement.volume = this.volume;
+        this.audioElement.currentTime = this.currentTimeSeconds;
+
+        this.audioElement.ontimeupdate = () => {
+          if (this.audioElement) {
+            this.currentTimeSeconds = this.audioElement.currentTime;
+            if (this.onTimeUpdateCallback) {
+              this.onTimeUpdateCallback(this.currentTimeSeconds);
+            }
+          }
+        };
+
+        this.audioElement.onended = () => {
+          this.nextTrack();
+        };
+      }
+
+      this.isPlaying = true;
+      if (this.onStateChangeCallback) this.onStateChangeCallback(true);
+      
+      this.audioElement.play().catch((err) => {
+        console.warn("Audio autoplay prevented, falling back to synth:", err);
+        this.startSynthPlayback(track);
+      });
+      return;
+    }
+
+    // Fallback Web Audio Synth
+    this.startSynthPlayback(track);
+  }
+
+  private startSynthPlayback(track: TrackInfo) {
     this.initCtx();
     if (!this.ctx || !this.masterGain) return;
 
     this.isPlaying = true;
     if (this.onStateChangeCallback) this.onStateChangeCallback(true);
 
-    const track = TRACKS[this.currentTrackIndex];
     const chordDurationMs = (60 / track.bpm) * 4000; // 4 beats per chord
     let chordIdx = 0;
 
-    // Play initial chord and setup loop
     this.playChord(track.chords[chordIdx], track.melody[chordIdx % track.melody.length]);
 
     this.chordIntervalId = window.setInterval(() => {
@@ -145,7 +200,6 @@ class LoFiMusicSynth {
       this.playChord(track.chords[chordIdx], melodyFreq);
     }, chordDurationMs);
 
-    // Timer loop for progress bar
     if (!this.intervalId) {
       this.intervalId = window.setInterval(() => {
         if (!this.isPlaying) return;
@@ -165,7 +219,6 @@ class LoFiMusicSynth {
     const now = this.ctx.currentTime;
     const chordDuration = 3.8; // Seconds
 
-    // Play smooth warm synth pad chords
     chordFreqs.forEach((freq) => {
       if (!this.ctx || !this.masterGain) return;
 
@@ -173,16 +226,13 @@ class LoFiMusicSynth {
       const gain = this.ctx.createGain();
       const filter = this.ctx.createBiquadFilter();
 
-      // Soft warm triangle/sine synth wave
       osc.type = "sine";
       osc.frequency.setValueAtTime(freq, now);
 
-      // Lowpass filter for cozy warm analog vibe
       filter.type = "lowpass";
       filter.frequency.setValueAtTime(450, now);
       filter.frequency.exponentialRampToValueAtTime(750, now + 1.5);
 
-      // Envelope: Gentle attack and decay
       gain.gain.setValueAtTime(0.001, now);
       gain.gain.linearRampToValueAtTime(0.08, now + 0.6);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + chordDuration);
@@ -195,11 +245,10 @@ class LoFiMusicSynth {
       osc.stop(now + chordDuration + 0.1);
     });
 
-    // Sub Bass Note
     const bassOsc = this.ctx.createOscillator();
     const bassGain = this.ctx.createGain();
     bassOsc.type = "triangle";
-    bassOsc.frequency.setValueAtTime(chordFreqs[0] / 2, now); // 1 octave down
+    bassOsc.frequency.setValueAtTime(chordFreqs[0] / 2, now);
 
     bassGain.gain.setValueAtTime(0.001, now);
     bassGain.gain.linearRampToValueAtTime(0.12, now + 0.4);
@@ -210,7 +259,6 @@ class LoFiMusicSynth {
     bassOsc.start(now);
     bassOsc.stop(now + chordDuration + 0.1);
 
-    // Subtle Pluck Melody Note
     const melOsc = this.ctx.createOscillator();
     const melGain = this.ctx.createGain();
     melOsc.type = "triangle";
@@ -228,6 +276,9 @@ class LoFiMusicSynth {
 
   public pauseTrack() {
     this.isPlaying = false;
+    if (this.audioElement) {
+      this.audioElement.pause();
+    }
     if (this.onStateChangeCallback) this.onStateChangeCallback(false);
     if (this.chordIntervalId) {
       clearInterval(this.chordIntervalId);
@@ -237,6 +288,10 @@ class LoFiMusicSynth {
 
   public stopTrack() {
     this.pauseTrack();
+    if (this.audioElement) {
+      this.audioElement.pause();
+      this.audioElement.currentTime = 0;
+    }
     this.currentTimeSeconds = 0;
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -257,6 +312,9 @@ class LoFiMusicSynth {
 
   public setVolume(vol: number) {
     this.volume = vol;
+    if (this.audioElement) {
+      this.audioElement.volume = vol;
+    }
     if (this.masterGain && this.ctx) {
       this.masterGain.gain.setValueAtTime(vol, this.ctx.currentTime);
     }
@@ -264,6 +322,9 @@ class LoFiMusicSynth {
 
   public seek(seconds: number) {
     this.currentTimeSeconds = seconds;
+    if (this.audioElement) {
+      this.audioElement.currentTime = seconds;
+    }
     if (this.onTimeUpdateCallback) this.onTimeUpdateCallback(this.currentTimeSeconds);
   }
 

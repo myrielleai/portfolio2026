@@ -618,7 +618,7 @@ export function createSmartphoneTexture(): THREE.CanvasTexture {
     {
       app: "Messages",
       title: "baba",
-      sub: '"dont forget to take a break"',
+      sub: "dont forget to take a break",
       time: "now",
       iconBg: "#34c759",
       iconText: "💬"

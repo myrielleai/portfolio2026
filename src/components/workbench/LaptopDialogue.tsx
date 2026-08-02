@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface GlobeDialogueProps {
+interface LaptopDialogueProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function GlobeDialogue({ isOpen, onClose }: GlobeDialogueProps) {
+export default function LaptopDialogue({ isOpen, onClose }: LaptopDialogueProps) {
   useEffect(() => {
     if (!isOpen) return;
     const timer = setTimeout(() => {
@@ -29,7 +29,7 @@ export default function GlobeDialogue({ isOpen, onClose }: GlobeDialogueProps) {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="text-base sm:text-lg md:text-xl font-serif italic text-amber-100/90 tracking-wider drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]"
           >
-            i want to go to japan
+            back to the grind
           </motion.p>
         </div>
       )}

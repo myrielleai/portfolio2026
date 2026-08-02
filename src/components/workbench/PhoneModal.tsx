@@ -198,7 +198,7 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
                     baba
                   </h4>
                   <p className="text-[12px] text-white/90 font-normal leading-snug mt-0.5">
-                    "dont forget to take a break"
+                    dont forget to take a break
                   </p>
                 </div>
               </motion.div>
@@ -269,7 +269,7 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
 
               {/* Email iOS Card */}
               <a
-                href="mailto:hello@myrielle.dev"
+                href="mailto:myrielle.work@gmail.com"
                 onClick={() => playClickSound()}
                 className="group flex items-center justify-between p-3 bg-[#1c1c1e]/75 hover:bg-[#2c2c2e]/90 border border-white/10 rounded-[20px] transition-all shadow-md active:scale-[0.98] cursor-pointer backdrop-blur-md"
               >
@@ -285,7 +285,7 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
                       <span className="text-[9px] text-white/40">• 10m ago</span>
                     </div>
                     <div className="font-semibold text-white text-xs truncate">
-                      hello@myrielle.dev
+                      myrielle.work@gmail.com
                     </div>
                     <div className="text-[10px] text-zinc-400 truncate">
                       Direct inquiries & contact

@@ -232,17 +232,22 @@ export default function EarbudsModal({ isOpen, onClose }: EarbudsModalProps) {
                       }`}
                     >
                       <div
-                        className={`w-11 h-11 rounded-xl bg-gradient-to-tr ${track.coverGradient} flex items-center justify-center shrink-0 shadow-md`}
+                        className={`w-11 h-11 rounded-xl overflow-hidden relative shrink-0 shadow-md bg-gradient-to-tr ${track.coverGradient}`}
                       >
-                        {isCurrent && isPlaying ? (
-                          <div className="flex items-end gap-0.5 h-4">
-                            <span className="w-1 bg-white rounded-full animate-bounce h-3" />
-                            <span className="w-1 bg-white rounded-full animate-bounce h-4 delay-75" />
-                            <span className="w-1 bg-white rounded-full animate-bounce h-2 delay-150" />
-                          </div>
-                        ) : (
-                          <Music className="w-5 h-5 text-white/80" />
+                        {track.coverImage && (
+                          <img src={track.coverImage} alt={track.title} className="w-full h-full object-cover" />
                         )}
+                        {isCurrent && isPlaying ? (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
+                            <div className="flex items-end gap-0.5 h-4">
+                              <span className="w-1 bg-white rounded-full animate-bounce h-3" />
+                              <span className="w-1 bg-white rounded-full animate-bounce h-4 delay-75" />
+                              <span className="w-1 bg-white rounded-full animate-bounce h-2 delay-150" />
+                            </div>
+                          </div>
+                        ) : !track.coverImage ? (
+                          <Music className="w-5 h-5 text-white/80 absolute inset-0 m-auto" />
+                        ) : null}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div 
@@ -291,48 +296,63 @@ export default function EarbudsModal({ isOpen, onClose }: EarbudsModalProps) {
                     y: isPlaying ? 0 : 4
                   }}
                   transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-                  className={`relative w-64 h-64 md:w-72 md:h-72 rounded-[28px] overflow-hidden shadow-2xl bg-gradient-to-tr ${currentTrack.coverGradient} p-6 flex flex-col justify-between border border-white/20`}
+                  className={`relative w-64 h-64 md:w-72 md:h-72 rounded-[28px] overflow-hidden shadow-2xl bg-gradient-to-tr ${currentTrack.coverGradient} border border-white/20`}
                   style={{
                     boxShadow: isPlaying
                       ? `0 20px 45px -10px ${currentTrack.bgGlow}, 0 10px 20px -5px rgba(0,0,0,0.5)`
                       : "0 10px 30px -10px rgba(0,0,0,0.5)"
                   }}
                 >
-                  {/* Subtle Apple Music Style Gloss & Texture Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/40 pointer-events-none" />
-                  
-                  {/* Decorative Album Art Branding */}
-                  <div className="relative z-10 flex items-center justify-between text-white/90">
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest bg-black/20 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
-                      {currentTrack.album}
-                    </span>
-                    <Music className="w-5 h-5 text-white/80" />
-                  </div>
+                  {currentTrack.coverImage ? (
+                    <>
+                      <img
+                        src={currentTrack.coverImage}
+                        alt={`${currentTrack.title} - ${currentTrack.album}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/40 pointer-events-none" />
+                    </>
+                  ) : (
+                    <>
+                      {/* Subtle Apple Music Style Gloss & Texture Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/40 pointer-events-none" />
+                      
+                      {/* Decorative Album Art Branding */}
+                      <div className="relative z-10 p-6 flex flex-col justify-between h-full">
+                        <div className="flex items-center justify-between text-white/90">
+                          <span className="text-[10px] font-extrabold uppercase tracking-widest bg-black/20 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+                            {currentTrack.album}
+                          </span>
+                          <Music className="w-5 h-5 text-white/80" />
+                        </div>
 
-                  {/* Artwork Center Graphic */}
-                  <div className="relative z-10 flex flex-col items-center justify-center text-center my-auto">
-                    <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center mb-2 shadow-inner">
-                      <motion.div
-                        animate={{ rotate: isPlaying ? 360 : 0 }}
-                        transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-                      >
-                        <Headphones className="w-8 h-8 text-white drop-shadow-md" />
-                      </motion.div>
-                    </div>
-                    <div 
-                      className="text-xl font-extrabold text-white !text-white tracking-wide drop-shadow-md"
-                      style={{ color: "#ffffff" }}
-                    >
-                      {currentTrack.title}
-                    </div>
-                  </div>
+                        {/* Artwork Center Graphic */}
+                        <div className="flex flex-col items-center justify-center text-center my-auto">
+                          <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center mb-2 shadow-inner">
+                            <motion.div
+                              animate={{ rotate: isPlaying ? 360 : 0 }}
+                              transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+                            >
+                              <Headphones className="w-8 h-8 text-white drop-shadow-md" />
+                            </motion.div>
+                          </div>
+                          <div 
+                            className="text-xl font-extrabold text-white !text-white tracking-wide drop-shadow-md"
+                            style={{ color: "#ffffff" }}
+                          >
+                            {currentTrack.title}
+                          </div>
+                        </div>
 
-                  {/* Artwork Footer Note */}
-                  <div className="relative z-10 text-center">
-                    <span className="text-xs font-semibold text-white/80 tracking-wide uppercase">
-                      Apple Music • Stereo
-                    </span>
-                  </div>
+                        {/* Artwork Footer Note */}
+                        <div className="text-center">
+                          <span className="text-xs font-semibold text-white/80 tracking-wide uppercase">
+                            Apple Music • Stereo
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </motion.div>
               </div>
             )}

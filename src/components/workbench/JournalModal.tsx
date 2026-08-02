@@ -62,13 +62,82 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
               >
                 {/* Column 1 / Left Page */}
                 <div className="space-y-5">
-                  <p className="text-zinc-700 leading-relaxed text-sm">
+                  <p className="font-caveat text-2xl sm:text-3xl text-zinc-800 leading-relaxed font-medium">
                     bading
                   </p>
                 </div>
 
                 {/* Column 2 / Right Page */}
-                <div className="space-y-5" />
+                <div className="relative space-y-5 min-h-[300px]">
+                  {/* Page 2 Scribble Container */}
+                  <div className="relative pt-1">
+                    <div className="flex justify-between items-center text-xs font-mono text-zinc-400 mb-2 select-none">
+                      <span className="font-caveat text-lg text-zinc-500/80 -rotate-2">pg. 2</span>
+                    </div>
+
+                    {/* Hand-drawn Scribble & Doodles */}
+                    <div className="relative p-5 rounded-xl bg-amber-50/30 border border-amber-900/10 shadow-xs overflow-hidden select-none">
+                      {/* Hand-drawn SVG strokes */}
+                      <svg
+                        className="w-full h-52 text-zinc-700 overflow-visible"
+                        viewBox="0 0 300 170"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        {/* Wavy looping scribble line across the page top */}
+                        <path
+                          d="M 10 30 Q 35 5 60 32 T 110 30 T 160 35 T 210 25 T 260 40 T 285 20"
+                          stroke="rgba(39, 39, 42, 0.6)"
+                          strokeWidth="1.6"
+                        />
+
+                        {/* Hand-drawn spiral / swirl scribble */}
+                        <path
+                          d="M 55 95 C 45 80 80 70 85 100 C 90 120 55 125 40 105 C 25 80 70 55 105 75 C 130 90 120 130 80 135 C 35 140 15 95 50 60 C 75 35 130 45 140 85"
+                          stroke="rgba(180, 83, 9, 0.7)"
+                          strokeWidth="1.8"
+                        />
+
+                        {/* Scribbled cross-hatch shading box */}
+                        <path
+                          d="M 175 75 L 225 125 M 185 75 L 235 125 M 195 75 L 245 125 M 170 90 L 220 140 M 175 70 L 240 70 M 180 82 L 245 82 M 185 94 L 240 94"
+                          stroke="rgba(113, 113, 122, 0.55)"
+                          strokeWidth="1.3"
+                        />
+
+                        {/* Hand-drawn doodle star */}
+                        <path
+                          d="M 235 38 L 239 47 L 249 48 L 241 55 L 243 65 L 235 60 L 227 65 L 229 55 L 221 48 L 231 47 Z"
+                          fill="rgba(245, 158, 11, 0.25)"
+                          stroke="rgba(217, 119, 6, 0.85)"
+                          strokeWidth="1.5"
+                        />
+
+                        {/* Sparkle strokes */}
+                        <path d="M 260 28 L 270 23 M 264 37 L 275 37 M 260 46 L 271 50" stroke="#d97706" strokeWidth="1.5" />
+
+                        {/* Red ink strikethrough scribble at bottom */}
+                        <path
+                          d="M 15 155 Q 65 145 115 156 T 215 148 T 280 154"
+                          stroke="rgba(225, 29, 72, 0.65)"
+                          strokeWidth="2.4"
+                        />
+                      </svg>
+
+                      {/* Handwritten scribble texts */}
+                      <div className="absolute top-5 right-5 font-caveat text-2xl text-amber-900/90 rotate-3">
+                        ideas in progress ✨
+                      </div>
+
+                      <div className="absolute bottom-3 left-5 font-reenie text-3xl text-zinc-700/90 -rotate-2">
+                        scribble scribble ~
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             </div>
           </motion.div>

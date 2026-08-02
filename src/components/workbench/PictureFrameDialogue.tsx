@@ -29,7 +29,7 @@ export default function PictureFrameDialogue({ isOpen, onClose }: PictureFrameDi
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="text-base sm:text-lg md:text-xl font-serif italic text-amber-100/90 tracking-wider drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]"
           >
-            take me back to the beach... 🌴🌊
+            i miss them...
           </motion.p>
         </div>
       )}

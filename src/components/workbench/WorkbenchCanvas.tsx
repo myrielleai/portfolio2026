@@ -16,6 +16,7 @@ import MiataDialogue from "./MiataDialogue";
 import MatchaDialogue from "./MatchaDialogue";
 import RubiksDialogue from "./RubiksDialogue";
 import ChessDialogue from "./ChessDialogue";
+import LaptopDialogue from "./LaptopDialogue";
 import { playClickSound, playHoverSound, playToggleSound } from "../../utils/audio";
 import { scrollToSection } from "../../utils/scrollTo";
 
@@ -48,6 +49,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
   const [isMatchaOpen, setIsMatchaOpen] = useState(false);
   const [isRubiksOpen, setIsRubiksOpen] = useState(false);
   const [isChessOpen, setIsChessOpen] = useState(false);
+  const [isLaptopOpen, setIsLaptopOpen] = useState(false);
   const [isBlueprintActive, setIsBlueprintActive] = useState(false);
   const [, setIsLampOn] = useState(true);
   const [currentQuote, setCurrentQuote] = useState<string | null>(null);
@@ -67,6 +69,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
     setIsMatchaOpen(false);
     setIsRubiksOpen(false);
     setIsChessOpen(false);
+    setIsLaptopOpen(false);
     setCurrentQuote(null);
   };
 
@@ -405,7 +408,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       closeAllOverlays();
 
       if (objName === "macbook" || objName === "keyboard") {
-        scrollToSection("projects");
+        setIsLaptopOpen(true);
       } else if (objName === "journal") {
         setIsJournalOpen(true);
       } else if (objName === "coffeeMug" || objName === "matcha" || objName === "matchaMug" || objName === "mug" || objName === "cup") {
@@ -924,6 +927,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       <MatchaDialogue isOpen={isMatchaOpen} onClose={() => setIsMatchaOpen(false)} />
       <RubiksDialogue isOpen={isRubiksOpen} onClose={() => setIsRubiksOpen(false)} />
       <ChessDialogue isOpen={isChessOpen} onClose={() => setIsChessOpen(false)} />
+      <LaptopDialogue isOpen={isLaptopOpen} onClose={() => setIsLaptopOpen(false)} />
     </div>
   );
 }
