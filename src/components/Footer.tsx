@@ -210,7 +210,7 @@ export default function Footer() {
           </div>
 
           <div className="col-span-12 sm:col-span-6 text-left space-y-0.5 font-mono text-[9px] text-[var(--text-muted)] tracking-tight leading-relaxed">
-            <div>INTELLIGENT SYSTEMS & PREMIUM INTERFACES /////////</div>
+            <div>IT'S A LEAP OF FAITH /////////</div>
           </div>
 
         </div>

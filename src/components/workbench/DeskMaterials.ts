@@ -788,7 +788,7 @@ export function createStickyNoteTexture(text?: string, color: string = "#fef3c7"
   const defaultTasks = [
     "☑ sleep",
     "☑ matcha",
-    "☐ Discover Secrets"
+    "☐ clean my table"
   ];
 
   const lines = text ? text.split("\n") : defaultTasks;

@@ -12,7 +12,7 @@ export default function EasterEggModal({ isOpen, onClose }: EasterEggModalProps)
   const [tasks, setTasks] = useState([
     { id: 1, text: "sleep", completed: true },
     { id: 2, text: "matcha", completed: true },
-    { id: 3, text: "Discover all workbench secrets ✨", completed: false }
+    { id: 3, text: "clean my table", completed: false }
   ]);
   const [newTaskText, setNewTaskText] = useState("");
 

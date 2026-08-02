@@ -886,7 +886,7 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   stickyNotesGroup.name = "stickyNotes";
   deskGroup.add(stickyNotesGroup);
 
-  const noteTexture = createStickyNoteTexture("☑ sleep\n☑ matcha\n☐ Discover Secrets");
+  const noteTexture = createStickyNoteTexture("☑ sleep\n☑ matcha\n☐ clean my table");
   const noteGeom = new THREE.PlaneGeometry(1.2, 1.2);
   const noteMat = new THREE.MeshStandardMaterial({
     map: noteTexture,
