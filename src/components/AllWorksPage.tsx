@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Sparkles, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowLeft, Sparkles, ExternalLink } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { GithubIcon } from "./Icons";
 import { worksCategories, type WorkCategory, type WorkItem } from "../data/worksData";
@@ -55,7 +55,7 @@ export default function AllWorksPage() {
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-12 py-12 lg:py-16 flex flex-col justify-start relative z-10">
         
         {/* Page Intro Header - Big PROJECTS matching navbar length */}
-        <div className="mb-10 lg:mb-14 w-full flex items-center justify-between font-display font-black text-[60px] sm:text-[90px] md:text-[126px] lg:text-[140px] xl:text-[160px] leading-none text-[var(--heading)] uppercase select-none tracking-tight">
+        <div className="mb-10 lg:mb-14 w-full flex items-center justify-between font-display font-black text-[120px] sm:text-[150px] md:text-[186px] lg:text-[200px] xl:text-[220px] leading-none text-[var(--heading)] uppercase select-none tracking-tight">
           {"PROJECTS".split("").map((char, index) => (
             <motion.span
               key={index}
@@ -116,69 +116,16 @@ export default function AllWorksPage() {
                 )}
 
                 {/* Category Header Row */}
-                <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 ${isSelected ? "border-b border-[var(--border)] pb-8 mb-8" : ""}`}>
-                  
-                  {/* Left Info: Index, Title & Subtitle */}
-                  <div className="flex items-start sm:items-center gap-4 sm:gap-6">
-                    <span
-                      className={`font-mono text-sm sm:text-base font-bold px-3 py-1 rounded-lg border transition-colors ${
-                        isSelected
-                          ? "bg-[var(--accent)] text-white border-transparent"
-                          : "bg-[var(--surface-muted)] text-[var(--accent)] border-[var(--border)]"
-                      }`}
-                    >
-                      {category.index}
-                    </span>
-
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-3">
-                        <h2
-                          className={`font-display font-extrabold tracking-tight transition-all duration-300 ${
-                            isSelected
-                              ? "text-3xl sm:text-5xl lg:text-6xl text-[var(--heading)]"
-                              : "text-2xl sm:text-3xl lg:text-4xl text-[var(--heading)] group-hover/cat:text-[var(--accent)]"
-                          }`}
-                        >
-                          {category.title}
-                        </h2>
-                        <span className="font-mono text-xs px-2.5 py-0.5 rounded-full border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--text-muted)] font-medium">
-                          {category.countLabel}
-                        </span>
-                      </div>
-
-                      {/* Description visible when selected or snippet when hovering */}
-                      {isSelected ? (
-                        <p className="font-sans text-sm sm:text-base text-[var(--text-muted)] max-w-3xl pt-2 leading-relaxed">
-                          {category.description}
-                        </p>
-                      ) : (
-                        <p className="font-sans text-xs sm:text-sm text-[var(--text-muted)] line-clamp-1">
-                          {category.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right Action: Expand/Collapse indicator */}
-                  <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
-                    {isSelected ? (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCategoryId(null);
-                        }}
-                        className="inline-flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-[var(--heading)] bg-[var(--surface-muted)] hover:bg-[var(--accent)] hover:text-white px-4 py-2 rounded-xl border border-[var(--border)] transition-all duration-200 shadow-sm"
-                      >
-                        <span>COLLAPSE</span>
-                        <Minimize2 className="w-3.5 h-3.5" />
-                      </button>
-                    ) : (
-                      <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-[var(--text-muted)] group-hover/cat:text-[var(--accent)] px-3.5 py-1.5 rounded-xl border border-[var(--border)] group-hover/cat:border-[var(--accent)]/40 bg-[var(--surface-muted)]/50 transition-all duration-200">
-                        <span>EXPAND</span>
-                        <Maximize2 className="w-3.5 h-3.5 group-hover/cat:scale-110 transition-transform duration-200" />
-                      </div>
-                    )}
-                  </div>
+                <div className={`flex items-center justify-between relative z-10 ${isSelected ? "border-b border-[var(--border)] pb-6 mb-6" : ""}`}>
+                  <h2
+                    className={`font-display font-extrabold tracking-tight transition-all duration-300 ${
+                      isSelected
+                        ? "text-3xl sm:text-5xl lg:text-6xl text-[var(--heading)]"
+                        : "text-2xl sm:text-3xl lg:text-4xl text-[var(--heading)] group-hover/cat:text-[var(--accent)]"
+                    }`}
+                  >
+                    {category.title}
+                  </h2>
                 </div>
 
                 {/* Expanded Inside Items Area */}

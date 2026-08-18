@@ -86,7 +86,7 @@ export default function ArchiveFooter() {
       className="w-full min-h-screen border-t border-[var(--border)] px-4 sm:px-8 lg:px-16 py-8 sm:py-12 relative z-10 overflow-hidden transition-colors duration-300 select-none flex flex-col justify-center items-center"
       style={{ backgroundColor: "var(--bg)" }}
     >
-      {/* Animated Flying Stickers Layer */}
+      {/* Flying Floating Stickers Layer inside Footer */}
       <FlyingStickers />
 
       {/* Dynamic Interactive Radial Spotlight Background */}
@@ -177,6 +177,15 @@ export default function ArchiveFooter() {
           </div>
         </div>
       </div>
+
+      {/* Floating Stickers Hint Badge */}
+      <div className="absolute bottom-6 right-8 pointer-events-none z-30 opacity-80 hidden sm:block">
+        <span className="font-mono text-[10px] tracking-widest text-[var(--accent)] font-bold uppercase bg-[var(--surface)]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[var(--border)] shadow-md inline-flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          FLYING STICKERS ARCHIVE • DRAG OR CLICK ANYWHERE!
+        </span>
+      </div>
     </footer>
   );
 }
+

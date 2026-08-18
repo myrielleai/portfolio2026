@@ -12,7 +12,13 @@ import {
   Flame,
   Smile,
   Globe,
-  Code
+  Code,
+  Cpu,
+  Layers,
+  Wand2,
+  Box,
+  Laptop,
+  Compass,
 } from "lucide-react";
 
 // Predefined sticker presets for floating and interactive stickers
@@ -23,7 +29,7 @@ const STICKER_PRESETS = [
     icon: Palette,
     bg: "bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600",
     textColor: "text-white",
-    border: "border-white",
+    border: "border-white/90",
     shadow: "shadow-purple-500/30",
   },
   {
@@ -32,7 +38,7 @@ const STICKER_PRESETS = [
     icon: Zap,
     bg: "bg-amber-400 dark:bg-amber-500",
     textColor: "text-slate-950 font-black",
-    border: "border-white",
+    border: "border-white/90",
     shadow: "shadow-amber-500/30",
   },
   {
@@ -50,7 +56,7 @@ const STICKER_PRESETS = [
     icon: Sparkles,
     bg: "bg-pink-600 dark:bg-pink-500",
     textColor: "text-white",
-    border: "border-white",
+    border: "border-white/90",
     shadow: "shadow-pink-500/30",
   },
   {
@@ -68,7 +74,7 @@ const STICKER_PRESETS = [
     icon: Heart,
     bg: "bg-rose-500",
     textColor: "text-white",
-    border: "border-white",
+    border: "border-white/90",
     shadow: "shadow-rose-500/30",
   },
   {
@@ -77,7 +83,7 @@ const STICKER_PRESETS = [
     icon: Smile,
     bg: "bg-gradient-to-r from-orange-400 to-pink-500",
     textColor: "text-white",
-    border: "border-white",
+    border: "border-white/90",
     shadow: "shadow-orange-500/30",
   },
   {
@@ -95,7 +101,7 @@ const STICKER_PRESETS = [
     icon: Star,
     bg: "bg-gradient-to-r from-yellow-400 to-amber-500",
     textColor: "text-slate-900 font-extrabold",
-    border: "border-white",
+    border: "border-white/90",
     shadow: "shadow-yellow-500/30",
   },
   {
@@ -113,7 +119,7 @@ const STICKER_PRESETS = [
     icon: Globe,
     bg: "bg-teal-600",
     textColor: "text-teal-50",
-    border: "border-white",
+    border: "border-white/90",
     shadow: "shadow-teal-500/30",
   },
   {
@@ -125,18 +131,72 @@ const STICKER_PRESETS = [
     border: "border-accent",
     shadow: "shadow-slate-500/30",
   },
+  {
+    id: "react-ts",
+    text: "REACT + TS ⚡",
+    icon: Cpu,
+    bg: "bg-gradient-to-r from-sky-500 to-blue-700",
+    textColor: "text-white",
+    border: "border-sky-200",
+    shadow: "shadow-sky-500/30",
+  },
+  {
+    id: "ui-magic",
+    text: "UI/UX MAGIC",
+    icon: Wand2,
+    bg: "bg-gradient-to-r from-fuchsia-600 to-purple-700",
+    textColor: "text-white",
+    border: "border-fuchsia-200",
+    shadow: "shadow-fuchsia-500/30",
+  },
+  {
+    id: "open-source",
+    text: "OPEN SOURCE",
+    icon: Layers,
+    bg: "bg-gradient-to-r from-emerald-500 to-teal-700",
+    textColor: "text-white",
+    border: "border-emerald-200",
+    shadow: "shadow-emerald-500/30",
+  },
+  {
+    id: "prototype",
+    text: "PROTOTYPE LAB 🧪",
+    icon: Box,
+    bg: "bg-gradient-to-r from-indigo-600 to-violet-800",
+    textColor: "text-indigo-100",
+    border: "border-indigo-300",
+    shadow: "shadow-indigo-500/30",
+  },
+  {
+    id: "shipped",
+    text: "SHIPPED 🚀",
+    icon: Laptop,
+    bg: "bg-gradient-to-r from-green-500 to-emerald-600",
+    textColor: "text-white",
+    border: "border-white/90",
+    shadow: "shadow-green-500/30",
+  },
+  {
+    id: "explore",
+    text: "EXPLORE & BUILD",
+    icon: Compass,
+    bg: "bg-gradient-to-r from-amber-600 to-rose-600",
+    textColor: "text-white",
+    border: "border-amber-200",
+    shadow: "shadow-rose-500/30",
+  },
 ];
 
 interface FlyingStickerItem {
   instanceId: string;
   presetIndex: number;
-  initialX: number; // percentage 5..90
-  speedY: number; // pixels per frame or duration
+  initialX: number; // percentage 2..94
+  speedY: number; // duration in seconds
   delay: number;
   rotation: number;
+  rotateDelta: number;
   scale: number;
   swayAmp: number;
-  swayFreq: number;
 }
 
 interface BurstStickerItem {
@@ -155,27 +215,37 @@ export default function FlyingStickers() {
   const [flyingStickers, setFlyingStickers] = useState<FlyingStickerItem[]>([]);
   const [burstStickers, setBurstStickers] = useState<BurstStickerItem[]>([]);
 
-  // Generate initial floating stickers spread across the footer
+  // Generate floating stickers spread across the full width and height on mount
   useEffect(() => {
-    const items: FlyingStickerItem[] = Array.from({ length: 16 }).map((_, i) => ({
-      instanceId: `fly-${i}-${Date.now()}`,
-      presetIndex: i % STICKER_PRESETS.length,
-      initialX: 3 + (i * 6) + (Math.random() * 2 - 1),
-      speedY: 15 + Math.random() * 10, // duration in seconds
-      delay: (i * 1.3) - 10, // negative delays ensure full screen coverage on load
-      rotation: (Math.random() - 0.5) * 35,
-      scale: 0.85 + Math.random() * 0.35,
-      swayAmp: 15 + Math.random() * 25,
-      swayFreq: 2 + Math.random() * 3,
-    }));
+    const totalCount = 26;
+    const items: FlyingStickerItem[] = Array.from({ length: totalCount }).map((_, i) => {
+      // Divide screen width into bins with random jitter for uniform horizontal distribution
+      const binWidth = 92 / totalCount;
+      const initialX = Math.min(94, Math.max(2, 3 + i * binWidth + (Math.random() * 2 - 1)));
+      const speedY = 18 + Math.random() * 14; // duration between 18s and 32s
+
+      return {
+        instanceId: `fly-${i}-${Date.now()}`,
+        presetIndex: i % STICKER_PRESETS.length,
+        initialX,
+        speedY,
+        // Negative delays populate stickers across full screen height immediately on load
+        delay: -Math.random() * speedY,
+        rotation: (Math.random() - 0.5) * 40,
+        rotateDelta: 10 + Math.random() * 20,
+        scale: 0.8 + Math.random() * 0.35,
+        swayAmp: (Math.random() > 0.5 ? 1 : -1) * (10 + Math.random() * 16),
+      };
+    });
+
     setFlyingStickers(items);
   }, []);
 
-  // Handle click on footer to launch burst stickers upward
+  // Handle click on background layer to burst mini stickers
   const spawnBurstStickersAt = (clickX: number, clickY: number) => {
     const count = 3 + Math.floor(Math.random() * 3);
     const newItems: BurstStickerItem[] = Array.from({ length: count }).map((_, i) => {
-      const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.2; // upward trajectory
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.5;
       const speed = 4 + Math.random() * 6;
       return {
         id: `burst-${Date.now()}-${i}-${Math.random()}`,
@@ -185,13 +255,13 @@ export default function FlyingStickers() {
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         rotation: (Math.random() - 0.5) * 60,
-        scale: 0.8 + Math.random() * 0.4,
+        scale: 0.85 + Math.random() * 0.35,
       };
     });
-    setBurstStickers((prev) => [...prev.slice(-15), ...newItems]);
+    setBurstStickers((prev) => [...prev.slice(-18), ...newItems]);
   };
 
-  // Burst sticker physics animation loop
+  // Burst sticker physics loop
   useEffect(() => {
     if (burstStickers.length === 0) return;
     const interval = setInterval(() => {
@@ -201,9 +271,9 @@ export default function FlyingStickers() {
             ...item,
             x: item.x + item.vx,
             y: item.y + item.vy,
-            vy: item.vy - 0.15, // float upward extra momentum
-            rotation: item.rotation + 1.5,
-            scale: item.scale * 0.985,
+            vy: item.vy - 0.12, // subtle float up
+            rotation: item.rotation + 1.8,
+            scale: item.scale * 0.982,
           }))
           .filter((item) => item.scale > 0.2)
       );
@@ -211,9 +281,9 @@ export default function FlyingStickers() {
     return () => clearInterval(interval);
   }, [burstStickers]);
 
-  // Handle container click event listener via parent or local overlay
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
+    // Only spawn if clicking direct container background (not a sticker or card)
+    if (e.target !== containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -226,30 +296,38 @@ export default function FlyingStickers() {
       onClick={handleContainerClick}
       className="absolute inset-0 pointer-events-auto overflow-hidden z-15 select-none"
     >
-      {/* 1. Continuous Floating Flying Stickers Layer */}
+      {/* 1. Full Footer Flying Floating Stickers Layer */}
       {flyingStickers.map((sticker) => {
         const preset = STICKER_PRESETS[sticker.presetIndex];
         const Icon = preset.icon;
+
+        const leftTarget = Math.min(94, Math.max(2, sticker.initialX + sticker.swayAmp));
+        const rightTarget = Math.min(94, Math.max(2, sticker.initialX - sticker.swayAmp));
 
         return (
           <motion.div
             key={sticker.instanceId}
             initial={{
-              y: "120%",
+              y: "110%",
               x: `${sticker.initialX}%`,
               rotate: sticker.rotation,
               scale: sticker.scale,
               opacity: 0,
             }}
             animate={{
-              y: ["120%", "-115vh"],
+              y: ["110%", "-115%"],
               x: [
                 `${sticker.initialX}%`,
-                `${sticker.initialX + (sticker.swayAmp / 10)}%`,
-                `${sticker.initialX - (sticker.swayAmp / 10)}%`,
+                `${leftTarget}%`,
+                `${rightTarget}%`,
                 `${sticker.initialX}%`,
               ],
-              rotate: [sticker.rotation, sticker.rotation + 15, sticker.rotation - 15, sticker.rotation],
+              rotate: [
+                sticker.rotation,
+                sticker.rotation + sticker.rotateDelta,
+                sticker.rotation - sticker.rotateDelta,
+                sticker.rotation,
+              ],
               opacity: [0, 0.95, 0.95, 0.95, 0],
             }}
             transition={{
@@ -260,19 +338,20 @@ export default function FlyingStickers() {
             }}
             drag
             dragConstraints={containerRef}
+            dragElastic={0.1}
             whileHover={{
               scale: sticker.scale * 1.25,
               rotate: 0,
-              zIndex: 40,
+              zIndex: 60,
               cursor: "grab",
             }}
             whileTap={{ scale: sticker.scale * 1.1, cursor: "grabbing" }}
             className="absolute bottom-0 left-0 pointer-events-auto cursor-grab touch-none"
-            style={{ zIndex: 20 }}
+            style={{ zIndex: 25 }}
           >
             {/* Die-cut sticker badge wrapper */}
             <div
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border-2 ${preset.border} ${preset.bg} ${preset.textColor} shadow-lg ${preset.shadow} transform transition-transform duration-200 hover:shadow-2xl ring-4 ring-white/20 dark:ring-black/30 backdrop-blur-sm`}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border-2 ${preset.border} ${preset.bg} ${preset.textColor} shadow-xl ${preset.shadow} transform transition-all duration-200 hover:shadow-2xl ring-4 ring-white/20 dark:ring-black/30 backdrop-blur-sm`}
             >
               <Icon className="w-4 h-4 shrink-0 animate-pulse" />
               <span className="font-mono text-xs font-black tracking-wider uppercase whitespace-nowrap drop-shadow-sm">
@@ -297,7 +376,7 @@ export default function FlyingStickers() {
                 left: `${item.x}px`,
                 top: `${item.y}px`,
                 transform: `translate(-50%, -50%) rotate(${item.rotation}deg) scale(${item.scale})`,
-                zIndex: 35,
+                zIndex: 55,
               }}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: item.scale, opacity: 1 }}
@@ -305,7 +384,7 @@ export default function FlyingStickers() {
               className="pointer-events-none"
             >
               <div
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border-2 ${preset.border} ${preset.bg} ${preset.textColor} shadow-2xl ring-4 ring-white/30`}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border-2 ${preset.border} ${preset.bg} ${preset.textColor} shadow-2xl ring-4 ring-white/30`}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" />
                 <span className="font-mono text-xs font-black tracking-wider uppercase whitespace-nowrap">
@@ -316,14 +395,7 @@ export default function FlyingStickers() {
           );
         })}
       </AnimatePresence>
-
-      {/* Hint Badge at Bottom Right of Footer */}
-      <div className="absolute bottom-4 right-6 pointer-events-none z-25 opacity-75 hidden sm:block">
-        <span className="font-mono text-[10px] tracking-widest text-[var(--accent)] font-bold uppercase bg-[var(--surface)]/80 backdrop-blur-md px-3 py-1 rounded-full border border-[var(--border)] shadow-sm inline-flex items-center gap-1.5">
-          <Sparkles className="w-3 h-3 text-amber-500 animate-spin" style={{ animationDuration: "6s" }} />
-          FLYING STICKERS ARCHIVE • CLICK OR DRAG!
-        </span>
-      </div>
     </div>
   );
 }
+
