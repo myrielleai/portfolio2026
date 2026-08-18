@@ -143,7 +143,7 @@ export const portfolioData: PortfolioData = {
       tags: ["PostgreSQL", "Render", "SQL"],
       demoUrl: "https://hmbms-server.onrender.com/",
       githubUrl: "https://github.com/KadenYohan/MilkBank-Group-Seven",
-      image: "/project1.png"
+      image: "/project1.webp"
     },
     {
       title: "ReliefSync: Disaster Logistics Engine",
@@ -151,7 +151,7 @@ export const portfolioData: PortfolioData = {
       tags: ["React", "Tailwind CSS", "LocalForage", "Framer Motion"],
       demoUrl: "https://reliefsync-frontend-d3sw.onrender.com/index.html",
       githubUrl: "https://github.com/myrielleai/ReliefSync",
-      image: "/project2.png"
+      image: "/project2.webp"
     },
     {
       title: "UChannel Website",
@@ -159,7 +159,7 @@ export const portfolioData: PortfolioData = {
       tags: ["React", "Three.js", "TypeScript", "Tailwind CSS"],
       demoUrl: "https://uchannel.ph",
       githubUrl: "https://github.com",
-      image: "/project3.png"
+      image: "/project3.webp"
     },
     {
       title: "Endlezz Market Website",
@@ -167,7 +167,7 @@ export const portfolioData: PortfolioData = {
       tags: ["React", "CSS Grid", "TypeScript", "Vite"],
       demoUrl: "https://endlezz-market.vercel.app/",
       githubUrl: "https://github.com/myrielleai/EndlezzMarket",
-      image: "/project4.png"
+      image: "/project4.webp"
     }
   ],
   skills: [

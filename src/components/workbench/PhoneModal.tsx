@@ -88,13 +88,13 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
             className={`absolute inset-0 transition-opacity duration-700 pointer-events-none ${
               isFlashlightOn
                 ? "bg-gradient-to-b from-amber-500/20 via-zinc-950 to-black opacity-100"
-                : "bg-gradient-to-b from-indigo-950/60 via-purple-950/40 via-slate-950 to-black opacity-95"
+                : "bg-gradient-to-b from-indigo-950/60 via-[#9333ea]/30 via-slate-950 to-black opacity-95"
             }`}
           />
 
           {/* Glowing Ambient Wallpaper Orbs */}
           <div className="absolute top-12 -left-12 w-48 h-48 bg-indigo-500/25 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-44 -right-12 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-44 -right-12 w-48 h-48 bg-[#9333ea]/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-20 left-6 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
 
           {/* Flashlight Beam Ambient Glow */}
@@ -210,7 +210,7 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
                 className="group flex items-center justify-between p-3 bg-[#1c1c1e]/75 hover:bg-[#2c2c2e]/90 border border-white/10 rounded-[20px] transition-all shadow-md active:scale-[0.98] cursor-pointer backdrop-blur-md"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-[#C45A3C] border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow">
                     <InstagramIcon className="w-4 h-4 text-white" />
                   </div>
                   <div className="min-w-0">

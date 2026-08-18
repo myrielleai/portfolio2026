@@ -15,10 +15,10 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-12 pt-4 transition-all duration-300 pointer-events-none">
-      <div className="max-w-7xl mx-auto rounded-2xl border border-[var(--border)]/80 bg-[var(--scrim)] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(147,51,234,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all duration-300 pointer-events-auto overflow-hidden">
+      <div className="max-w-7xl mx-auto rounded-2xl border border-[var(--border)]/80 bg-[var(--scrim)] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(196,90,60,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all duration-300 pointer-events-auto overflow-hidden">
         <div className="px-6 lg:px-8 h-16 flex items-center justify-between">
           
-          {/* Left side: Brand identity & availability indicator */}
+          {/* Left side: Brand identity */}
           <div className="flex items-center gap-6">
             <a
               href="#"
@@ -30,13 +30,6 @@ export default function Navbar() {
             >
               {portfolioData.name.toLowerCase()}
             </a>
-            
-            {portfolioData.isAvailableForWork && (
-              <div className="hidden sm:flex items-center gap-2.5 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-mono text-[10px] tracking-wider uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>{portfolioData.availabilityText}</span>
-              </div>
-            )}
           </div>
 
           {/* Right side: Desktop Navigation & Theme Toggle */}

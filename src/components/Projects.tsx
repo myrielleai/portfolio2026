@@ -83,6 +83,8 @@ function ProjectCard({ project, index, total, progress }: ProjectCardProps) {
           <img
             src={project.image}
             alt={project.title}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover object-top group-hover/img:scale-[1.02] transition-transform duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" />
@@ -224,15 +226,15 @@ export default function Projects() {
           transition={{ type: "spring", stiffness: 100, damping: 15 }}
           className="mt-20 sm:mt-28 flex justify-center"
         >
-          <a
-            href={portfolioData.githubUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-3 px-8 py-4 rounded-full border border-[var(--border)] bg-[var(--surface)] font-mono text-xs font-semibold tracking-widest text-[var(--text)] hover:text-[var(--heading)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-muted)] hover:shadow-lg transition-all duration-300 group"
+          <button
+            onClick={() => {
+              window.history.pushState({}, "", "/works");
+            }}
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-full border border-[var(--border)] bg-[var(--surface)] font-mono text-xs font-semibold tracking-widest text-[var(--text)] hover:text-[var(--heading)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-muted)] hover:shadow-lg transition-all duration-300 group cursor-pointer"
           >
             VIEW ALL WORKS
             <ArrowUpRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--heading)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
-          </a>
+          </button>
         </motion.div>
 
       </div>

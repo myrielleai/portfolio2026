@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -8,11 +8,14 @@ import Navbar from "./components/Navbar";
 import AvatarShowcase from "./components/AvatarShowcase";
 import About from "./components/About";
 import Projects from "./components/Projects";
-import LabWorkspace from "./components/LabWorkspace";
 import LabTeaser from "./components/LabTeaser";
 import Capabilities from "./components/Capabilities";
 import Footer from "./components/Footer";
 import Preloader from "./components/Preloader";
+
+// Lazy load heavy standalone sub-views on demand
+const LabWorkspace = lazy(() => import("./components/LabWorkspace"));
+const AllWorksPage = lazy(() => import("./components/AllWorksPage"));
 
 export default function App() {
   const [loadingComplete, setLoadingComplete] = useState(false);
@@ -51,7 +54,7 @@ export default function App() {
 
   useEffect(() => {
     // Only run smooth scroll and triggers on the main homepage when loading is complete
-    if (!loadingComplete || currentPath === "/lab") return;
+    if (!loadingComplete || currentPath === "/lab" || currentPath === "/works") return;
 
     // Register GSAP ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
@@ -117,6 +120,7 @@ export default function App() {
   }, [loadingComplete, currentPath]);
 
   const isLabView = currentPath === "/lab";
+  const isWorksView = currentPath === "/works";
 
   return (
     <div
@@ -130,7 +134,22 @@ export default function App() {
       <div className="w-full min-h-screen flex flex-col">
         {isLabView ? (
           /* Render full screen Lab workspace console directly */
-          <LabWorkspace onExitLab={() => window.history.pushState({}, "", "/")} />
+          <Suspense fallback={
+            <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+              INITIALIZING LAB WORKSPACE...
+            </div>
+          }>
+            <LabWorkspace onExitLab={() => window.history.pushState({}, "", "/")} />
+          </Suspense>
+        ) : isWorksView ? (
+          /* Render Works Archive page directly */
+          <Suspense fallback={
+            <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+              LOADING WORKS ARCHIVE...
+            </div>
+          }>
+            <AllWorksPage />
+          </Suspense>
         ) : (
           /* Render home page view layout */
           <>

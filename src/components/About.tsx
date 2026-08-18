@@ -53,7 +53,7 @@ function ScrollStatement() {
     >
       <div className="sticky top-0 h-screen w-full flex items-center justify-center px-6 lg:px-16 overflow-hidden">
         {/* Ambient atmospheric glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 dark:bg-purple-400/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#9333ea]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-display leading-[1.35] tracking-tight text-center">
@@ -106,13 +106,17 @@ export default function About() {
             <div className="flex justify-center items-center py-6 lg:py-0 reveal">
               <div className="relative group">
                 {/* Subtle ambient blur backlight for premium aesthetic */}
-                <div className="absolute -inset-4 rounded-[3rem] bg-gradient-to-tr from-[var(--accent)]/20 via-purple-500/10 to-transparent blur-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                <div className="absolute -inset-4 rounded-[3rem] bg-gradient-to-tr from-[var(--accent)]/20 via-[#9333ea]/10 to-transparent blur-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
                 {/* Photo Frame - Soft-edged portrait */}
                 <div className="relative w-64 h-80 sm:w-72 sm:h-96 lg:w-80 lg:h-[26rem] rounded-[2.5rem] overflow-hidden border border-[var(--border-strong)] bg-[var(--surface-muted)] shadow-2xl transition-transform duration-700 ease-out group-hover:scale-[1.02]">
                   <img
-                    src="/about.jpeg"
+                    src="/about.webp"
                     alt={portfolioData.name}
+                    loading="lazy"
+                    decoding="async"
+                    width={320}
+                    height={416}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-500" />

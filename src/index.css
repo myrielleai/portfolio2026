@@ -198,12 +198,12 @@ h1, h2, h3, .heading-editorial {
   0%, 100% {
     transform: scale(1);
     opacity: 1;
-    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4);
+    box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4);
   }
   50% {
     transform: scale(1.1);
     opacity: 0.8;
-    box-shadow: 0 0 0 8px rgba(168, 85, 247, 0);
+    box-shadow: 0 0 0 8px rgba(147, 51, 234, 0);
   }
 }
 
@@ -338,4 +338,19 @@ h1, h2, h3, .heading-editorial {
 
 .card h3 {
   color: inherit;
+}
+
+/* ----------------------------------------------------------------
+   Works Archive Page Ambient Background System
+   ---------------------------------------------------------------- */
+.bg-grid-mesh {
+  background-image: 
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.bg-dot-mesh {
+  background-image: radial-gradient(var(--border-strong) 1.2px, transparent 1.2px);
+  background-size: 28px 28px;
 }

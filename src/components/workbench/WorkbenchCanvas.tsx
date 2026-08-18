@@ -480,10 +480,12 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
     window.addEventListener("resize", handleResize);
 
     // 8. Render Animation Loop
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
+    let isIntersecting = false;
     const clock = new THREE.Clock();
 
     const animate = () => {
+      if (!isIntersecting) return;
       animationFrameId = requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
 
@@ -837,10 +839,34 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       renderer.render(scene, camera);
     };
 
-    animate();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isIntersecting = entry.isIntersecting;
+        if (isIntersecting) {
+          if (!animationFrameId) {
+            clock.start();
+            animate();
+          }
+        } else {
+          if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+            clock.stop();
+          }
+        }
+      },
+      { threshold: 0.01 }
+    );
+
+    if (container) {
+      observer.observe(container);
+    }
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       container.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);

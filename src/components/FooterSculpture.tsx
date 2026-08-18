@@ -77,9 +77,9 @@ export default function FooterSculpture() {
 
     const meshColorVal = isDark ? 0x09090b : 0xf4f4f5;
     const lineColorVal = isDark ? 0xffffff : 0x18181b;
-    const particleColorVal = isDark ? 0xc084fc : 0x9333ea;
-    const ringColorVal = isDark ? 0x71717a : 0xa1a1aa;
-    const accentColorVal = isDark ? 0xc084fc : 0x9333ea;
+    const particleColorVal = 0x9333ea;
+    const ringColorVal = 0x9333ea;
+    const accentColorVal = 0x9333ea;
 
     // --- Scene Setup ---
     const scene = new THREE.Scene();

@@ -515,7 +515,7 @@ export function createSmartphoneTexture(): THREE.CanvasTexture {
   drawOrb(130, 220, 250, "rgba(99, 102, 241, 0.85)", "rgba(99, 102, 241, 0)"); // Electric Indigo top-left
   drawOrb(400, 360, 240, "rgba(236, 72, 153, 0.80)", "rgba(236, 72, 153, 0)"); // Vibrant Pink mid-right
   drawOrb(180, 780, 280, "rgba(14, 165, 233, 0.70)", "rgba(14, 165, 233, 0)"); // Cyan bottom
-  drawOrb(360, 160, 200, "rgba(168, 85, 247, 0.80)", "rgba(168, 85, 247, 0)"); // Purple top-right
+  drawOrb(360, 160, 200, "rgba(196, 90, 60, 0.80)", "rgba(196, 90, 60, 0)"); // Terracotta top-right
 
   // 2. Dynamic Island Notch at top center
   ctx.fillStyle = "#000000";
@@ -1511,7 +1511,7 @@ export function createPhotostripTexture1(): THREE.CanvasTexture {
   ctx.fillStyle = g4;
   ctx.fillRect(frameX, y4, frameW, frameH);
 
-  const confettiColors = ["#f43f5e", "#fbbf24", "#34d399", "#a855f7", "#ffffff"];
+  const confettiColors = ["#f43f5e", "#fbbf24", "#34d399", "#9333ea", "#ffffff"];
   for (let i = 0; i < 24; i++) {
     ctx.fillStyle = confettiColors[i % confettiColors.length];
     const cx = frameX + 15 + (i * 37) % (frameW - 30);

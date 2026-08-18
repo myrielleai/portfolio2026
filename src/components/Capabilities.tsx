@@ -119,9 +119,9 @@ export default function Capabilities() {
   return (
     <section
       id="capabilities"
-      className="w-full py-24 lg:py-32 border-b border-[var(--border)] bg-[var(--surface)] transition-colors duration-300"
+      className="w-full py-24 lg:py-32 bg-[var(--surface)] transition-colors duration-300 relative overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 pb-8 border-b border-[var(--border)] gap-6">
@@ -187,6 +187,9 @@ export default function Capabilities() {
         </div>
 
       </div>
+
+      {/* Seamless gradient fade transition into Footer */}
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-[var(--surface)]/40 to-[var(--bg)] pointer-events-none z-0" />
     </section>
   );
 }

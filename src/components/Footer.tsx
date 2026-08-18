@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { portfolioData } from "../data/portfolioData";
-import FooterSculpture from "./FooterSculpture";
+import CreationAdamFooterBg from "./CreationAdamFooterBg";
 import { scrollToSection } from "../utils/scrollTo";
 
 const WORDS = ["build", "create", "craft", "design", "make"];
@@ -10,6 +10,7 @@ export default function Footer() {
   const { name, email, linkedinUrl, instagramUrl } = portfolioData;
   const [time, setTime] = useState("");
   const [wordIndex, setWordIndex] = useState(0);
+  const wordRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -41,20 +42,20 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer id="contact" className="w-full bg-[var(--bg)] pt-32 pb-2 px-8 lg:px-16 reveal flex flex-col justify-end transition-colors duration-300 border-t border-[var(--border)]">
+    <footer id="contact" className="w-full bg-[var(--bg)] pt-32 pb-2 px-8 lg:px-16 reveal flex flex-col justify-end transition-colors duration-300 relative overflow-hidden">
+      
+      {/* Cinematic Creation of Adam Parallax Fresco Background */}
+      <CreationAdamFooterBg targetRef={wordRef} wordIndex={wordIndex} />
 
-      {/* Footer Main Grid: 3D model on the left, headline & navigation on the right */}
+
+      {/* Footer Main Grid: headline & navigation on the right */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch relative z-10 w-full mb-16">
         
-        {/* Left Column: Interactive 3D Sculpture (whitespace on md/lg, visible on all screens now) */}
-        <div className="col-span-12 md:col-span-5 h-[380px] md:h-auto min-h-[340px] relative flex flex-col">
-          <div className="h-[280px] md:h-[calc(100%-6rem)] w-full relative mt-16 md:mt-24">
-            <FooterSculpture />
-          </div>
-        </div>
+        {/* Left Column Spacer: Keeps right column content aligned where it is */}
+        <div className="hidden md:block md:col-span-5" />
 
         {/* Right Column: Headline & Directory */}
-        <div className="col-span-12 md:col-span-7 flex flex-col justify-between">
+        <div className="col-span-12 md:col-span-7 flex flex-col justify-between -translate-x-[20px]">
           
           {/* Large Top Headline */}
           <div className="mb-8 md:mb-12">
@@ -63,9 +64,9 @@ export default function Footer() {
             <br />
             <br />
             <br />
-            <h2 className="text-[var(--heading)] font-switzer text-[36px] sm:text-[44px] tracking-[-0.03em] leading-[1.2]">
+            <h2 className="text-[var(--heading)] font-switzer text-[44px] sm:text-[56px] tracking-[-0.03em] leading-[1.2]">
               Let's{" "}
-              <span className="relative inline-block overflow-hidden h-[1.1em] align-bottom min-w-[3.5em]">
+              <span ref={wordRef} className="relative inline-block overflow-hidden h-[1.1em] align-bottom min-w-[3.5em]">
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={WORDS[wordIndex]}
@@ -90,7 +91,7 @@ export default function Footer() {
 
             {/* Column 1: Navigation */}
             <div className="col-span-12 sm:col-span-3 space-y-2">
-              <span className="block font-mono text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
+              <span className="block font-mono text-[12px] text-[var(--text-muted)] tracking-wider uppercase">
                 Navigation
               </span>
               <div className="space-y-1">
@@ -100,7 +101,7 @@ export default function Footer() {
                     e.preventDefault();
                     scrollToSection("showcase");
                   }}
-                  className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Showcase
                 </a>
@@ -110,7 +111,7 @@ export default function Footer() {
                     e.preventDefault();
                     scrollToSection("projects");
                   }}
-                  className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Selected Work
                 </a>
@@ -120,7 +121,7 @@ export default function Footer() {
                     e.preventDefault();
                     scrollToSection("capabilities");
                   }}
-                  className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Capabilities
                 </a>
@@ -129,7 +130,7 @@ export default function Footer() {
 
             {/* Column 2: Socials */}
             <div className="col-span-12 sm:col-span-3 space-y-2">
-              <span className="block font-mono text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
+              <span className="block font-mono text-[12px] text-[var(--text-muted)] tracking-wider uppercase">
                 Socials
               </span>
               <div className="space-y-1">
@@ -137,7 +138,7 @@ export default function Footer() {
                   href={instagramUrl || "https://instagram.com"}
                   target="_blank"
                   rel="noreferrer"
-                  className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Instagram
                 </a>
@@ -145,7 +146,7 @@ export default function Footer() {
                   href={linkedinUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   LinkedIn
                 </a>
@@ -154,12 +155,12 @@ export default function Footer() {
 
             {/* Column 3: Contact */}
             <div className="col-span-12 sm:col-span-6 space-y-2">
-              <span className="block font-mono text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
+              <span className="block font-mono text-[12px] text-[var(--text-muted)] tracking-wider uppercase">
                 Contact
               </span>
               <a
                 href={`mailto:${email}`}
-                className="block text-[var(--heading)] font-switzer text-base sm:text-lg font-semibold hover:text-[var(--accent)] transition-colors break-all"
+                className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors break-all"
               >
                 {email}
               </a>
@@ -172,44 +173,86 @@ export default function Footer() {
       </div>
 
       {/* 3. Massive decorative brand name */}
-      <div className="w-full overflow-hidden relative z-10">
-        <a
+      <div className="w-full relative z-20 py-2">
+        <motion.a
           href="#"
           onClick={(e) => {
             e.preventDefault();
             scrollToSection("");
           }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: false, amount: 0.2 }}
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.045,
+                delayChildren: 0.08,
+              },
+            },
+          }}
           className="block text-[16vw] sm:text-[18vw] lg:text-[21vw] font-display font-bold text-[var(--heading)] hover:text-[var(--accent)] text-right leading-[0.75] tracking-tight opacity-90 transition-colors duration-300 cursor-pointer select-none"
         >
-          {name.toLowerCase()}
-        </a>
+          {name.toLowerCase().split("").map((char, index) => {
+            const isY = char === "y";
+            return (
+              <span
+                key={index}
+                className={`inline-block ${
+                  isY ? "overflow-visible pb-24 -mb-24" : "overflow-hidden pb-4 -mb-4"
+                } pt-4 -mt-4`}
+              >
+                <motion.span
+                  className="inline-block"
+                  variants={{
+                    hidden: { y: "115%", opacity: 0, rotate: 3 },
+                    visible: {
+                      y: "0%",
+                      opacity: 1,
+                      rotate: 0,
+                      transition: {
+                        duration: 0.85,
+                        ease: [0.16, 1, 0.3, 1],
+                      },
+                    },
+                  }}
+                >
+                  <span className={isY ? "inline-block translate-y-[11px] relative z-30" : ""}>
+                    {char}
+                  </span>
+                </motion.span>
+              </span>
+            );
+          })}
+        </motion.a>
       </div>
 
       {/* 4. Sub-Footer */}
       <div className="border-t border-[var(--border)] pt-8 pb-2 grid grid-cols-1 md:grid-cols-12 gap-6 items-start relative z-10 bg-transparent">
         <div className="hidden md:block md:col-span-5" />
 
-        <div className="md:col-span-7 grid grid-cols-12 gap-6">
+        <div className="md:col-span-7 grid grid-cols-12 gap-6 translate-x-[50px]">
 
           <div className="col-span-12 sm:col-span-3 space-y-0.5">
-            <div className="text-[9px] text-[var(--text-muted)] font-mono tracking-wider uppercase">
+            <div className="text-[10px] text-[var(--text-muted)] font-mono tracking-wider uppercase">
               © 2026 // {name.toUpperCase()}
             </div>
-            <div className="text-[9px] text-[var(--text-muted)]/70 font-mono tracking-wider uppercase">
+            <div className="text-[10px] text-[var(--text-muted)]/70 font-mono tracking-wider uppercase">
               ALL RIGHTS RESERVED
             </div>
           </div>
 
           <div className="col-span-12 sm:col-span-3 space-y-0.5">
-            <div className="text-[9px] text-[var(--text-muted)] font-mono tracking-wider uppercase">
+            <div className="text-[10px] text-[var(--text-muted)] font-mono tracking-wider uppercase">
               MAKATI CITY, PH
             </div>
-            <div className="text-[9px] text-[var(--heading)] font-mono tracking-wider uppercase">
+            <div className="text-[10px] text-[var(--heading)] font-mono tracking-wider uppercase">
               {time}
             </div>
           </div>
 
-          <div className="col-span-12 sm:col-span-6 text-left space-y-0.5 font-mono text-[9px] text-[var(--text-muted)] tracking-tight leading-relaxed">
+          <div className="col-span-12 sm:col-span-6 text-left space-y-0.5 font-mono text-[10px] text-[var(--text-muted)] tracking-tight leading-relaxed">
             <div>IT'S A LEAP OF FAITH /////////</div>
           </div>
 
