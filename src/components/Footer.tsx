@@ -42,14 +42,14 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer id="contact" className="w-full bg-[var(--bg)] pt-32 pb-2 px-8 lg:px-16 reveal flex flex-col justify-end transition-colors duration-300 relative overflow-hidden">
+    <footer id="contact" className="w-full bg-[var(--bg)] pt-20 lg:pt-28 pb-2 px-8 lg:px-16 flex flex-col justify-end transition-colors duration-300 relative overflow-hidden">
       
       {/* Cinematic Creation of Adam Parallax Fresco Background */}
       <CreationAdamFooterBg targetRef={wordRef} wordIndex={wordIndex} />
 
 
       {/* Footer Main Grid: headline & navigation on the right */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch relative z-10 w-full mb-16">
+      <div className="reveal grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch relative z-10 w-full mb-16">
         
         {/* Left Column Spacer: Keeps right column content aligned where it is */}
         <div className="hidden md:block md:col-span-5" />
@@ -59,11 +59,7 @@ export default function Footer() {
           
           {/* Large Top Headline */}
           <div className="mb-8 md:mb-12">
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
+
             <h2 className="text-[var(--heading)] font-switzer text-[44px] sm:text-[56px] tracking-[-0.03em] leading-[1.2]">
               Let's{" "}
               <span ref={wordRef} className="relative inline-block overflow-hidden h-[1.1em] align-bottom min-w-[3.5em]">

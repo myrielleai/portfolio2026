@@ -24,7 +24,6 @@ export default function CreationAdamFooterBg({
   // Scroll tracking (0 to 1) via Ref (avoids React re-render state churn on every scroll pixel)
   const scrollProgressRef = useRef(0.5);
   const isVisibleRef = useRef(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   // Target word coordinates relative to footer container (%)
   const [targetCoords, setTargetCoords] = useState<{ x: number; y: number }>({ x: 62, y: 28 });
@@ -95,16 +94,13 @@ export default function CreationAdamFooterBg({
       };
     };
 
-    const handleMouseEnter = () => setIsHovered(true);
     const handleMouseLeave = () => {
-      setIsHovered(false);
       targetMouse.current = { x: 0, y: 0 };
     };
 
     const container = containerRef.current;
     if (container) {
       container.addEventListener("mousemove", handleMouseMove, { passive: true });
-      container.addEventListener("mouseenter", handleMouseEnter);
       container.addEventListener("mouseleave", handleMouseLeave);
     }
 
@@ -182,7 +178,6 @@ export default function CreationAdamFooterBg({
       }
       if (container) {
         container.removeEventListener("mousemove", handleMouseMove);
-        container.removeEventListener("mouseenter", handleMouseEnter);
         container.removeEventListener("mouseleave", handleMouseLeave);
       }
     };
@@ -193,50 +188,24 @@ export default function CreationAdamFooterBg({
       ref={containerRef}
       className="absolute inset-0 w-full h-full overflow-hidden pointer-events-auto select-none bg-[var(--bg)] transition-colors duration-300"
     >
-      {/* Plane 1 — Distant: base fresco image */}
+      {/* Seamless Top Fade Overlay — smoothly blends section above into footer background */}
+      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[var(--bg)] via-[var(--bg)]/70 to-transparent pointer-events-none z-10" />
+
+      {/* Plane 1 — Primary Creation of Adam background image */}
       <div
         ref={plane1Ref}
-        className="absolute w-[115%] h-[115%] -top-[7.5%] -left-[7.5%]"
+        className="absolute w-[110%] h-[110%] -top-[5%] -left-[5%]"
         style={{
-          backgroundImage: `url('/creation-adam-bg.webp')`,
+          backgroundImage: `url('/creation-adam-bg.png')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          opacity: 0.4,
-          filter: "brightness(1.0) contrast(1.05) saturate(0.85)",
+          backgroundRepeat: "no-repeat",
+          opacity: 0.5,
           willChange: "transform",
         }}
       />
 
-      {/* Plane 2 — Mid-ground: depth layer overlay */}
-      <div
-        ref={plane2Ref}
-        className="absolute w-[120%] h-[120%] -top-[10%] -left-[10%]"
-        style={{
-          backgroundImage: `url('/creation-adam-bg.webp')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center 40%",
-          opacity: 0.18,
-          mixBlendMode: "screen",
-          willChange: "transform",
-        }}
-      />
-
-      {/* Plane 3 — Foreground: atmospheric warm haze */}
-      <div
-        ref={plane3Ref}
-        className="absolute w-[130%] h-[130%] -top-[15%] -left-[15%]"
-        style={{
-          background:
-            "radial-gradient(ellipse 65% 60% at 55% 45%, rgba(196,90,60,0.18) 0%, rgba(120,60,160,0.08) 50%, transparent 80%)",
-          opacity: 0.85,
-          willChange: "transform",
-        }}
-      />
-
-      {/* Subtle blueprint grid overlay */}
-      <div className="absolute inset-0 bg-lab-grid opacity-15 mix-blend-multiply pointer-events-none" />
-
-      {/* Focal Target Glow on Violet Word */}
+      {/* Subtle Focal Target Glow on Dynamic Verb Word */}
       <div
         className="absolute pointer-events-none transition-all duration-500 rounded-full"
         style={{
@@ -245,28 +214,12 @@ export default function CreationAdamFooterBg({
           transform: "translate(-50%, -50%)",
           width: pulse ? "180px" : "110px",
           height: pulse ? "180px" : "110px",
-          background: "radial-gradient(circle, rgba(196, 90, 60, 0.25) 0%, rgba(196, 90, 60, 0) 70%)",
-          opacity: pulse ? 1 : 0.6,
+          background: "radial-gradient(circle, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0) 70%)",
+          opacity: pulse ? 1 : 0.5,
         }}
       />
-
-      {/* 4. Technical Blueprint HUD Overlay */}
-      <div className="absolute top-6 left-8 z-20 font-mono text-[9px] text-[var(--text-muted)] tracking-widest pointer-events-none select-none uppercase opacity-80 hidden sm:block">
-        <div className="flex items-center gap-2 text-[var(--accent)] font-semibold mb-0.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-          <span>PARALLAX_FRESCO // CREATION_OF_ADAM</span>
-        </div>
-        <div ref={posDeltaRef}>POS_DELTA: [+0, +0]</div>
-        <div>TARGET_WORD: [{Math.round(targetCoords.x)}%, {Math.round(targetCoords.y)}%]</div>
-      </div>
-
-      <div className="absolute top-6 right-8 z-20 font-mono text-[9px] text-[var(--text-muted)] tracking-widest pointer-events-none select-none uppercase opacity-80 text-right hidden sm:block">
-        <div>MICHELANGELO // 1512</div>
-        <div>STATUS: {isHovered ? "PARALLAX_TRACKING" : "STANDBY_DRIFT"}</div>
-      </div>
-
-      {/* 5. Editorial Light Scrim Overlay for seamless top transition from Capabilities */}
-      <div className="absolute inset-x-0 top-0 h-72 sm:h-96 bg-gradient-to-b from-[var(--bg)] via-[var(--bg)]/75 to-transparent pointer-events-none z-20" />
     </div>
   );
 }
+
+

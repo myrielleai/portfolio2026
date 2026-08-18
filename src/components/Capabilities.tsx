@@ -119,7 +119,7 @@ export default function Capabilities() {
   return (
     <section
       id="capabilities"
-      className="w-full py-24 lg:py-32 bg-[var(--surface)] transition-colors duration-300 relative overflow-hidden"
+      className="w-full pt-24 pb-20 lg:pt-32 lg:pb-24 bg-[var(--surface)] transition-colors duration-300 relative overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
 
@@ -189,7 +189,7 @@ export default function Capabilities() {
       </div>
 
       {/* Seamless gradient fade transition into Footer */}
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent via-[var(--surface)]/40 to-[var(--bg)] pointer-events-none z-0" />
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent via-[var(--surface)]/60 to-[var(--bg)] pointer-events-none z-10" />
     </section>
   );
 }
