@@ -127,10 +127,12 @@ export default function About() {
             {/* Right Column: Paragraph 2 */}
             <div className="reveal space-y-6">
               <p className="text-base sm:text-lg text-[var(--text)] leading-relaxed font-sans">
-                I also bring a background in architecture and design, which fundamentally shapes how I approach user interaction, and visual storytelling.              </p>
+                I also bring a background in architecture and design, which fundamentally shapes how I approach user interaction and visual storytelling.
+              </p>
 
               <p className="text-base sm:text-lg text-[var(--text)] leading-relaxed font-sans">
-                My focus right now is creating digital experiences that seamlessly merge intelligent systems with intentional, thoughtful design.              </p>
+                My focus right now is creating digital experiences that seamlessly merge intelligent systems with intentional, thoughtful design.
+              </p>
             </div>
 
           </div>

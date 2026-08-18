@@ -58,9 +58,9 @@ export default function Footer() {
         <div className="col-span-12 md:col-span-7 flex flex-col justify-between -translate-x-[20px]">
           
           {/* Large Top Headline */}
-          <div className="mb-8 md:mb-12">
+          <div className="mb-8 md:mb-12 translate-y-[10px]">
 
-            <h2 className="text-[var(--heading)] font-switzer text-[44px] sm:text-[56px] tracking-[-0.03em] leading-[1.2]">
+            <h2 className="text-[var(--heading)] font-switzer text-[36px] sm:text-[46px] tracking-[-0.03em] leading-[1.2]">
               Let's{" "}
               <span ref={wordRef} className="relative inline-block overflow-hidden h-[1.1em] align-bottom min-w-[3.5em]">
                 <AnimatePresence mode="wait">
@@ -87,7 +87,7 @@ export default function Footer() {
 
             {/* Column 1: Navigation */}
             <div className="col-span-12 sm:col-span-3 space-y-2">
-              <span className="block font-mono text-[12px] text-[var(--text-muted)] tracking-wider uppercase">
+              <span className="block font-mono text-[11px] text-[var(--text-muted)] tracking-wider uppercase">
                 Navigation
               </span>
               <div className="space-y-1">
@@ -97,7 +97,7 @@ export default function Footer() {
                     e.preventDefault();
                     scrollToSection("showcase");
                   }}
-                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-lg sm:text-xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Showcase
                 </a>
@@ -107,7 +107,7 @@ export default function Footer() {
                     e.preventDefault();
                     scrollToSection("projects");
                   }}
-                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-lg sm:text-xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Selected Work
                 </a>
@@ -117,7 +117,7 @@ export default function Footer() {
                     e.preventDefault();
                     scrollToSection("capabilities");
                   }}
-                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-lg sm:text-xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Capabilities
                 </a>
@@ -126,7 +126,7 @@ export default function Footer() {
 
             {/* Column 2: Socials */}
             <div className="col-span-12 sm:col-span-3 space-y-2">
-              <span className="block font-mono text-[12px] text-[var(--text-muted)] tracking-wider uppercase">
+              <span className="block font-mono text-[11px] text-[var(--text-muted)] tracking-wider uppercase">
                 Socials
               </span>
               <div className="space-y-1">
@@ -134,7 +134,7 @@ export default function Footer() {
                   href={instagramUrl || "https://instagram.com"}
                   target="_blank"
                   rel="noreferrer"
-                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-lg sm:text-xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   Instagram
                 </a>
@@ -142,7 +142,7 @@ export default function Footer() {
                   href={linkedinUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors"
+                  className="block text-[var(--heading)] font-switzer text-lg sm:text-xl font-semibold hover:text-[var(--accent)] transition-colors"
                 >
                   LinkedIn
                 </a>
@@ -151,12 +151,12 @@ export default function Footer() {
 
             {/* Column 3: Contact */}
             <div className="col-span-12 sm:col-span-6 space-y-2">
-              <span className="block font-mono text-[12px] text-[var(--text-muted)] tracking-wider uppercase">
+              <span className="block font-mono text-[11px] text-[var(--text-muted)] tracking-wider uppercase">
                 Contact
               </span>
               <a
                 href={`mailto:${email}`}
-                className="block text-[var(--heading)] font-switzer text-xl sm:text-2xl font-semibold hover:text-[var(--accent)] transition-colors break-all"
+                className="block text-[var(--heading)] font-switzer text-lg sm:text-xl font-semibold hover:text-[var(--accent)] transition-colors break-all"
               >
                 {email}
               </a>
