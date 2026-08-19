@@ -7,7 +7,7 @@ interface SketchbookBackgroundProps {
 export default function SketchbookBackground({ onEggFound }: SketchbookBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [eggDiscovered, setEggDiscovered] = useState(false);
+  const [, setEggDiscovered] = useState(false);
   const eggFoundRef = useRef(false);
 
   useEffect(() => {
