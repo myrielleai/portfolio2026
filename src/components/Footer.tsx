@@ -4,7 +4,7 @@ import { portfolioData } from "../data/portfolioData";
 import CreationAdamFooterBg from "./CreationAdamFooterBg";
 import { scrollToSection } from "../utils/scrollTo";
 
-const WORDS = ["build", "create", "craft", "design", "make"];
+const WORDS = ["create", "build", "craft", "design", "make"];
 
 export default function Footer() {
   const { name, email, linkedinUrl, instagramUrl } = portfolioData;
@@ -49,7 +49,13 @@ export default function Footer() {
 
 
       {/* Footer Main Grid: headline & navigation on the right */}
-      <div className="reveal grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch relative z-10 w-full mb-16">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch relative z-10 w-full mb-16"
+      >
         
         {/* Left Column Spacer: Keeps right column content aligned where it is */}
         <div className="hidden md:block md:col-span-5" />
@@ -166,7 +172,7 @@ export default function Footer() {
 
         </div>
 
-      </div>
+      </motion.div>
 
       {/* 3. Massive decorative brand name */}
       <div className="w-full relative z-20 py-2">

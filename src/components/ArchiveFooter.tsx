@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { MouseEvent } from "react";
 import { motion } from "framer-motion";
-import FlyingStickers from "./FlyingStickers";
+import SketchbookBackground from "./SketchbookBackground";
 
 interface Particle {
   id: number;
@@ -24,7 +24,7 @@ export default function ArchiveFooter() {
   // Mouse position for local interactive radial spotlight
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
-  // Track mouse movement inside footer for spotlight effect
+  // Track mouse movement inside footer
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!footerRef.current) return;
     const rect = footerRef.current.getBoundingClientRect();
@@ -80,25 +80,21 @@ export default function ArchiveFooter() {
   const line2 = "together!".split("");
 
   return (
-    <footer
+    <section
       ref={footerRef}
       onMouseMove={handleMouseMove}
-      className="w-full min-h-screen border-t border-[var(--border)] px-4 sm:px-8 lg:px-16 py-8 sm:py-12 relative z-10 overflow-hidden transition-colors duration-300 select-none flex flex-col justify-center items-center"
-      style={{ backgroundColor: "var(--bg)" }}
+      className="w-full min-h-screen border-t border-zinc-200 px-4 sm:px-8 lg:px-16 py-8 sm:py-12 relative z-10 overflow-hidden transition-colors duration-300 select-none flex flex-col justify-center items-center bg-white"
     >
-      {/* Flying Floating Stickers Layer inside Footer */}
-      <FlyingStickers />
+      {/* Interactive Spider-Verse / Comic Sketchbook Background Layer */}
+      <SketchbookBackground />
 
-      {/* Dynamic Interactive Radial Spotlight Background */}
+      {/* Subtle Radial Glow Overlay on Cursor */}
       <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-60 dark:opacity-40"
+        className="absolute inset-0 pointer-events-none transition-opacity duration-300 opacity-40"
         style={{
-          background: `radial-gradient(600px circle at ${mousePos.x}% ${mousePos.y}%, rgba(147, 51, 234, 0.12), transparent 70%)`,
+          background: `radial-gradient(500px circle at ${mousePos.x}% ${mousePos.y}%, rgba(147, 51, 234, 0.08), transparent 70%)`,
         }}
       />
-
-      {/* Decorative Grid Lines */}
-      <div className="absolute inset-0 bg-dot-mesh opacity-20 pointer-events-none" />
 
       {/* Interactive Floating Particles Layer */}
       <div className="absolute inset-0 pointer-events-none z-30">
@@ -119,14 +115,14 @@ export default function ArchiveFooter() {
         ))}
       </div>
 
-      <div className="max-w-7xl w-full mx-auto flex flex-col items-center justify-center relative z-20 py-4 sm:py-8">
+      <div className="max-w-7xl w-full mx-auto flex flex-col items-center justify-center relative z-20 py-4 sm:py-8 pointer-events-none">
         {/* Pre-headline Text */}
         <motion.p
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="font-mono text-sm sm:text-base md:text-lg font-bold tracking-[0.25em] text-[var(--accent)] uppercase mb-4 sm:mb-6 text-center select-none relative -top-[20px]"
+          className="font-mono text-sm sm:text-base md:text-lg font-bold tracking-[0.25em] text-purple-700 uppercase mb-4 sm:mb-6 text-center select-none relative -top-[10px] pointer-events-auto"
         >
           Got something exciting in mind?
         </motion.p>
@@ -134,10 +130,10 @@ export default function ArchiveFooter() {
         {/* Massive Interactive Centered Headline */}
         <div
           onClick={handleTextClick}
-          className="text-center cursor-pointer group/headline py-2 flex flex-col items-center justify-center"
+          className="text-center cursor-pointer group/headline py-2 flex flex-col items-center justify-center pointer-events-auto"
         >
           {/* Line 1: Let's work */}
-          <div className="flex flex-wrap items-center justify-center tracking-tight leading-[0.9] font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[110px] xl:text-[130px] text-[var(--heading)]">
+          <div className="flex flex-wrap items-center justify-center tracking-tight leading-[0.9] font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[110px] xl:text-[130px] text-zinc-900">
             {line1.map((char, index) => (
               <motion.span
                 key={index}
@@ -145,7 +141,7 @@ export default function ArchiveFooter() {
                   y: -14,
                   scale: 1.18,
                   rotate: (index % 2 === 0 ? 1 : -1) * 6,
-                  color: "var(--accent)",
+                  color: "#9333ea",
                 }}
                 transition={{ type: "spring", stiffness: 450, damping: 14 }}
                 className={`inline-block transition-colors duration-200 ${
@@ -158,7 +154,7 @@ export default function ArchiveFooter() {
           </div>
 
           {/* Line 2: together! */}
-          <div className="flex flex-wrap items-center justify-center tracking-tight leading-[0.9] font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[110px] xl:text-[130px] text-[var(--accent)] group-hover/headline:text-[var(--heading)] transition-colors duration-500">
+          <div className="flex flex-wrap items-center justify-center tracking-tight leading-[0.9] font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[110px] xl:text-[130px] text-purple-700 group-hover/headline:text-zinc-900 transition-colors duration-500">
             {line2.map((char, index) => (
               <motion.span
                 key={index}
@@ -177,15 +173,8 @@ export default function ArchiveFooter() {
           </div>
         </div>
       </div>
-
-      {/* Floating Stickers Hint Badge */}
-      <div className="absolute bottom-6 right-8 pointer-events-none z-30 opacity-80 hidden sm:block">
-        <span className="font-mono text-[10px] tracking-widest text-[var(--accent)] font-bold uppercase bg-[var(--surface)]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[var(--border)] shadow-md inline-flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          FLYING STICKERS ARCHIVE • DRAG OR CLICK ANYWHERE!
-        </span>
-      </div>
-    </footer>
+    </section>
   );
 }
+
 

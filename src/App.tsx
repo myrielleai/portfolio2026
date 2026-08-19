@@ -53,8 +53,8 @@ export default function App() {
   }, [currentPath]);
 
   useEffect(() => {
-    // Only run smooth scroll and triggers on the main homepage when loading is complete
-    if (!loadingComplete || currentPath === "/lab" || currentPath === "/works") return;
+    const normalizedPath = currentPath.replace(/\/$/, "") || "/";
+    if (!loadingComplete || normalizedPath === "/lab") return;
 
     // Register GSAP ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
@@ -119,8 +119,9 @@ export default function App() {
     };
   }, [loadingComplete, currentPath]);
 
-  const isLabView = currentPath === "/lab";
-  const isWorksView = currentPath === "/works";
+  const normalizedPath = currentPath.replace(/\/$/, "") || "/";
+  const isLabView = normalizedPath === "/lab";
+  const isWorksView = normalizedPath === "/works";
 
   return (
     <div
