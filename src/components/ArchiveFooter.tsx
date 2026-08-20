@@ -20,17 +20,15 @@ const ACCENT_COLORS = ["#9333ea", "#f59e0b", "#ec4899", "#3b82f6", "#10b981"];
 export default function ArchiveFooter() {
   const [particles, setParticles] = useState<Particle[]>([]);
   const footerRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
 
-  // Mouse position for local interactive radial spotlight
-  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
-
-  // Track mouse movement inside footer
+  // Track mouse movement inside footer with direct DOM manipulation (no React re-render churn)
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!footerRef.current) return;
+    if (!footerRef.current || !glowRef.current) return;
     const rect = footerRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setMousePos({ x, y });
+    glowRef.current.style.background = `radial-gradient(500px circle at ${x}% ${y}%, rgba(147, 51, 234, 0.08), transparent 70%)`;
   };
 
   // Spawn particle sparkles on text click
@@ -58,23 +56,32 @@ export default function ArchiveFooter() {
     setParticles((prev) => [...prev.slice(-20), ...newParticles]);
   };
 
-  // Particle animation loop
+  // Particle animation loop using requestAnimationFrame
   useEffect(() => {
     if (particles.length === 0) return;
-    const timer = setInterval(() => {
-      setParticles((prev) =>
-        prev
+    let animId: number;
+
+    const updateParticles = () => {
+      setParticles((prev) => {
+        const next = prev
           .map((p) => ({
             ...p,
             x: p.x + p.vx,
-            y: p.y + p.vy + 0.3, // gravity
+            y: p.y + p.vy + 0.3,
             scale: p.scale * 0.92,
           }))
-          .filter((p) => p.scale > 0.15)
-      );
-    }, 30);
-    return () => clearInterval(timer);
-  }, [particles]);
+          .filter((p) => p.scale > 0.15);
+
+        if (next.length > 0) {
+          animId = requestAnimationFrame(updateParticles);
+        }
+        return next;
+      });
+    };
+
+    animId = requestAnimationFrame(updateParticles);
+    return () => cancelAnimationFrame(animId);
+  }, [particles.length > 0]);
 
   const line1 = "Let's work".split("");
   const line2 = "together!".split("");
@@ -88,11 +95,12 @@ export default function ArchiveFooter() {
       {/* Interactive Spider-Verse / Comic Sketchbook Background Layer */}
       <SketchbookBackground />
 
-      {/* Subtle Radial Glow Overlay on Cursor */}
+      {/* Subtle Radial Glow Overlay on Cursor (Direct DOM updated) */}
       <div
+        ref={glowRef}
         className="absolute inset-0 pointer-events-none transition-opacity duration-300 opacity-40"
         style={{
-          background: `radial-gradient(500px circle at ${mousePos.x}% ${mousePos.y}%, rgba(147, 51, 234, 0.08), transparent 70%)`,
+          background: `radial-gradient(500px circle at 50% 50%, rgba(147, 51, 234, 0.08), transparent 70%)`,
         }}
       />
 
@@ -176,5 +184,6 @@ export default function ArchiveFooter() {
     </section>
   );
 }
+
 
 

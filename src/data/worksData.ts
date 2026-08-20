@@ -27,7 +27,7 @@ export const worksCategories: WorkCategory[] = [
     index: "01",
     title: "Websites",
     description: "Production web applications, cloud backends, logistics engines, and interactive web platforms.",
-    countLabel: "4 Projects",
+    countLabel: "7 Projects",
     items: [
       {
         id: "web-1",
@@ -76,6 +76,42 @@ export const worksCategories: WorkCategory[] = [
         image: "/project4.webp",
         demoUrl: "https://endlezz-market.vercel.app/",
         githubUrl: "https://github.com/myrielleai/EndlezzMarket",
+        date: "2025",
+        category: "websites"
+      },
+      {
+        id: "web-5",
+        title: "Neural Studio & AI Design Lab",
+        subtitle: "Autonomous AI & Intelligent Canvas Suite",
+        description: "An intelligent generative workspace combining agentic workflow orchestration, real-time node graphs, and low-latency canvas rendering.",
+        tags: ["React", "TypeScript", "AI Logic", "Tailwind CSS", "Canvas API"],
+        image: "/about.webp",
+        demoUrl: "https://github.com/myrielleai",
+        githubUrl: "https://github.com/myrielleai",
+        date: "2026",
+        category: "websites"
+      },
+      {
+        id: "web-6",
+        title: "Creation of Adam Digital Archive",
+        subtitle: "Interactive Masterpiece & Shader Canvas",
+        description: "High-resolution dynamic WebGL canvas renderer showcasing classical art digital preservation, fragment shaders, and depth map parallax.",
+        tags: ["WebGL", "Three.js", "GLSL Shaders", "TypeScript", "Framer Motion"],
+        image: "/creation-adam-bg.webp",
+        demoUrl: "https://github.com/myrielleai",
+        githubUrl: "https://github.com/myrielleai",
+        date: "2026",
+        category: "websites"
+      },
+      {
+        id: "web-7",
+        title: "HyperScale Logistics & Grid Dashboard",
+        subtitle: "High-Velocity Analytics & Operations Portal",
+        description: "Enterprise logistics and telemetry dashboard supporting real-time data streaming, interactive data visualization, and responsive grid monitoring.",
+        tags: ["React", "D3.js", "TypeScript", "PostgreSQL", "Tailwind CSS"],
+        image: "/project1.webp",
+        demoUrl: "https://github.com/myrielleai",
+        githubUrl: "https://github.com/myrielleai",
         date: "2025",
         category: "websites"
       }

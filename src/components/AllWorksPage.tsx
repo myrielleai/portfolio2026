@@ -1,9 +1,8 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { ArrowLeft, Sparkles, ExternalLink, Box, LayoutGrid } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
-import { GithubIcon } from "./Icons";
-import { worksCategories, type WorkCategory, type WorkItem } from "../data/worksData";
+import { worksCategories, type WorkCategory } from "../data/worksData";
 import ArchiveFooter from "./ArchiveFooter";
 import Footer from "./Footer";
 import UnseenProjectsShowcase from "./UnseenProjectsShowcase";
@@ -39,20 +38,12 @@ function WorksFooterSection() {
 export default function AllWorksPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>("websites");
   const [fullscreenCategoryId, setFullscreenCategoryId] = useState<string | null>(null);
-  const [categoryViewModes, setCategoryViewModes] = useState<Record<string, "3d" | "grid">>({});
 
   const handleBackToHome = () => {
     window.history.pushState({}, "", "/");
   };
 
   const activeFullscreenCategory = worksCategories.find((cat) => cat.id === fullscreenCategoryId);
-
-  const toggleCategoryViewMode = (catId: string, mode: "3d" | "grid") => {
-    setCategoryViewModes((prev) => ({
-      ...prev,
-      [catId]: mode,
-    }));
-  };
 
   return (
     <div
@@ -73,7 +64,7 @@ export default function AllWorksPage() {
 
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-12 pt-4 pointer-events-none">
-        <div className="max-w-7xl mx-auto rounded-2xl border border-zinc-200 bg-white/85 backdrop-blur-xl shadow-sm transition-all duration-300 pointer-events-auto overflow-hidden">
+        <div className="max-w-7xl mx-auto rounded-2xl border border-zinc-200 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300 pointer-events-auto overflow-hidden">
           <div className="px-6 lg:px-8 h-16 flex items-center justify-between">
             
             {/* Left: Back to Home & Title */}
@@ -90,15 +81,8 @@ export default function AllWorksPage() {
               </span>
             </div>
 
-            {/* Right: Fullscreen 3D Launcher & Theme Toggle */}
+            {/* Right: Theme Toggle */}
             <div className="flex items-center gap-3 sm:gap-4">
-              <button
-                onClick={() => setFullscreenCategoryId(worksCategories[0].id)}
-                className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-wider text-white bg-purple-600 hover:bg-purple-700 px-3.5 py-1.5 rounded-xl shadow-md transition-all duration-200"
-              >
-                <Box className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">FULLSCREEN UNSEEN 3D</span>
-              </button>
               <ThemeToggle />
             </div>
           </div>
@@ -134,12 +118,10 @@ export default function AllWorksPage() {
             const isSelected = selectedCategoryId === category.id;
             const isAnySelected = selectedCategoryId !== null;
             const isFaded = isAnySelected && !isSelected;
-            const currentViewMode = categoryViewModes[category.id] || "3d";
 
             return (
               <motion.div
                 key={category.id}
-                layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{
                   opacity: isFaded ? 0.45 : 1,
@@ -148,43 +130,6 @@ export default function AllWorksPage() {
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                 className="w-full relative z-30 py-2 bg-white"
               >
-                {/* View Controls Header Bar */}
-                <div className="flex items-center justify-end gap-2 mb-4 relative z-10">
-                  <div className="flex items-center gap-1 p-1 rounded-xl bg-zinc-100 border border-zinc-200">
-                    <button
-                      onClick={() => toggleCategoryViewMode(category.id, "3d")}
-                      className={`inline-flex items-center gap-1.5 font-mono text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
-                        currentViewMode === "3d"
-                          ? "bg-purple-600 text-white shadow-sm font-bold"
-                          : "text-zinc-600 hover:text-zinc-900"
-                      }`}
-                    >
-                      <Box className="w-3.5 h-3.5" />
-                      <span>3D UNSEEN</span>
-                    </button>
-                    <button
-                      onClick={() => toggleCategoryViewMode(category.id, "grid")}
-                      className={`inline-flex items-center gap-1.5 font-mono text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
-                        currentViewMode === "grid"
-                          ? "bg-purple-600 text-white shadow-sm font-bold"
-                          : "text-zinc-600 hover:text-zinc-900"
-                      }`}
-                    >
-                      <LayoutGrid className="w-3.5 h-3.5" />
-                      <span>GRID</span>
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => setFullscreenCategoryId(category.id)}
-                    className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-white bg-zinc-900 hover:bg-purple-600 px-3.5 py-2 rounded-xl transition-all shadow-sm"
-                    title="Expand Fullscreen 3D Scene"
-                  >
-                    <Box className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">FULLSCREEN</span>
-                  </button>
-                </div>
-
                 {/* Expanded Area */}
                 <AnimatePresence>
                   {isSelected && (
@@ -197,109 +142,17 @@ export default function AllWorksPage() {
                       onClick={(e) => e.stopPropagation()}
                     >
                       {/* Embedded Unseen Studio 3D Multi-Plane Scene */}
-                      {currentViewMode === "3d" && (
-                        <div className="mb-10">
-                          <UnseenProjectsShowcase
-                            category={category}
-                            categories={worksCategories}
-                            onSelectCategory={(id) => {
-                              setSelectedCategoryId(id);
-                              toggleCategoryViewMode(id, "3d");
-                            }}
-                            onClose={() => setSelectedCategoryId(null)}
-                            embedded={true}
-                            onToggleFullscreen={() => setFullscreenCategoryId(category.id)}
-                          />
-                        </div>
-                      )}
-
-                      {/* Wide Multi-Column Items Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
-                        {category.items.map((item: WorkItem, itemIdx: number) => (
-                          <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, y: 24 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, delay: itemIdx * 0.07 }}
-                            className="group/item rounded-2xl border border-zinc-200 bg-white hover:border-purple-500/60 p-5 sm:p-6 flex flex-col justify-between gap-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
-                          >
-                            {/* Card Top: Visual Thumbnail */}
-                            {item.image && (
-                              <div className="w-full aspect-[16/10] rounded-xl overflow-hidden border border-zinc-200 bg-zinc-50 relative group/img shadow-sm">
-                                <img
-                                  src={item.image}
-                                  alt={item.title}
-                                  className="w-full h-full object-cover object-top group-hover/item:scale-105 transition-transform duration-500"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 group-hover/item:opacity-20 transition-opacity duration-300" />
-                              </div>
-                            )}
-
-                            {/* Card Middle: Info */}
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="font-mono text-[10px] tracking-widest text-purple-700 font-bold uppercase">
-                                  {item.date || "2026"}
-                                </span>
-                                {item.featured && (
-                                  <span className="inline-flex items-center gap-1 font-mono text-[9px] tracking-wider px-2.5 py-0.5 rounded-full border border-amber-500/40 bg-amber-50 text-amber-700 uppercase font-bold">
-                                    <Sparkles className="w-2.5 h-2.5" /> FEATURED
-                                  </span>
-                                )}
-                              </div>
-
-                              <h3 className="font-display text-lg sm:text-xl font-bold text-zinc-900 tracking-tight group-hover/item:text-purple-600 transition-colors duration-200">
-                                {item.title}
-                              </h3>
-
-                              {item.subtitle && (
-                                <p className="font-mono text-xs text-purple-600 font-semibold">
-                                  {item.subtitle}
-                                </p>
-                              )}
-
-                              <p className="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed">
-                                {item.description}
-                              </p>
-                            </div>
-
-                            {/* Card Bottom: Actions */}
-                            <div className="pt-4 border-t border-zinc-100">
-                              {/* Action Buttons */}
-                              <div className="flex items-center gap-2.5">
-                                {item.demoUrl && (
-                                  <a
-                                    href={item.demoUrl}
-                                    target={item.demoUrl.startsWith("/") ? "_self" : "_blank"}
-                                    rel="noreferrer"
-                                    onClick={(e) => {
-                                      if (item.demoUrl?.startsWith("/")) {
-                                        e.preventDefault();
-                                        window.history.pushState({}, "", item.demoUrl);
-                                      }
-                                    }}
-                                    className="flex-1 inline-flex items-center justify-center gap-1.5 font-mono text-xs font-semibold text-zinc-900 hover:text-white hover:bg-purple-600 px-3 py-2 rounded-lg border border-zinc-200 hover:border-purple-600 bg-zinc-50 transition-all"
-                                  >
-                                    <span>DEMO / VIEW</span>
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                  </a>
-                                )}
-
-                                {item.githubUrl && (
-                                  <a
-                                    href={item.githubUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="inline-flex items-center justify-center gap-1.5 font-mono text-xs font-semibold text-zinc-600 hover:text-zinc-900 px-3 py-2 rounded-lg border border-zinc-200 hover:border-zinc-300 bg-zinc-50 transition-all"
-                                  >
-                                    <GithubIcon className="w-3.5 h-3.5" />
-                                    <span>CODE</span>
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
+                      <div className="mb-0">
+                        <UnseenProjectsShowcase
+                          category={category}
+                          categories={worksCategories}
+                          onSelectCategory={(id) => {
+                            setSelectedCategoryId(id);
+                          }}
+                          onClose={() => setSelectedCategoryId(null)}
+                          embedded={true}
+                          onToggleFullscreen={() => setFullscreenCategoryId(category.id)}
+                        />
                       </div>
                     </motion.div>
                   )}
