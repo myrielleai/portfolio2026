@@ -19,16 +19,52 @@ const ACCENT_COLORS = ["#9333ea", "#f59e0b", "#ec4899", "#3b82f6", "#10b981"];
 
 export default function ArchiveFooter() {
   const [particles, setParticles] = useState<Particle[]>([]);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isFullRevealed, setIsFullRevealed] = useState(false);
   const footerRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
+  const spotlightImgLayerRef = useRef<HTMLDivElement>(null);
+  const spotlightRingRef = useRef<HTMLDivElement>(null);
+
+  // Toggle full photo reveal on background click
+  const handleBackgroundClick = (e: MouseEvent<HTMLDivElement>) => {
+    // If user clicks on interactive buttons, don't trigger
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("a")) return;
+    setIsFullRevealed((prev) => !prev);
+  };
 
   // Track mouse movement inside footer with direct DOM manipulation (no React re-render churn)
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!footerRef.current || !glowRef.current) return;
+    if (!footerRef.current) return;
     const rect = footerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    glowRef.current.style.background = `radial-gradient(500px circle at ${x}% ${y}%, rgba(147, 51, 234, 0.08), transparent 70%)`;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const xPct = (x / rect.width) * 100;
+    const yPct = (y / rect.height) * 100;
+
+    // Direct DOM updates for smooth 60fps performance
+    if (glowRef.current) {
+      glowRef.current.style.background = `radial-gradient(500px circle at ${xPct}% ${yPct}%, rgba(147, 51, 234, 0.08), transparent 70%)`;
+    }
+
+    if (spotlightImgLayerRef.current) {
+      const maskStyle = `radial-gradient(300px circle at ${x}px ${y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0) 100%)`;
+      spotlightImgLayerRef.current.style.webkitMaskImage = maskStyle;
+      spotlightImgLayerRef.current.style.maskImage = maskStyle;
+    }
+
+    if (spotlightRingRef.current) {
+      spotlightRingRef.current.style.background = `radial-gradient(320px circle at ${x}px ${y}px, rgba(245, 158, 11, 0.16), rgba(147, 51, 234, 0.1) 50%, transparent 80%)`;
+    }
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
   };
 
   // Spawn particle sparkles on text click
@@ -89,9 +125,58 @@ export default function ArchiveFooter() {
   return (
     <section
       ref={footerRef}
+      onClick={handleBackgroundClick}
       onMouseMove={handleMouseMove}
-      className="w-full min-h-screen border-t border-zinc-200 px-4 sm:px-8 lg:px-16 py-8 sm:py-12 relative z-10 overflow-hidden transition-colors duration-300 select-none flex flex-col justify-center items-center bg-white"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="w-full min-h-screen border-t border-zinc-200 px-4 sm:px-8 lg:px-16 py-8 sm:py-12 relative z-10 overflow-hidden transition-colors duration-300 select-none flex flex-col justify-center items-center bg-white cursor-pointer"
     >
+      {/* Base Dimmed Background Drawing Image */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+        <img
+          src="/drawing.png"
+          alt="Works Archive Sketch Background"
+          className={`w-full h-full object-cover object-center transition-opacity duration-500 mix-blend-multiply filter contrast-100 brightness-95 ${
+            isFullRevealed ? "opacity-90 contrast-125 brightness-100" : "opacity-25"
+          }`}
+        />
+        {/* Soft paper vignette gradient overlay for readability & artistic depth */}
+        <div
+          className={`absolute inset-0 bg-gradient-to-b from-white/70 via-white/35 to-white/80 pointer-events-none transition-opacity duration-500 ${
+            isFullRevealed ? "opacity-30" : "opacity-100"
+          }`}
+        />
+      </div>
+
+      {/* High-Definition Dynamic Spotlight Layer for drawing.png (active when not full revealed) */}
+      <div
+        ref={spotlightImgLayerRef}
+        className={`absolute inset-0 z-0 pointer-events-none overflow-hidden select-none transition-opacity duration-300 ${
+          isHovering && !isFullRevealed ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          WebkitMaskImage: `radial-gradient(300px circle at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0) 100%)`,
+          maskImage: `radial-gradient(300px circle at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0) 100%)`,
+        }}
+      >
+        <img
+          src="/drawing.png"
+          alt="Works Archive Sketch Spotlight"
+          className="w-full h-full object-cover object-center opacity-100 mix-blend-multiply filter contrast-135 brightness-105 scale-[1.01]"
+        />
+      </div>
+
+      {/* Spotlight Warm Beam/Glow Overlay */}
+      <div
+        ref={spotlightRingRef}
+        className={`absolute inset-0 pointer-events-none z-10 transition-opacity duration-300 ${
+          isHovering && !isFullRevealed ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          background: `radial-gradient(320px circle at 50% 50%, rgba(245, 158, 11, 0.16), rgba(147, 51, 234, 0.1) 50%, transparent 80%)`,
+        }}
+      />
+
       {/* Interactive Spider-Verse / Comic Sketchbook Background Layer */}
       <SketchbookBackground />
 
@@ -121,6 +206,17 @@ export default function ArchiveFooter() {
             {p.char}
           </span>
         ))}
+      </div>
+
+      {/* Full Photo Reveal Toggle Pill Hint */}
+      <div
+        className={`absolute bottom-6 right-6 z-30 pointer-events-none transition-all duration-300 transform ${
+          isHovering ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+        }`}
+      >
+        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono font-medium tracking-wide bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-purple-200 dark:border-purple-800/40 text-purple-700 dark:text-purple-300 shadow-sm">
+          <span>{isFullRevealed ? "✦ Click to hide full photo" : "✦ Click background to reveal full photo"}</span>
+        </span>
       </div>
 
       <div className="max-w-7xl w-full mx-auto flex flex-col items-center justify-center relative z-20 py-4 sm:py-8 pointer-events-none">
