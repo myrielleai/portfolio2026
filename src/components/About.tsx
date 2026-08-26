@@ -98,7 +98,7 @@ export default function About() {
 
               {/* The Bio Paragraph */}
               <p className="text-base sm:text-lg text-[var(--text)] leading-relaxed font-sans">
-                I am a <strong className="text-[var(--heading)] font-semibold">Full-Stack Developer and Designer</strong> dedicated to architecting intelligent digital solutions. Currently intersecting robust backend infrastructure with spatial logic, I am actively evolving my practice into applied AI engineering to build smarter, systems-driven user experiences.
+                I’m a <strong className="text-[var(--heading)] font-semibold">Developer and Designer</strong> building toward the future of intelligent digital experiences. Currently specializing in AI engineering and expanding my full-stack development practice, I explore how thoughtful design and technology can come together to create meaningful solutions.
               </p>
             </div>
 
