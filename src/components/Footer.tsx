@@ -220,7 +220,7 @@ export default function Footer() {
                     },
                   }}
                 >
-                  <span className={isY ? "inline-block translate-y-[11px] relative z-30" : ""}>
+                  <span className={isY ? "inline-block translate-y-[3px] sm:translate-y-[11px] relative z-30" : ""}>
                     {char}
                   </span>
                 </motion.span>

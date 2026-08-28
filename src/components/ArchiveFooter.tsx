@@ -208,16 +208,6 @@ export default function ArchiveFooter() {
         ))}
       </div>
 
-      {/* Full Photo Reveal Toggle Pill Hint */}
-      <div
-        className={`absolute bottom-6 right-6 z-30 pointer-events-none transition-all duration-300 transform ${
-          isHovering ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        }`}
-      >
-        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono font-medium tracking-wide bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-purple-200 dark:border-purple-800/40 text-purple-700 dark:text-purple-300 shadow-sm">
-          <span>{isFullRevealed ? "✦ Click to hide full photo" : "✦ Click background to reveal full photo"}</span>
-        </span>
-      </div>
 
       <div className="max-w-7xl w-full mx-auto flex flex-col items-center justify-center relative z-20 py-4 sm:py-8 pointer-events-none">
         {/* Pre-headline Text */}

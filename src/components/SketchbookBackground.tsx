@@ -55,32 +55,7 @@ export default function SketchbookBackground({ onEggFound }: SketchbookBackgroun
       if (e.touches.length > 0) {
         const rect = container.getBoundingClientRect();
         mouse.targetX = e.touches[0].clientX - rect.left;
-        mouse.targetY = e.touches[0].clientY - rect.top;
-        mouse.isActive = true;
       }
-    };
-
-    // --- Sketch Drawing Helper Utilities ---
-
-    const drawJitterCircle = (
-      c: CanvasRenderingContext2D,
-      cx: number,
-      cy: number,
-      r: number,
-      seed = 0
-    ) => {
-      c.beginPath();
-      const steps = 24;
-      for (let i = 0; i <= steps; i++) {
-        const angle = (i / steps) * Math.PI * 2;
-        const jitter = Math.sin(angle * 5 + seed) * 0.7;
-        const rad = r + jitter;
-        const px = cx + Math.cos(angle) * rad;
-        const py = cy + Math.sin(angle) * rad;
-        if (i === 0) c.moveTo(px, py);
-        else c.lineTo(px, py);
-      }
-      c.stroke();
     };
 
     const renderSketches = (
@@ -91,35 +66,11 @@ export default function SketchbookBackground({ onEggFound }: SketchbookBackgroun
       pX: number,
       pY: number
     ) => {
-      const mainColor = isIlluminated ? "#18181b" : "#a1a1aa";
-      const accentColor = isIlluminated ? "#7e22ce" : "#d4d4d8";
       const faintDetailColor = isIlluminated ? "rgba(24, 24, 27, 0.7)" : "rgba(161, 161, 170, 0.3)";
-
-      c.lineWidth = isIlluminated ? 1.4 : 0.9;
-      c.strokeStyle = mainColor;
-
-      // Draw star helper utility
-      const drawStar = (sx: number, sy: number, r: number, color: string) => {
-        c.strokeStyle = color;
-        c.beginPath();
-        for (let i = 0; i < 5; i++) {
-          const a1 = (i * Math.PI * 2) / 5 - Math.PI / 2;
-          const a2 = a1 + Math.PI / 5;
-          const x1 = sx + Math.cos(a1) * r;
-          const y1 = sy + Math.sin(a1) * r;
-          const x2 = sx + Math.cos(a2) * (r * 0.4);
-          const y2 = sy + Math.sin(a2) * (r * 0.4);
-          if (i === 0) c.moveTo(x1, y1);
-          else c.lineTo(x1, y1);
-          c.lineTo(x2, y2);
-        }
-        c.closePath();
-        c.stroke();
-      };
 
 
       // 6. EASTER EGG LOCATION
-      const eggX = width * 0.82 + pX * 0.5;
+      const eggX = width * 0.90 + pX * 0.5;
       const eggY = height * 0.82 + pY * 0.5;
       const distToEgg = Math.hypot(mouseX - eggX, mouseY - eggY);
       const isEggLit = distToEgg < 200;
@@ -132,11 +83,6 @@ export default function SketchbookBackground({ onEggFound }: SketchbookBackgroun
 
       c.save();
       c.translate(eggX, eggY);
-      c.strokeStyle = isEggLit ? "#9333ea" : mainColor;
-      c.lineWidth = isEggLit ? 2 : 1;
-      drawJitterCircle(c, 0, 0, 32, 80);
-      drawJitterCircle(c, 0, 0, 38, 81);
-      drawStar(0, 0, 18, isEggLit ? "#ec4899" : accentColor);
 
       if (isEggLit) {
         const glow = c.createRadialGradient(0, 0, 5, 0, 0, 70);
@@ -150,12 +96,14 @@ export default function SketchbookBackground({ onEggFound }: SketchbookBackgroun
         c.font = "900 18px 'Casual', sans-serif";
         c.fillStyle = "#581c87";
         c.textAlign = "center";
-        c.fillText("You found me.", 0, -48);
+        c.textBaseline = "middle";
+        c.fillText("you found me ;) ", 0, 0);
       } else {
         c.font = "italic 9px monospace";
         c.fillStyle = faintDetailColor;
         c.textAlign = "center";
-        c.fillText("???", 0, 48);
+        c.textBaseline = "middle";
+        c.fillText("???", 0, 0);
       }
       c.restore();
     };

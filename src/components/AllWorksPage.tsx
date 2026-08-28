@@ -14,7 +14,6 @@ function WorksFooterSection() {
     offset: ["start start", "end end"],
   });
 
-  const scale = useTransform(scrollYProgress, [0, 0.85], [1, 0.92]);
   const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0.3]);
   const y = useTransform(scrollYProgress, [0, 0.85], [0, -30]);
 
@@ -22,10 +21,13 @@ function WorksFooterSection() {
     <div ref={containerRef} className="relative w-full bg-white">
       {/* Sticky Previous Section: "Let's work together!" */}
       <div className="sticky top-0 z-10 w-full min-h-screen flex flex-col justify-center items-center overflow-hidden bg-white">
-        <motion.div style={{ scale, opacity, y }} className="w-full flex flex-col justify-center items-center">
+        <motion.div style={{ opacity, y }} className="w-full flex flex-col justify-center items-center">
           <ArchiveFooter />
         </motion.div>
       </div>
+
+      {/* Scroll Buffer: Pinned duration before Footer gets seen */}
+      <div className="h-[120vh] pointer-events-none" />
 
       {/* Homepage Footer sliding UP over the previous section like a photo card */}
       <div className="relative z-20 bg-white border-t border-zinc-200 shadow-[0_-25px_60px_rgba(0,0,0,0.06)]">
