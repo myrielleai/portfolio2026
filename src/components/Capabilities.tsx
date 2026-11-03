@@ -1,83 +1,102 @@
 import { useEffect, useRef } from "react";
-import { Cpu, Layout, Layers, Sparkles, Server, Zap, Compass, BarChart3 } from "lucide-react";
+import { Brain, ScanEye, BarChart3, Sparkles, Rocket, Layout, Layers, Server } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Public-domain artworks from Wikimedia Commons, shown in their original colours
+const commons = (file: string) => `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=800`;
 
 export default function Capabilities() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const services = [
     {
+      bgColor: "#ede4ff",
+      fallbackTextColor: "#1e0b3a",
+      image: commons('Raphael_School_of_Athens.jpg'),
+      credit: "Raphael · The School of Athens",
+      focus: "50% 40%",
+      icon: Brain,
+      title: "Model Training & Evaluation",
+      description: "I label the data, then train and tune the model until it actually performs, not just in a notebook.",
+      tools: "PyTorch · TensorFlow / Keras · YOLO",
+    },
+    {
+      bgColor: "#0a0a0a",
+      fallbackTextColor: "#ffffff",
+      image: commons('Johannes_Vermeer_-_The_Astronomer_-_1668.jpg'),
+      credit: "Vermeer · The Astronomer",
+      focus: "45% 35%",
+      icon: ScanEye,
+      title: "Computer Vision",
+      description: "Detection and segmentation that spots what people miss, like the leaf lesions in DeepLeaf.",
+      tools: "YOLO · OpenCV · Roboflow",
+    },
+    {
+      bgColor: "#9333ea",
+      fallbackTextColor: "#ffffff",
+      image: commons('A_Sunday_on_La_Grande_Jatte,_Georges_Seurat,_1884.jpg'),
+      credit: "Seurat · A Sunday on La Grande Jatte",
+      focus: "55% 55%",
+      icon: BarChart3,
+      title: "Data & Classic ML",
+      description: "I clean, explore and model your data so the numbers finally tell a clear story.",
+      tools: "pandas · scikit-learn",
+    },
+    {
       bgColor: "#FFF",
       fallbackTextColor: "#0a0a0a",
-      image: "https://images.unsplash.com/photo-1535376472810-5d229c65da09?crop=entropy&cs=srgb&fm=jpg&w=600&auto=format&fit=crop&q=80",
-      icon: Compass,
-      number: "01",
-      title: "Product Strategy & Discovery",
-      description: "Transforming complex technical challenges into validated MVP roadmap specifications and user journey flows.",
-    },
-    {
-      bgColor: "#000",
-      fallbackTextColor: "#ffffff",
-      image: "https://images.unsplash.com/photo-1529641484336-ef35148bab06?crop=entropy&cs=srgb&fm=jpg&w=600&auto=format&fit=crop&q=80",
-      icon: BarChart3,
-      number: "02",
-      title: "Data & Telemetry Pipelines",
-      description: "Constructing real-time telemetry, data stream visualization, ETL workflows, and reporting dashboards.",
-    },
-    {
-      bgColor: "#FBC02D",
-      fallbackTextColor: "#0a0a0a",
-      image: "https://images.unsplash.com/photo-1541356665065-22676f35dd40?crop=entropy&cs=srgb&fm=jpg&w=600&auto=format&fit=crop&q=80",
-      icon: Layout,
-      number: "03",
-      title: "UI/UX & Design Systems",
-      description: "Architecting minimalist, accessible design systems with tailored CSS variables, dark-mode tokens, and pixel-perfect layouts.",
-    },
-    {
-      bgColor: "#C2185B",
-      fallbackTextColor: "#ffffff",
-      image: "https://images.unsplash.com/photo-1550684848-86a5d8727436?crop=entropy&cs=srgb&fm=jpg&w=600&auto=format&fit=crop&q=80",
-      icon: Layers,
-      number: "04",
-      title: "Full-Stack Engineering",
-      description: "Building resilient web applications with React, TypeScript, and Node.js paired with production-ready databases.",
-    },
-    {
-      bgColor: "#2f6a9d",
-      fallbackTextColor: "#ffffff",
-      image: "https://images.unsplash.com/photo-1620121692029-d088224ddc74?crop=entropy&cs=srgb&fm=jpg&w=600&auto=format&fit=crop&q=80",
-      icon: Cpu,
-      number: "05",
-      title: "AI Integration & Logic",
-      description: "Implementing intelligent AI layers, structured model outputs, real-time streaming APIs, and autonomous agent orchestration.",
-    },
-    {
-      bgColor: "#212121",
-      fallbackTextColor: "#ffffff",
-      image: "https://images.unsplash.com/photo-1604871000636-074fa5117945?crop=entropy&cs=srgb&fm=jpg&w=600&auto=format&fit=crop&q=80",
-      icon: Server,
-      number: "06",
-      title: "Cloud Infrastructure",
-      description: "Deploying high-availability cloud microservices, edge network routing, serverless pipelines, and container infrastructure.",
-    },
-    {
-      bgColor: "#B388FF",
-      fallbackTextColor: "#0a0a0a",
-      image: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?crop=entropy&cs=srgb&fm=jpg&w=600&auto=format&fit=crop&q=80",
+      image: commons('Brueghel-tower-of-babel.jpg'),
+      credit: "Bruegel · The Tower of Babel",
+      focus: "50% 45%",
       icon: Sparkles,
-      number: "07",
-      title: "Motion & Creative Tech",
-      description: "Crafting interactive web experiences using 3D scenes, smooth inertia scroll, and fluid GSAP animation physics.",
+      title: "LLM Apps",
+      description: "Chat, search over your documents and structured answers, built right into your product.",
+      tools: "LLM APIs · LangChain",
     },
     {
-      bgColor: "#43A047",
+      bgColor: "#1e0b3a",
       fallbackTextColor: "#ffffff",
-      image: "https://images.unsplash.com/photo-1496450080853-5f78c43af9e9?crop=entropy&cs=srgb&fm=jpg&w=600&auto=format&fit=crop&q=80",
-      icon: Zap,
-      number: "08",
-      title: "Performance Optimization",
-      description: "Optimizing web applications for sub-second LCP, minimal bundle footprint, zero memory leaks, and 60fps rendering.",
+      image: commons('Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg'),
+      credit: "Friedrich · Wanderer above the Sea of Fog",
+      focus: "50% 30%",
+      icon: Rocket,
+      title: "Model Deployment",
+      description: "From a trained model to a live app anyone can open and try in seconds.",
+      tools: "Streamlit · real-time inference",
+    },
+    {
+      bgColor: "#FFF",
+      fallbackTextColor: "#0a0a0a",
+      image: commons('Johannes_Vermeer_-_Girl_with_a_Pearl_Earring_-_670_-_Mauritshuis.jpg'),
+      credit: "Vermeer · Girl with a Pearl Earring",
+      focus: "50% 35%",
+      icon: Layout,
+      title: "Frontend Development",
+      description: "Fast, responsive screens that make sense the first time someone uses them.",
+      tools: "React · TypeScript · Tailwind CSS",
+    },
+    {
+      bgColor: "#ede4ff",
+      fallbackTextColor: "#1e0b3a",
+      image: commons('The_Great_Wave_off_Kanagawa.jpg'),
+      credit: "Hokusai · The Great Wave off Kanagawa",
+      focus: "40% 45%",
+      icon: Layers,
+      title: "Motion & 3D",
+      description: "Motion and 3D that make a site feel alive, like the desk you just played with.",
+      tools: "Framer Motion · GSAP · Three.js",
+    },
+    {
+      bgColor: "#0a0a0a",
+      fallbackTextColor: "#ffffff",
+      image: commons('Turner_-_Rain,_Steam_and_Speed_-_National_Gallery_file.jpg'),
+      credit: "Turner · Rain, Steam and Speed",
+      focus: "60% 55%",
+      icon: Server,
+      title: "Backend & Databases",
+      description: "APIs and databases that keep everything running, from the Figma file to the deploy.",
+      tools: "Node.js · Express · PHP · MySQL · PostgreSQL · Vercel",
     },
   ];
 
@@ -130,23 +149,19 @@ export default function Capabilities() {
               03 // Expertise
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display text-[var(--heading)] tracking-tight">
-              Capabilities &amp; Services
+              Skills &amp; Capabilities
             </h2>
           </div>
-          <p className="font-mono text-xs text-[var(--text-muted)] max-w-sm leading-relaxed">
-            Specialized engineering disciplines combined to deliver next-generation digital products.
-          </p>
         </div>
 
         {/* Capabilities Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {services.map((item, index) => {
-            const Icon = item.icon;
             return (
               <div
                 key={index}
                 ref={(el) => { cardRefs.current[index] = el; }}
-                className="card group flex flex-col justify-between"
+                className={`card group flex flex-col justify-between ${item.bgColor === "#FFF" ? "ring-1 ring-[var(--border)]" : ""}`}
                 {...{ 'bg-color': item.bgColor }}
                 style={{
                   '--bg-color': item.bgColor,
@@ -155,31 +170,35 @@ export default function Capabilities() {
                   opacity: 0,
                 } as React.CSSProperties}
               >
-                <img
-                  className="card__image"
-                  src={item.image}
-                  alt={item.title}
-                  loading="lazy"
-                  decoding="async"
-                />
+                <div className="card__image card__art relative overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.credit}
+                    loading="lazy"
+                    decoding="async"
+                    className="card__classic"
+                    style={{ objectPosition: item.focus }}
+                  />
+                  <span className="absolute bottom-1.5 left-2 font-serif text-[10px] italic opacity-0 transition-opacity duration-300 group-hover:opacity-90" style={{ color: item.fallbackTextColor, textShadow: "0 1px 4px rgba(0,0,0,0.35)" }}>
+                    {item.credit}
+                  </span>
+                </div>
 
                 <div className="card__text flex flex-col justify-between flex-grow mt-3">
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 rounded-md bg-black/15 dark:bg-white/15 flex items-center justify-center">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <span className="font-mono text-xs font-bold opacity-80">{item.number}</span>
-                    </div>
-
                     <h3 className="text-lg font-bold font-display tracking-tight mb-2">
                       {item.title}
                     </h3>
                   </div>
 
-                  <p className="text-xs sm:text-sm opacity-90 leading-relaxed font-sans mt-2">
-                    {item.description}
-                  </p>
+                  <div className="mt-2">
+                    <p className="text-xs sm:text-sm opacity-90 leading-relaxed font-sans">
+                      {item.description}
+                    </p>
+                    <p className="mt-3 font-mono text-[10px] uppercase tracking-wider opacity-60">
+                      {item.tools}
+                    </p>
+                  </div>
                 </div>
               </div>
             );
@@ -188,8 +207,6 @@ export default function Capabilities() {
 
       </div>
 
-      {/* Seamless gradient fade transition into Footer */}
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent via-[var(--surface)]/60 to-[var(--bg)] pointer-events-none z-10" />
     </section>
   );
 }

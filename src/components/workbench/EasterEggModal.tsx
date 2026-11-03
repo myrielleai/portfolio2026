@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckSquare, Square, Plus, Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 import { playClickSound, playToggleSound } from "../../utils/audio";
 
 interface EasterEggModalProps {
@@ -8,135 +8,177 @@ interface EasterEggModalProps {
   onClose: () => void;
 }
 
+// Hand-drawn checkbox: a wobbly square, ticked with a pen stroke
+function Box({ done }: { done: boolean }) {
+  return (
+    <svg viewBox="0 0 28 28" className="h-6 w-6 shrink-0 overflow-visible" aria-hidden>
+      <path d="M4 5.5 C 10 4.2, 18 4.8, 23.5 4.6 C 24 10, 23.6 17, 23.8 23.4 C 17 23.9, 10 23.2, 4.4 23.6 C 4 17, 4.6 10, 4 5.5 Z" fill="none" stroke="#4c1d95" strokeWidth="1.6" strokeLinejoin="round" />
+      {done && (
+        <motion.path
+          d="M7 14.5 L12 20 L27 2"
+          fill="none"
+          stroke="#7e22ce"
+          strokeWidth="2.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        />
+      )}
+    </svg>
+  );
+}
+
 export default function EasterEggModal({ isOpen, onClose }: EasterEggModalProps) {
   const [tasks, setTasks] = useState([
     { id: 1, text: "sleep", completed: true },
     { id: 2, text: "matcha", completed: true },
-    { id: 3, text: "clean my table", completed: false }
+    { id: 3, text: "clean my table", completed: false },
   ]);
   const [newTaskText, setNewTaskText] = useState("");
 
   const toggleTask = (id: number) => {
     playToggleSound(true);
-    setTasks(prev =>
-      prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t))
-    );
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
   };
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskText.trim()) return;
     playClickSound();
-    setTasks(prev => [
-      ...prev,
-      { id: Date.now(), text: newTaskText.trim(), completed: false }
-    ]);
+    setTasks((prev) => [...prev, { id: Date.now(), text: newTaskText.trim(), completed: false }]);
     setNewTaskText("");
   };
 
   const deleteTask = (id: number) => {
     playClickSound();
-    setTasks(prev => prev.filter(t => t.id !== id));
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const close = () => {
+    playClickSound();
+    onClose();
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm cursor-pointer"
-          onClick={() => {
-            playClickSound();
-            onClose();
-          }}
-        >
         <motion.div
-          onClick={(e) => e.stopPropagation()}
-          initial={{ opacity: 0, scale: 0.85, rotate: -3 }}
-          animate={{ opacity: 1, scale: 1, rotate: -1 }}
-          exit={{ opacity: 0, scale: 0.85, rotate: 3 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
-          className="relative w-full max-w-md aspect-square bg-yellow-200 text-zinc-900 rounded-none p-6 sm:p-7 shadow-2xl border-4 border-yellow-300 font-sans select-none overflow-hidden flex flex-col justify-between cursor-default"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#12081c]/55 backdrop-blur-sm cursor-pointer"
+          onClick={close}
         >
-          {/* Adhesive Tape Accent at top */}
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-6 bg-yellow-400/40 backdrop-blur-xs border border-yellow-500/30 rotate-1 shadow-xs rounded-none pointer-events-none" />
-
-          {/* Close Button */}
-          <button
-            onClick={() => {
-              playClickSound();
-              onClose();
-            }}
-            className="absolute top-4 right-4 p-1.5 text-zinc-700 hover:text-black bg-yellow-300/80 hover:bg-yellow-400 rounded-full transition-colors cursor-pointer"
+          <motion.div
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.8, rotate: -8, y: 30 }}
+            animate={{ opacity: 1, scale: 1, rotate: -2, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, rotate: 4, y: 20 }}
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            className="relative w-full max-w-[380px] aspect-square cursor-default select-none"
           >
-            <X className="w-4 h-4" />
-          </button>
-
-          <h3 className="text-2xl font-extrabold text-zinc-950 mb-3 flex items-center justify-between">
-            <span className="font-serif italic">
-              <span>To do</span>
-            </span>
-          </h3>
-
-          {/* Task List */}
-          <div className="flex-1 min-h-0 space-y-2 overflow-y-auto pr-1 my-2">
-            {tasks.map(task => (
-              <div
-                key={task.id}
-                onClick={() => toggleTask(task.id)}
-                className={`group flex items-center justify-between p-2.5 rounded-none border transition-all cursor-pointer ${
-                  task.completed
-                    ? "bg-yellow-300/50 border-yellow-400/80 text-zinc-600"
-                    : "bg-yellow-100/90 border-yellow-300 text-zinc-900 hover:bg-yellow-100"
-                }`}
-              >
-                <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                  {task.completed ? (
-                    <CheckSquare className="w-5 h-5 text-emerald-700 shrink-0" />
-                  ) : (
-                    <Square className="w-5 h-5 text-amber-700 shrink-0" />
-                  )}
-                  <span
-                    className={`text-xs sm:text-sm font-mono font-semibold truncate ${
-                      task.completed ? "line-through text-zinc-500" : ""
-                    }`}
-                  >
-                    {task.text}
-                  </span>
-                </div>
-
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    deleteTask(task.id);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-amber-800 hover:text-red-700 hover:bg-yellow-300/60 rounded-none transition-all cursor-pointer shrink-0"
-                  title="Delete task"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Add New Task Input */}
-          <form onSubmit={handleAddTask} className="mt-4 flex gap-2">
-            <input
-              type="text"
-              value={newTaskText}
-              onChange={e => setNewTaskText(e.target.value)}
-              placeholder="Add a new task..."
-              className="flex-1 bg-yellow-100/90 border border-yellow-400/80 rounded-none px-3 py-2 text-xs font-mono text-zinc-900 placeholder:text-amber-800/60 focus:outline-none focus:ring-2 focus:ring-amber-600"
+            {/* Paper: lavender, like the note on the desk, slight lift at the bottom-right corner */}
+            <div
+              className="absolute inset-0 shadow-[0_30px_50px_-20px_rgba(40,10,60,0.55),0_2px_6px_rgba(40,10,60,0.2)]"
+              style={{
+                background:
+                  "linear-gradient(170deg, #f1e4ff 0%, #e9d5ff 55%, #dcc2fb 100%)",
+                clipPath: "polygon(0 0, 100% 0, 100% 88%, 88% 100%, 0 100%)",
+              }}
             />
+            {/* curled corner */}
+            <div
+              className="absolute bottom-0 right-0 h-[12%] w-[12%]"
+              style={{
+                background: "linear-gradient(135deg, #c9a8f3 0%, #eadcff 50%, rgba(0,0,0,0) 51%)",
+                filter: "drop-shadow(-3px -3px 4px rgba(60,20,90,0.25))",
+              }}
+            />
+            {/* adhesive strip shading along the top */}
+            <div className="absolute inset-x-0 top-0 h-[16%] bg-gradient-to-b from-[#7e22ce]/20 to-transparent" />
+            {/* washi tape */}
+            <div
+              className="absolute -top-4 left-1/2 h-8 w-32 -translate-x-1/2 rotate-[3deg] opacity-90"
+              style={{
+                background:
+                  "repeating-linear-gradient(45deg, rgba(147,51,234,0.45) 0 8px, rgba(233,213,255,0.6) 8px 16px)",
+                maskImage: "linear-gradient(90deg, transparent 0, #000 6px, #000 calc(100% - 6px), transparent 100%)",
+              }}
+            />
+
             <button
-              type="submit"
-              className="bg-amber-600 hover:bg-amber-700 text-white font-mono font-bold text-xs px-3 py-2 rounded-none flex items-center gap-1 transition-colors cursor-pointer shadow-xs"
+              onClick={close}
+              className="absolute right-3 top-3 z-10 rounded-full p-1.5 text-[#6b21a8]/70 transition hover:bg-[#6b21a8]/10 hover:text-[#3b0764] cursor-pointer"
+              aria-label="Close note"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add</span>
+              <X className="h-4 w-4" />
             </button>
-          </form>
+
+            <div className="relative flex h-full flex-col px-8 pb-8 pt-10 font-bold text-[#4c1d95]" style={{ fontFamily: "'Courier New', ui-monospace, monospace" }}>
+              <h3 className="text-[28px] leading-none font-bold text-[#3b0764]">📌 TO DO</h3>
+              <span className="mt-2 block h-[3px] w-[42%] rounded-full bg-[#9333ea]" />
+
+              {/* Ruled lines with the tasks written on them */}
+              <div
+                className="mt-4 flex-1 min-h-0 overflow-y-auto pr-1"
+                data-lenis-prevent
+                style={{
+                  backgroundImage: "repeating-linear-gradient(180deg, transparent 0 39px, rgba(126,34,206,0.22) 39px 40px)",
+                  backgroundAttachment: "local",
+                }}
+              >
+                <AnimatePresence initial={false}>
+                  {tasks.map((task) => (
+                    <motion.div
+                      key={task.id}
+                      layout
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 12 }}
+                      className="group flex h-10 items-center gap-3"
+                    >
+                      <button onClick={() => toggleTask(task.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left cursor-pointer">
+                        <Box done={task.completed} />
+                        <span className={`relative truncate text-[19px] leading-none ${task.completed ? "text-[#7e22ce]" : ""}`}>
+                          {task.text}
+                          {task.completed && (
+                            <motion.span
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: 1 }}
+                              transition={{ duration: 0.3 }}
+                              className="absolute left-[-2px] right-[-2px] top-[55%] h-[2.5px] origin-left -rotate-1 rounded-full bg-[#7e22ce]/60"
+                            />
+                          )}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => deleteTask(task.id)}
+                        className="shrink-0 text-[22px] leading-none text-[#9333ea] opacity-0 transition group-hover:opacity-80 hover:!opacity-100 cursor-pointer"
+                        aria-label={`Erase ${task.text}`}
+                      >
+                        ×
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+
+                {/* Write a new line */}
+                <form onSubmit={handleAddTask} className="flex h-10 items-center gap-3">
+                  <span className="w-6 text-center text-[22px] leading-none text-[#6b21a8]/70">+</span>
+                  <input
+                    type="text"
+                    value={newTaskText}
+                    onChange={(e) => setNewTaskText(e.target.value)}
+                    placeholder="write something..."
+                    className="min-w-0 flex-1 bg-transparent text-[19px] font-bold leading-none text-[#4c1d95] placeholder:text-[#6b21a8]/45 focus:outline-none"
+                  />
+                </form>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
-      </div>
       )}
     </AnimatePresence>
   );

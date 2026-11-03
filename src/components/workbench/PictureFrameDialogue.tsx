@@ -20,14 +20,14 @@ export default function PictureFrameDialogue({ isOpen, onClose }: PictureFrameDi
       {isOpen && (
         <div 
           onClick={onClose}
-          className="absolute bottom-28 sm:bottom-36 left-1/2 -translate-x-1/2 z-20 pointer-events-auto cursor-pointer select-none text-center px-4"
+          className="absolute left-1/2 top-[calc(var(--mat-bottom,82%)+14px)] -translate-x-1/2 z-20 pointer-events-auto cursor-pointer select-none text-center px-4"
         >
           <motion.p
             initial={{ opacity: 0, y: 12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="text-base sm:text-lg md:text-xl font-serif italic text-amber-100/90 tracking-wider drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]"
+            className="inline-block max-w-[88vw] sm:whitespace-nowrap px-2 text-base sm:text-lg md:text-xl font-serif italic desk-caption tracking-wide"
           >
             i miss them...
           </motion.p>

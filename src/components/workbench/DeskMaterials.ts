@@ -746,22 +746,22 @@ export function createSmartphoneTexture(): THREE.CanvasTexture {
 
 
 // 6. Sticky Note Texture with To-Do List
-export function createStickyNoteTexture(text?: string, color: string = "#fef3c7"): THREE.CanvasTexture {
+export function createStickyNoteTexture(text?: string, color: string = "#e9d5ff"): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
   canvas.height = 512;
   const ctx = canvas.getContext("2d")!;
 
-  // Sticky note warm ivory base
+  // Sticky note lavender base
   ctx.fillStyle = color;
   ctx.fillRect(0, 0, 512, 512);
 
   // Top adhesive shadow strip
-  ctx.fillStyle = "rgba(202, 138, 4, 0.25)";
+  ctx.fillStyle = "rgba(126, 34, 206, 0.2)";
   ctx.fillRect(0, 0, 512, 45);
 
   // Ruled notebook lines
-  ctx.strokeStyle = "rgba(217, 119, 6, 0.18)";
+  ctx.strokeStyle = "rgba(126, 34, 206, 0.2)";
   ctx.lineWidth = 2;
   for (let y = 110; y < 500; y += 60) {
     ctx.beginPath();
@@ -771,13 +771,13 @@ export function createStickyNoteTexture(text?: string, color: string = "#fef3c7"
   }
 
   // Header Title
-  ctx.fillStyle = "#1e293b";
+  ctx.fillStyle = "#3b0764";
   ctx.font = "bold 38px 'Courier New', monospace, cursive";
   ctx.textAlign = "left";
   ctx.fillText("📌 TO DO", 45, 85);
 
-  // Red accent underline below title
-  ctx.strokeStyle = "#ef4444";
+  // Purple accent underline below title
+  ctx.strokeStyle = "#9333ea";
   ctx.lineWidth = 3.5;
   ctx.beginPath();
   ctx.moveTo(45, 98);
@@ -797,18 +797,18 @@ export function createStickyNoteTexture(text?: string, color: string = "#fef3c7"
   lines.forEach((line, idx) => {
     const y = 155 + idx * 58;
     if (line.startsWith("☑") || line.startsWith("[x]")) {
-      ctx.fillStyle = "#15803d"; // Green for completed
+      ctx.fillStyle = "#7e22ce"; // Purple for completed
       ctx.fillText(line, 45, y);
 
       // Strikethrough line
-      ctx.strokeStyle = "rgba(21, 128, 61, 0.55)";
+      ctx.strokeStyle = "rgba(126, 34, 206, 0.55)";
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(45, y - 8);
       ctx.lineTo(45 + ctx.measureText(line).width, y - 8);
       ctx.stroke();
     } else {
-      ctx.fillStyle = "#334155";
+      ctx.fillStyle = "#4c1d95";
       ctx.fillText(line, 45, y);
     }
   });

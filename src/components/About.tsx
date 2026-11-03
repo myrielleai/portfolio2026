@@ -10,22 +10,21 @@ interface WordProps {
 }
 
 function Word({ children, progress, range }: WordProps) {
-  const opacity = useTransform(progress, range, [0.18, 1]);
+  // Function form keeps this on the JS side (range form gets handed to the native scroll timeline)
+  const opacity = useTransform(progress, (v) => {
+    const t = Math.min(1, Math.max(0, (v - range[0]) / (range[1] - range[0])));
+    return 0.18 + t * 0.82;
+  });
   
   // Clean punctuation to match the word "intention" precisely
   const isPurple = children.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "") === "intention";
 
   
-  const color = useTransform(progress, range, [
-    "var(--text-muted)",
-    isPurple ? "var(--accent)" : "var(--heading)",
-  ]);
-
   return (
     <span className="relative inline-block mx-[0.2em] my-[0.08em]">
       <motion.span
-        style={{ opacity, color }}
-        className="inline-block transition-colors duration-150 select-none font-display font-bold tracking-tight"
+        style={{ opacity, color: isPurple ? "var(--accent)" : "var(--heading)" }}
+        className="inline-block select-none font-display font-bold tracking-tight"
       >
         {children}
       </motion.span>
@@ -82,7 +81,7 @@ export default function About() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16 items-center">
 
             {/* Left Column: Greeting & Bio */}
-            <div className="space-y-6 reveal">
+            <div className="space-y-6">
               {/* The Greeting */}
               <div>
                 <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display text-[var(--heading)] tracking-tight leading-[1.05]">
@@ -98,12 +97,12 @@ export default function About() {
 
               {/* The Bio Paragraph */}
               <p className="text-base sm:text-lg text-[var(--text)] leading-relaxed font-sans">
-                I’m a <strong className="text-[var(--heading)] font-semibold">Developer and Designer</strong> building toward the future of intelligent digital experiences. Currently specializing in AI engineering and expanding my full-stack development practice, I explore how thoughtful design and technology can come together to create meaningful solutions.
+                I’m a <strong className="text-[var(--heading)] font-semibold">Developer and Designer</strong> building toward the future of intelligent digital experiences. I specialize in <strong className="text-[var(--heading)] font-semibold">AI engineering and model training</strong>, from annotating datasets to training and deploying models, backed by a full-stack development practice that turns them into real products.
               </p>
             </div>
 
             {/* Middle Column: Soft-Edged Portrait Photo */}
-            <div className="flex justify-center items-center py-6 lg:py-0 reveal">
+            <div className="flex justify-center items-center py-6 lg:py-0">
               <div className="relative group">
                 {/* Subtle ambient blur backlight for premium aesthetic */}
                 <div className="absolute -inset-4 rounded-[3rem] bg-gradient-to-tr from-[var(--accent)]/20 via-[#9333ea]/10 to-transparent blur-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
@@ -125,7 +124,7 @@ export default function About() {
             </div>
 
             {/* Right Column: Paragraph 2 */}
-            <div className="reveal space-y-6">
+            <div className="space-y-6">
               <p className="text-base sm:text-lg text-[var(--text)] leading-relaxed font-sans">
                 I also bring a background in architecture and design, which fundamentally shapes how I approach user interaction and visual storytelling.
               </p>

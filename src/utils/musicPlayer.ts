@@ -1,4 +1,7 @@
 // Web Audio API & HTML5 Audio Player for LabTeaser Earbuds
+//
+// The songs themselves aren't hosted on the site (they're copyrighted recordings): the player plays
+// a little original lo-fi loop for each one, and links out to the real song and its lyrics.
 
 export interface TrackInfo {
   id: string;
@@ -14,7 +17,6 @@ export interface TrackInfo {
   audioUrl?: string;
   bgGlow: string;
   accentColor: string;
-  lyrics: string[];
 }
 
 export const TRACKS: TrackInfo[] = [
@@ -26,18 +28,9 @@ export const TRACKS: TrackInfo[] = [
     duration: 212,
     bpm: 72,
     coverGradient: "from-amber-600 via-orange-600 to-rose-700",
-    coverImage: "/streetcar-cover.jpg",
-    audioUrl: "/streetcar.m4a",
+    coverImage: "/streetcar-cover.webp",
     bgGlow: "rgba(245, 158, 11, 0.45)",
     accentColor: "#f59e0b",
-    lyrics: [
-      "Streetcar moving down the street...",
-      "Let me tell you what I'm thinking...",
-      "I'm just thinking 'bout the time that elapsed...",
-      "Gotta keep moving on, gotta stay strong...",
-      "In the streetlights, glowing in the night...",
-      "Just riding on this streetcar home..."
-    ],
     // Ebmaj7 -> Cm7 -> Fm7 -> Bb7 (Soulful R&B progression)
     chords: [
       [311.13, 392.00, 466.16, 587.33], // Ebmaj7
@@ -55,16 +48,9 @@ export const TRACKS: TrackInfo[] = [
     duration: 209,
     bpm: 75,
     coverGradient: "from-rose-500 via-pink-600 to-amber-500",
-    coverImage: "/streetcar-cover.jpg",
-    audioUrl: "/best-part.m4a",
+    coverImage: "/streetcar-cover.webp",
     bgGlow: "rgba(244, 63, 94, 0.4)",
     accentColor: "#f43f5e",
-    lyrics: [
-      "You're the coffee that I need in the morning...",
-      "You're my sunshine in the rain when it's pouring...",
-      "If life is a movie, then you're the best part...",
-      "You're the best part, oh..."
-    ],
     chords: [
       [261.63, 329.63, 392.00, 493.88], // Cmaj7
       [220.00, 261.63, 329.63, 392.00], // Am7
@@ -81,16 +67,9 @@ export const TRACKS: TrackInfo[] = [
     duration: 278,
     bpm: 68,
     coverGradient: "from-[#9333ea] via-[#7c3aed] to-[#6d28d9]",
-    coverImage: "/streetcar-cover.jpg",
-    audioUrl: "/get-you.m4a",
+    coverImage: "/streetcar-cover.webp",
     bgGlow: "rgba(147, 51, 234, 0.4)",
     accentColor: "#9333ea",
-    lyrics: [
-      "Through my eyes, see the light of the sun...",
-      "Who would have thought I'd get you...",
-      "Everything I need right here...",
-      "Ooh, who would have thought..."
-    ],
     chords: [
       [207.65, 261.63, 311.13, 392.00], // Abmaj7
       [174.61, 207.65, 261.63, 311.13], // Fm7
@@ -107,7 +86,7 @@ class LoFiMusicSynth {
   private audioElement: HTMLAudioElement | null = null;
   private isPlaying: boolean = false;
   private currentTrackIndex: number = 0;
-  private volume: number = 0.7;
+  private volume: number = 0.25; // starts at 25%
   private currentTimeSeconds: number = 0;
   private intervalId: number | null = null;
   private chordIntervalId: number | null = null;

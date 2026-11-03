@@ -1,10 +1,30 @@
 export interface Project {
   title: string;
+  /** Which group the project appears under in Selected Works. */
+  category: "ai" | "web";
+  /** Short discipline / category line shown in the index row, e.g. "Cloud Database · Healthcare". */
+  subtitle?: string;
+  /** Year shown on the right of the row. */
+  year: string;
+  /** Adds a small "New" badge next to the title. */
+  isNew?: boolean;
+  /** Award / recognition, shown as a gold badge (e.g. "Top 3 · Hackathon"). */
+  award?: string;
+  /** Shows this project as the large highlighted card above the index (use on one project). */
+  featured?: boolean;
+  /** One-line summary shown big on the featured card. */
+  tagline?: string;
+  /** What you did — shown as a checklist on the featured card. */
+  role?: string[];
+  /** Short headline numbers shown in one line on the featured card. */
+  stats?: { value: string; label: string }[];
   description: string;
   tags: string[];
   demoUrl?: string;
   githubUrl?: string;
   image?: string;
+  /** Optional tall, full-page screenshot: hovering the browser window scrolls through it */
+  pageImage?: string;
 }
 
 export interface Experience {
@@ -136,38 +156,87 @@ export const portfolioData: PortfolioData = {
     }
   ],
 
+  // Selected Works — shown top to bottom on the home page. Put the newest work first.
+  // To add a project: copy one block, fill it in, and drop a screenshot (16:10 works best) into /public.
   projects: [
     {
-      title: "Makati Human Milk Bank System",
-      description: "Designed and deployed a cloud-based PostgreSQL database using Render, including schema design, relational modeling, and SQL query implementation. Ensured proper data structure and integration support for the system’s backend.",
-      tags: ["PostgreSQL", "Render", "SQL"],
-      demoUrl: "https://hmbms-server.onrender.com/",
-      githubUrl: "https://github.com/KadenYohan/MilkBank-Group-Seven",
-      image: "/project1.webp"
+      title: "DeepLeaf",
+      category: "ai",
+      subtitle: "AI · Computer Vision",
+      year: "2026",
+      featured: true,
+      isNew: true,
+      tagline: "An AI model that spots tomato leaf diseases and outlines every lesion.",
+      description: "A YOLO26 instance segmentation model that detects and outlines individual lesions of four tomato leaf diseases, published as an IEEE-format paper and deployed as a Streamlit web app.",
+      role: [
+        "Hand-annotated the lesion dataset",
+        "Trained and evaluated the YOLO26 model"
+      ],
+      stats: [
+        { value: "0.569", label: "mask mAP@0.5" },
+        { value: "1,371", label: "annotated images" },
+        { value: "4", label: "diseases" }
+      ],
+      tags: ["YOLO26", "PyTorch", "Roboflow", "Streamlit"],
+      demoUrl: "https://deepleafai2.streamlit.app/",
+      githubUrl: "https://github.com/myrielleai/DeepLeaf",
+      image: "/deepleaf.webp"
     },
     {
-      title: "ReliefSync: Disaster Logistics Engine",
-      description: "An ultra-fast, keyboard-driven task tracking app. Features instant local-first state, optimistic updates, and complex command menu palettes.",
+      title: "BookSwap",
+      category: "web",
+      subtitle: "Peer-to-Peer Book Exchange",
+      year: "2026",
+      isNew: true,
+      description: "A community platform for trading physical books, with verified listings, moderated meetup handovers and separate dashboards for readers, volunteer moderators and admins — including participation reports and printable exchange receipts.",
+      tags: ["React", "Tailwind CSS", "PHP", "MySQL", "Google OAuth"],
+      demoUrl: "https://bookswap-eta.vercel.app",
+      githubUrl: "https://github.com/myrielleai/BookSwap",
+      image: "/bookswap.webp"
+    },
+    {
+      title: "ReliefSync",
+      category: "web",
+      subtitle: "Disaster Logistics Engine",
+      year: "2025",
+      award: "Top 3 · Hackathon",
+      description: "A local-first disaster response engine for coordinating relief tasks and inventory. Instant offline state, optimistic updates, keyboard-driven navigation and a real-time operations dashboard.",
       tags: ["React", "Tailwind CSS", "LocalForage", "Framer Motion"],
       demoUrl: "https://reliefsync-frontend-d3sw.onrender.com/index.html",
       githubUrl: "https://github.com/myrielleai/ReliefSync",
       image: "/project2.webp"
     },
     {
-      title: "UChannel Website",
-      description: "Interactive visual environment for testing physical layouts, physics spring configurations, and gesture interactions in the browser.",
-      tags: ["React", "Three.js", "TypeScript", "Tailwind CSS"],
-      demoUrl: "https://uchannel.ph",
-      githubUrl: "https://github.com",
-      image: "/project3.webp"
+      title: "Makati Human Milk Bank",
+      category: "web",
+      subtitle: "Cloud Database · Healthcare",
+      year: "2025",
+      description: "Designed and deployed a cloud-based PostgreSQL database on Render — schema design, relational modeling and SQL queries — giving the milk bank's backend a clean, reliable data structure.",
+      tags: ["PostgreSQL", "Render", "SQL"],
+      demoUrl: "https://hmbms-server.onrender.com/",
+      githubUrl: "https://github.com/KadenYohan/MilkBank-Group-Seven",
+      image: "/project1.webp"
     },
     {
-      title: "Endlezz Market Website",
-      description: "A brutalist CSS Grid and layout builder that exports clean, production-ready, hand-coded Vanilla CSS and Tailwind styles.",
-      tags: ["React", "CSS Grid", "TypeScript", "Vite"],
+      title: "UChannel",
+      category: "web",
+      subtitle: "Interactive Web Experience",
+      year: "2025",
+      description: "An immersive company site built with React and Three.js, with gesture handling, spring physics and smooth scroll-driven motion, translated pixel-for-pixel from Figma.",
+      tags: ["React", "Three.js", "TypeScript", "Tailwind CSS"],
+      demoUrl: "https://uchannel.ph",
+      image: "/uchannel.webp"
+    },
+    {
+      title: "Endlezz Market",
+      category: "web",
+      subtitle: "E-Commerce Storefront",
+      year: "2025",
+      description: "A responsive streetwear storefront with a shop, product pages, a lookbook, search and a cart, backed by a Supabase catalogue.",
+      tags: ["Next.js", "TypeScript", "Tailwind CSS", "Supabase"],
       demoUrl: "https://endlezz-market.vercel.app/",
       githubUrl: "https://github.com/myrielleai/EndlezzMarket",
-      image: "/project4.webp"
+      image: "/endlezz.webp"
     }
   ],
   skills: [

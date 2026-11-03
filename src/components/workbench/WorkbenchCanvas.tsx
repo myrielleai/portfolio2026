@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { buildWorkbenchScene, type WorkbenchObjectHandles } from "./DeskObjects";
+import { buildWorkbenchScene, createAppleLogoShape, type WorkbenchObjectHandles } from "./DeskObjects";
 import JournalModal from "./JournalModal";
 import PhoneModal from "./PhoneModal";
 import QuoteToast from "./QuoteToast";
@@ -8,7 +8,7 @@ import BlueprintLine from "./BlueprintLine";
 import EasterEggModal from "./EasterEggModal";
 import EarbudsModal from "./EarbudsModal";
 import PictureFrameDialogue from "./PictureFrameDialogue";
-import GlobeDialogue from "./GlobeDialogue";
+import MapModal from "./MapModal";
 import ScissorsDialogue from "./ScissorsDialogue";
 import CatDialogue from "./CatDialogue";
 import SilverDialogue from "./SilverDialogue";
@@ -16,18 +16,114 @@ import MiataDialogue from "./MiataDialogue";
 import MatchaDialogue from "./MatchaDialogue";
 import RubiksDialogue from "./RubiksDialogue";
 import ChessDialogue from "./ChessDialogue";
-import LaptopDialogue from "./LaptopDialogue";
+import InfoCard, { type InfoCardContent } from "./InfoCard";
+import { buildDeskLamp, buildIphone18ProMax, buildPolaroidStack, buildPothos, createFramePhotoTexture, createLockScreenTexture, createStripTexture } from "./DeskPersonal";
+import { buildAirpods, buildCat, buildChess, buildGlobe, buildGlowPool, buildPencilCase, createCybersigilJournalTexture, roundedRect, buildJewelryDish, buildMatcha, buildMiataDisplay, buildRubiks, buildScissors } from "./DeskRedesign";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { useTheme } from "../ThemeContext";
 import { playClickSound, playHoverSound, playToggleSound } from "../../utils/audio";
 import { scrollToSection } from "../../utils/scrollTo";
 
 interface WorkbenchCanvasProps {
   onEnterLab?: () => void;
+  /** Called before a card action navigates away (lets the parent leave fullscreen first). */
+  onBeforeNavigate?: () => void;
 }
 
+// Every raycast name an object can report → one canonical id (used for hover labels + the "found" counter)
+const ALIAS: Record<string, string> = {
+  macbook: "laptop", keyboard: "laptop",
+  journal: "journal",
+  coffeeMug: "matcha", matcha: "matcha", matchaMug: "matcha", mug: "matcha", cup: "matcha",
+  phone: "phone", ipad: "phone", tablet: "phone",
+  pencil: "pencil",
+  stickyNotes: "stickyNotes",
+  earbuds: "earbuds", airpods: "earbuds", airpod: "earbuds", headphone: "earbuds", headphones: "earbuds",
+  scissors: "scissors", scissor: "scissors",
+  plant: "plant",
+  deskLamp: "lamp", lamp: "lamp",
+  rubiksCube: "rubiks", rubiks: "rubiks", cube: "rubiks", rubik: "rubiks",
+  pictureFrame: "frame", frame: "frame", photoFrame: "frame",
+  chess: "chess", chessPieces: "chess", pawn: "chess", knight: "chess", queen: "chess",
+  globe: "globe", globeSphere: "globe",
+  cat: "cat", orangeCat: "cat", tabbyCat: "cat", orangeTabby: "cat",
+  jewelry: "silver", silverJewelry: "silver", jewelries: "silver", rings: "silver", necklace: "silver",
+  miata: "miata", miataCar: "miata", toyMiata: "miata", toyCar: "miata", car: "miata",
+};
+
+// Hover label for each object (order = order of hint dots)
+const LABELS: Record<string, string> = {
+  laptop: "Laptop · my projects",
+  plant: "Plant",
+  journal: "Journal",
+  phone: "Phone",
+  matcha: "Matcha",
+  pencil: "Pencil",
+  stickyNotes: "Sticky notes",
+  earbuds: "Earbuds",
+  scissors: "Scissors",
+  lamp: "Desk lamp",
+  frame: "Polaroids",
+  chess: "Chess",
+  globe: "Globe",
+  cat: "Cat",
+  silver: "Silver",
+  rubiks: "Rubik's cube",
+  miata: "Miata",
+};
+const ALL_IDS = Object.keys(LABELS);
+const GRAIN_URL = `url("data:image/svg+xml;utf8,${encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>"
+)}")`;
+const FOUND_KEY = "workbench-found";
+
+// Desk arrangement: [x, y, rotationZ] in desk units. Nothing overlaps; the strip below the mat stays clear for dialogues.
+const DESK_LAYOUT: Record<string, [number, number, number]> = {
+  macbook: [0.0, -0.4, -0.06],
+  books: [-3.75, 0.55, 0.2],
+  journal: [-3.62, 0.62, 0.3],
+  pencil: [-2.4, -2.33, 1.571],
+  pencil2: [-2.4, -2.55, 1.571],
+  pen: [-2.33, -2.78, 1.571],
+  scissors: [-4.55, -2.75, 0.2],
+  rubiks: [-6.4, -3.0, 0.45],
+  globe: [-6.9, -1.2, 0.3],
+  lamp: [-7.2, 2.6, 0.12], // head aims at the journal
+  frame: [-0.6, 3.6, -0.08],
+  stickyNotes: [4.1, 4.0, -0.18],
+  mug: [2.9, 2.6, 0],
+  plant: [6.4, 3.6, 0.4],
+  chess: [4.25, 0.85, 0.35],
+  jewelry: [6.8, -1.3, 0.3],
+  phone: [1.18, -2.66, 1.5],
+  earbuds: [5.4, -2.9, 0.8],
+  cat: [3.86, -1.95, 0.1],
+  miata: [7.3, -3.4, -0.75],
+};
 
 
-export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
+
+export default function WorkbenchCanvas({ onEnterLab, onBeforeNavigate }: WorkbenchCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  // Discovery counter (persists per browser; storage can be unavailable, so guard it)
+  const [found, setFound] = useState<string[]>(() => {
+    try {
+      const raw = window.localStorage.getItem(FOUND_KEY);
+      const arr = raw ? (JSON.parse(raw) as string[]) : [];
+      return arr.filter((id) => ALL_IDS.includes(id));
+    } catch {
+      return [];
+    }
+  });
+  const foundRef = useRef<Set<string>>(new Set(found));
+  const [, setAllFoundToast] = useState(false);
+  const [info, setInfo] = useState<InfoCardContent | null>(null);
+
+  // Day / night follows the site theme
+  const { theme } = useTheme();
+  const themeRef = useRef(theme);
   const handlesRef = useRef<WorkbenchObjectHandles | null>(null);
 
   // Hover & Raycasting states
@@ -49,9 +145,8 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
   const [isMatchaOpen, setIsMatchaOpen] = useState(false);
   const [isRubiksOpen, setIsRubiksOpen] = useState(false);
   const [isChessOpen, setIsChessOpen] = useState(false);
-  const [isLaptopOpen, setIsLaptopOpen] = useState(false);
   const [isBlueprintActive, setIsBlueprintActive] = useState(false);
-  const [, setIsLampOn] = useState(true);
+  const [, setIsLampOn] = useState(false);
   const [currentQuote, setCurrentQuote] = useState<string | null>(null);
   const [isBlurred, setIsBlurred] = useState(false);
 
@@ -69,11 +164,11 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
     setIsMatchaOpen(false);
     setIsRubiksOpen(false);
     setIsChessOpen(false);
-    setIsLaptopOpen(false);
+    setInfo(null);
     setCurrentQuote(null);
   };
 
-  const isAnyModalOpen = isJournalOpen || isPhoneOpen || isEarbudsOpen || isEasterEggOpen;
+  const isAnyModalOpen = isJournalOpen || isPhoneOpen || isEarbudsOpen || isEasterEggOpen || isGlobeOpen;
   const isAnyModalOpenRef = useRef(false);
 
   useEffect(() => {
@@ -84,10 +179,24 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
   }, [isAnyModalOpen]);
 
 
+  // Theme → lamp on at night, off during the day (still toggleable by clicking the lamp)
+  useEffect(() => {
+    themeRef.current = theme;
+    isLampOnRef.current = theme === "dark";
+  }, [theme]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(FOUND_KEY, JSON.stringify(found));
+    } catch {
+      /* storage unavailable — counter just won't persist */
+    }
+  }, [found]);
+
   // Mouse Parallax & Dragging refs
   const mouseRef = useRef({ x: 0, y: 0 });
   const targetMouseRef = useRef({ x: 0, y: 0 });
-  const isLampOnRef = useRef(true);
+  const isLampOnRef = useRef(theme === "dark");
   const hoveredObjectNameRef = useRef<string | null>(null);
   const hoveredZoneNameRef = useRef<string | null>(null);
 
@@ -101,7 +210,9 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
 
     // Top-down Orthographic Camera (90 degrees top view)
     const aspect = container.clientWidth / container.clientHeight;
-    const d = 5.6; // Orthographic frustum height parameter
+    // Frustum half-height; grows on narrow/portrait frames so the whole desk still fits the width
+    const fitD = (a: number) => Math.max(5.6, 7.4 / a);
+    let d = fitD(aspect);
     const camera = new THREE.OrthographicCamera(
       -d * aspect, d * aspect, d, -d, 0.1, 100
     );
@@ -110,12 +221,17 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    const isCoarse = window.matchMedia("(pointer: coarse)").matches;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isCoarse ? 1.5 : 2));
+    renderer.shadowMap.enabled = !isCoarse; // phones/tablets: skip soft shadows for smoother frames
+    renderer.shadowMap.type = THREE.PCFShadowMap; // supports the soft shadow radius below
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.4;
     container.appendChild(renderer.domElement);
+    // Soft studio reflections for the metal / glazed props only (applied per material)
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
 
     // 2. Warm Cozy Afternoon Sunlight & Enhanced Ambient Lighting
     const ambientLight = new THREE.AmbientLight(0xfff2e6, 2.4);
@@ -134,8 +250,356 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
     scene.add(sunLight);
 
     // 3. Build 3D Workbench Scene
+    // Daytime light levels (night values are fixed); preview layouts can tweak these
+    const dayLight = { ambient: 2.4, hemi: 1.2, sun: 2.2, exposure: 1.4 };
     const handles = buildWorkbenchScene(scene);
+    // Arrange the desk ("messy but tidy") and apply the sunlit look
+    {
+      const L = DESK_LAYOUT;
+      const byPos = (x: number, y: number) =>
+        handles.deskGroup.children.find((c) => Math.abs(c.position.x - x) < 0.01 && Math.abs(c.position.y - y) < 0.01);
+      const targets: Record<string, THREE.Object3D | undefined> = {
+        macbook: handles.macbookGroup, journal: handles.journalGroup, mug: handles.mugGroup, phone: handles.phoneGroup,
+        pencil: handles.pencilGroup, stickyNotes: handles.stickyNotesGroup, earbuds: handles.earbudsGroup,
+        scissors: handles.scissorsGroup, plant: handles.plantGroup, lamp: handles.lampGroup, rubiks: handles.rubiksCubeGroup,
+        frame: handles.pictureFrameGroup, chess: handles.chessGroup, globe: handles.globeGroup, cat: handles.catGroup,
+        jewelry: handles.jewelryGroup, miata: handles.miataGroup,
+        books: byPos(-5.4, 0.4), pen: byPos(-3.75, -0.1), pencil2: byPos(-3.5, -0.1),
+      };
+      for (const [k, v] of Object.entries(L)) {
+        const o = targets[k];
+        if (o) { o.position.x = v[0]; o.position.y = v[1]; o.rotation.z = v[2]; o.userData.baseRotZ = v[2]; }
+      }
+      {
+        const loader = new THREE.TextureLoader();
+        // 1. Laptop open, DeepLeaf on screen
+        handles.macbookLid.userData.pinned = false;
+        // Logo orientation on the closed lid
+        handles.macbookLid.children.forEach((c) => {
+          const g = (c as THREE.Mesh).geometry as THREE.BufferGeometry | undefined;
+          if (g?.type === "ExtrudeGeometry") c.rotation.z = Math.PI;
+        });
+        // Rounded corners on the aluminium base and lid
+        {
+          const roundSlab = (depth: number) =>
+            new THREE.ExtrudeGeometry(roundedRect(3.6 - 0.03, 2.4 - 0.03, 0.2), {
+              depth: depth - 0.02, bevelEnabled: true, bevelSize: 0.015, bevelThickness: 0.01, bevelSegments: 3, curveSegments: 10,
+            });
+          const base = handles.macbookGroup.children.find((c) => {
+            const g = (c as THREE.Mesh).geometry as THREE.BoxGeometry | undefined;
+            return g?.type === "BoxGeometry" && g.parameters.width === 3.6 && g.parameters.depth === 0.1;
+          }) as THREE.Mesh | undefined;
+          if (base) {
+            const g = roundSlab(0.1);
+            g.translate(0, 0, -0.04); // match the old box (-0.05 .. 0.05)
+            base.geometry.dispose();
+            base.geometry = g;
+          }
+          const shell = handles.macbookLid.children.find((c) => {
+            const g = (c as THREE.Mesh).geometry as THREE.BoxGeometry | undefined;
+            return g?.type === "BoxGeometry" && g.parameters.width === 3.6;
+          }) as THREE.Mesh | undefined;
+          if (shell) {
+            const g = roundSlab(0.06);
+            g.translate(0, -1.2, 0.01); // old shell spanned 0 .. 0.06 below the hinge
+            shell.geometry.dispose();
+            shell.geometry = g;
+          }
+        }
+        const screenMesh = handles.macbookLid.children.find(
+          (c) => (c as THREE.Mesh).isMesh && ((c as THREE.Mesh).geometry as THREE.BufferGeometry).type === "PlaneGeometry"
+        ) as THREE.Mesh | undefined;
+        if (screenMesh) {
+          const tex = loader.load("/deepleaf.webp");
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.wrapS = THREE.RepeatWrapping;
+          tex.wrapT = THREE.RepeatWrapping;
+          tex.repeat.set(-1, -1);
+          tex.offset.set(1, 1);
+          (screenMesh.material as THREE.MeshBasicMaterial).map = tex;
+          (screenMesh.material as THREE.MeshBasicMaterial).needsUpdate = true;
+          screenMesh.position.z = -0.012; // sit just outside the lid shell so it isn't hidden inside it
+        }
+        // 2. Warm cream felt pad
+        const pad = handles.deskGroup.children.find(
+          (c) => (c as THREE.Mesh).isMesh && ((c as THREE.Mesh).geometry as THREE.BoxGeometry).parameters?.width === 10.2
+        ) as THREE.Mesh | undefined;
+        if (pad) {
+          const cv = document.createElement("canvas");
+          cv.width = 2040; cv.height = 1400;
+          const g = cv.getContext("2d")!;
+          g.fillStyle = "#e9dfcb"; g.fillRect(0, 0, cv.width, cv.height);
+          for (let i = 0; i < 60000; i++) {
+            const v = Math.random();
+            g.fillStyle = v > 0.5 ? `rgba(255,255,250,${Math.random() * 0.25})` : `rgba(140,110,80,${Math.random() * 0.12})`;
+            g.fillRect(Math.random() * cv.width, Math.random() * cv.height, 2, 2);
+          }
+          g.strokeStyle = "rgba(160,124,88,0.85)"; g.lineWidth = 5; g.setLineDash([22, 16]);
+          g.strokeRect(46, 46, cv.width - 92, cv.height - 92);
+          const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+          const m = pad.material as THREE.MeshStandardMaterial; m.map = t; m.roughness = 0.95; m.needsUpdate = true;
+        }
+        // 2b. Lighter honey-oak table that fills the whole view
+        const desk = handles.deskGroup.children.find(
+          (c) => (c as THREE.Mesh).isMesh && ((c as THREE.Mesh).geometry as THREE.BoxGeometry).parameters?.width === 16
+        ) as THREE.Mesh | undefined;
+        if (desk) {
+          const cv = document.createElement("canvas");
+          cv.width = 2400; cv.height = 1500;
+          const g = cv.getContext("2d")!;
+          const plankH = 300;
+          for (let py = 0; py < cv.height; py += plankH) {
+            const tone = 0.92 + Math.random() * 0.12;
+            const grd = g.createLinearGradient(0, py, 0, py + plankH);
+            grd.addColorStop(0, `rgb(${152 * tone},${104 * tone},${62 * tone})`);
+            grd.addColorStop(1, `rgb(${138 * tone},${92 * tone},${52 * tone})`);
+            g.fillStyle = grd; g.fillRect(0, py, cv.width, plankH);
+            for (let k = 0; k < 70; k++) {
+              const y0 = py + Math.random() * plankH, amp = 2 + Math.random() * 8, f = 0.002 + Math.random() * 0.004, ph = Math.random() * 6;
+              g.strokeStyle = `rgba(${92 + Math.random() * 30},${58 + Math.random() * 18},${32},${0.1 + Math.random() * 0.16})`;
+              g.lineWidth = 1 + Math.random() * 2.2; g.beginPath();
+              for (let x = 0; x <= cv.width; x += 20) { const y = y0 + Math.sin(x * f + ph) * amp; if (x === 0) g.moveTo(x, y); else g.lineTo(x, y); }
+              g.stroke();
+            }
+            g.fillStyle = "rgba(64,38,18,0.6)"; g.fillRect(0, py, cv.width, 3);
+            g.fillStyle = "rgba(255,230,200,0.16)"; g.fillRect(0, py + 3, cv.width, 2);
+          }
+          const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+          const m = desk.material as THREE.MeshStandardMaterial; m.map = t; m.roughness = 0.55; m.needsUpdate = true;
+          desk.scale.set(1.3, 1.3, 1);
+        }
+        scene.background = new THREE.Color(0x6b4a2c);
+        // 2c. Golden-hour sunbeam through a window (panes + leaf shadows), additive on the desk
+        {
+          const cv = document.createElement("canvas");
+          cv.width = 1600; cv.height = 1100;
+          const g = cv.getContext("2d")!;
+          g.fillStyle = "#000"; g.fillRect(0, 0, cv.width, cv.height);
+          g.save();
+          g.filter = "blur(6px)";
+          g.translate(cv.width * 0.47, cv.height * 0.5);
+          g.transform(1, -0.26, 0.42, 1, 0, 0); // skew = low sun angle through tall windows
+          const cols = 3, rows = 2, pw = 290, ph = 400, gap = 34; // big windows
+          const totalW = cols * pw + (cols - 1) * gap, totalH = rows * ph + (rows - 1) * gap;
+          for (let cx = 0; cx < cols; cx++) for (let cy = 0; cy < rows; cy++) {
+            const x = -totalW / 2 + cx * (pw + gap), y = -totalH / 2 + cy * (ph + gap);
+            const grd = g.createLinearGradient(x, y, x + pw, y + ph);
+            grd.addColorStop(0, "rgba(255,222,172,0.38)"); grd.addColorStop(1, "rgba(255,204,145,0.26)");
+            g.fillStyle = grd; g.fillRect(x, y, pw, ph);
+          }
+          // sheer curtain softening one edge
+          const cur = g.createLinearGradient(-totalW / 2, 0, -totalW / 2 + 160, 0);
+          cur.addColorStop(0, "rgba(0,0,0,0.55)"); cur.addColorStop(1, "rgba(0,0,0,0)");
+          g.fillStyle = cur; g.fillRect(-totalW / 2 - 20, -totalH / 2 - 20, 180, totalH + 40);
+          g.restore();
+          // leaf shadows from a plant outside the window
+          g.save(); g.filter = "blur(10px)"; g.fillStyle = "rgba(0,0,0,0.75)";
+          for (let i = 0; i < 26; i++) {
+            const x = cv.width * 0.62 + (Math.random() - 0.5) * 420, y = cv.height * 0.12 + Math.random() * 260;
+            g.beginPath(); g.ellipse(x, y, 16 + Math.random() * 26, 6 + Math.random() * 10, Math.random() * Math.PI, 0, Math.PI * 2); g.fill();
+          }
+          g.restore();
+          // warm haze over the whole beam area
+          const haze = g.createRadialGradient(cv.width * 0.5, cv.height * 0.45, 60, cv.width * 0.5, cv.height * 0.45, 900);
+          haze.addColorStop(0, "rgba(255,220,170,0.08)"); haze.addColorStop(1, "rgba(0,0,0,0)");
+          g.fillStyle = haze; g.fillRect(0, 0, cv.width, cv.height);
+          const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
+          const wm = handles.windowLightMesh.material as THREE.MeshBasicMaterial;
+          wm.map = t; wm.opacity = 0.5; wm.needsUpdate = true;
+          handles.windowLightMesh.position.z = 0.9; // above the props so light falls on everything
+          handles.windowLightMesh.scale.set(1.55, 1.55, 1);
+        }
+        // light levels: lower ambient so the sunbeam reads, warm low sun
+        dayLight.ambient = 1.45; dayLight.hemi = 0.85; dayLight.sun = 1.9; dayLight.exposure = 1.12;
+        ambientLight.intensity = 1.45; hemiLight.intensity = 0.85; sunLight.intensity = 1.9; renderer.toneMappingExposure = 1.12;
+        sunLight.color.set(0xffd2a0);
+        sunLight.position.set(5.5, 4.5, 12);
+        // Shadow camera covers the whole desk (no hard cut-off lines), with soft, lighter edges
+        {
+          const sc = sunLight.shadow.camera as THREE.OrthographicCamera;
+          sc.left = -12; sc.right = 12; sc.top = 9; sc.bottom = -9; sc.near = 0.5; sc.far = 30;
+          sc.updateProjectionMatrix();
+          sunLight.shadow.radius = 6;
+          sunLight.shadow.blurSamples = 12;
+          sunLight.shadow.normalBias = 0.02;
+          sunLight.shadow.intensity = 0.65;
+        }
+        // 3. Calmer palette
+        handles.globeGroup.traverse((c) => {
+          const mm = (c as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
+          if ((c as THREE.Mesh).isMesh && mm?.color) mm.color.multiply(new THREE.Color(0xcfc6b8));
+        });
+        // 4. Softer window light
+        // 5. Papers, cables, paperclip
+        const paperTex = (draw: (g: CanvasRenderingContext2D, w: number, h: number) => void, bg: string) => {
+          const c = document.createElement("canvas"); c.width = 840; c.height = 1188;
+          const g = c.getContext("2d")!; g.fillStyle = bg; g.fillRect(0, 0, c.width, c.height); draw(g, c.width, c.height);
+          const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return { t, c, g };
+        };
+        const addPaper = (tex: THREE.Texture, x: number, y: number, rz: number, z = 0.036, w = 1.5, h = 2.1) => {
+          const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 }));
+          mesh.position.set(x, y, z); mesh.rotation.z = rz; mesh.receiveShadow = true; mesh.castShadow = true;
+          handles.deskGroup.add(mesh);
+        };
+        // printed DeepLeaf paper
+        const pp = paperTex((g, w) => {
+          g.fillStyle = "#111"; g.font = "bold 30px serif"; g.textAlign = "center";
+          g.fillText("Tomato Foliar Disease Detection via", w / 2, 90);
+          g.fillText("YOLO26 Instance Segmentation", w / 2, 128);
+          g.font = "18px serif"; g.fillStyle = "#444"; g.fillText("Aldea · De Leon · Jerusalem · Lagarde · Comia", w / 2, 168);
+          g.fillStyle = "#9a9a9a";
+          for (let col = 0; col < 2; col++) for (let i = 0; i < 34; i++) {
+            const y = 220 + i * 16; if (col === 1 && i > 6 && i < 22) continue;
+            g.fillRect(60 + col * 380, y, 340 - (i % 7 === 6 ? 120 : Math.random() * 30), 6);
+          }
+          for (let i = 0; i < 22; i++) g.fillRect(60, 800 + i * 16, 720 - (i % 6 === 5 ? 300 : Math.random() * 40), 6);
+        }, "#fbfaf6");
+        const fig = new Image(); fig.src = "/deepleaf.webp";
+        fig.onload = () => { pp.g.drawImage(fig, 440, 330, 340, 212); pp.g.fillStyle = "#666"; pp.g.font = "italic 14px serif"; pp.g.fillText("Fig. 6. Segmented late blight lesion", 610, 565); pp.t.needsUpdate = true; };
+        addPaper(pp.t, 6.85, 1.17, -0.06, 0.012, 2.2, 3.1); // printed paper (journal-sized) lies just below the plant
+        const clip = new THREE.CatmullRomCurve3(
+          [[0, 0], [0.5, 0], [0.56, 0.1], [0.5, 0.2], [-0.04, 0.2], [-0.1, 0.1], [-0.04, 0.04], [0.42, 0.04], [0.45, 0.1], [0.42, 0.16], [0.05, 0.16]].map(([x, y]) => new THREE.Vector3(x, y, 0))
+        );
+        const clipMesh = new THREE.Mesh(new THREE.TubeGeometry(clip, 80, 0.013, 6, false), new THREE.MeshStandardMaterial({ color: 0xc9ced6, metalness: 0.9, roughness: 0.25 }));
+        clipMesh.position.set(5.85, 2.62, 0.03); clipMesh.rotation.z = -0.5; // clipped to the paper's corner clipMesh.castShadow = true; handles.deskGroup.add(clipMesh);
+        // 6. Personal props
+        handles.phoneScreenMat.map = createLockScreenTexture();
+        handles.phoneScreenMat.needsUpdate = true;
+        // iPhone 18 Pro Max, face down (replaces the old phone model inside the same clickable group)
+        handles.phoneGroup.children.forEach((c) => { c.visible = false; });
+        const iphone = buildIphone18ProMax(createAppleLogoShape());
+        iphone.position.z = 0.04;
+        iphone.scale.setScalar(0.8); // a little smaller on the desk
+        handles.phoneGroup.add(iphone);
+        if (handles.frameShadowMesh) handles.frameShadowMesh.visible = false;
+        handles.pictureFrameGroup.children.forEach((c) => {
+          const m = c as THREE.Mesh;
+          if (!m.isMesh) return;
+          const mat = m.material as THREE.MeshStandardMaterial;
+          const geo = m.geometry as THREE.PlaneGeometry & THREE.BoxGeometry;
+          if (geo.type === "PlaneGeometry" && mat.map) {
+            mat.map = createFramePhotoTexture(geo.parameters.width / geo.parameters.height);
+            mat.needsUpdate = true;
+          } else if (geo.type === "BoxGeometry" && geo.parameters.width === 0.44 && mat.map) {
+            const variant = m.position.x < 1.5 ? 0 : 1;
+            mat.map = createStripTexture(variant as 0 | 1);
+            mat.needsUpdate = true;
+          }
+        });
+        // pothos in a cream pot
+        handles.plantGroup.children.forEach((c, i) => { if (i >= 3) c.visible = false; });
+        handles.plantGroup.children.slice(0, 2).forEach((c) => ((c as THREE.Mesh).material as THREE.MeshStandardMaterial).color?.set(0xefe4d0));
+        handles.plantGroup.add(buildPothos(0.45));
+        // articulated lamp
+        handles.lampGroup.children.forEach((c) => { if ((c as THREE.Mesh).isMesh) c.visible = false; });
+        handles.lampGroup.add(buildDeskLamp());
+
+        // 7. Redesigned props (old meshes hidden, new ones live inside the same clickable groups)
+        const swapIn = (target: THREE.Group, obj: THREE.Object3D) => {
+          target.children.forEach((c) => { c.visible = false; });
+          target.add(obj);
+        };
+        const sc = buildScissors(envTex);
+        sc.group.scale.setScalar(0.86);
+        sc.group.position.y = -0.12;
+        swapIn(handles.scissorsGroup, sc.group);
+        handles.scissorBlade1 = sc.arm1;
+        handles.scissorBlade2 = sc.arm2;
+
+        handles.rubiksCubeGroup.children.forEach((c) => { c.visible = false; });
+        const cube = buildRubiks(envTex);
+        cube.scale.setScalar(1.12);
+        handles.rubiksCubeGroup.add(cube);
+        handles.rubiksCubeGroup.userData.cube = cube;
+
+        const cat = buildCat();
+        cat.group.scale.setScalar(1.25);
+        swapIn(handles.catGroup, cat.group);
+        handles.catTailMesh = cat.tail;
+
+        const miata = buildMiataDisplay(envTex);
+        swapIn(handles.miataGroup, miata.group);
+        handles.miataGroup.userData.glare = miata.glare;
+
+        const dish = buildJewelryDish(envTex);
+        swapIn(handles.jewelryGroup, dish.group);
+        handles.jewelrySparkles = dish.sparkles;
+        if (handles.jewelryLight) { handles.jewelryLight.intensity = 0; handles.jewelryLight.visible = false; }
+        handles.jewelryLight = undefined;
+
+        const matcha = buildMatcha(envTex);
+        handles.mugGroup.children.forEach((c) => { if (c !== handles.steamParticles) c.visible = false; });
+        handles.mugGroup.add(matcha.group);
+        handles.mugLiquid = matcha.liquid;
+
+        swapIn(handles.chessGroup, buildChess(envTex));
+
+        // Vintage globe
+        const globe = buildGlobe(envTex);
+        globe.group.scale.setScalar(1.15);
+        swapIn(handles.globeGroup, globe.group);
+        handles.globeGroup.rotation.z = 0;
+        handles.globeSphere = globe.sphere;
+
+        // Leather journal with a silver cybersigilism emboss
+        {
+          const coverMesh = handles.journalCover.children.find((c) => (c as THREE.Mesh).isMesh) as THREE.Mesh | undefined;
+          if (coverMesh) {
+            const m = coverMesh.material as THREE.MeshStandardMaterial;
+            m.map = createCybersigilJournalTexture();
+            m.roughness = 0.55;
+            m.metalness = 0.15;
+            m.needsUpdate = true;
+          }
+          // hide the old gold title/decals on top of the cover, keep the cover itself
+          handles.journalCover.children.forEach((c) => { if (c !== coverMesh) c.visible = false; });
+        }
+
+        // Pencils live in a frosted pencil case; the blue pencil can be taken out
+        const pencilCase = buildPencilCase(envTex);
+        pencilCase.position.set(-2.2, -2.55, 0);
+        handles.deskGroup.add(pencilCase);
+        for (const k of ["pencil", "pencil2", "pen"] as const) {
+          const o = targets[k];
+          if (o) o.position.z = 0.07;
+        }
+        handles.pencilGroup.userData.home = new THREE.Vector2(L.pencil[0], L.pencil[1]);
+        handles.pencilGroup.userData.outPos = new THREE.Vector2(-2.25, -3.3);
+
+        // The photo frame is swapped for a little stack of polaroids lying on the desk; clicking
+        // fans them out (the photo-booth strips and tape beside it stay)
+        {
+          handles.pictureFrameGroup.children.forEach((c) => {
+            const g = (c as THREE.Mesh).geometry as THREE.BufferGeometry & { parameters?: { width?: number } };
+            const w = g?.parameters?.width;
+            if (Math.abs(c.position.x) < 1.2 && w !== 0.44 && w !== 0.24) c.visible = false; // frame, photo, glass, corners
+          });
+          const polaroids = buildPolaroidStack();
+          polaroids.position.set(0, -0.35, 0);
+          handles.pictureFrameGroup.add(polaroids);
+          handles.pictureFrameGroup.userData.polaroids = polaroids;
+        }
+        swapIn(handles.earbudsGroup, buildAirpods(envTex));
+
+        // No blue glow spot on the keyboard
+        handles.screenLight.visible = false;
+      }
+    }
     handlesRef.current = handles;
+
+    // Night: warm pool under the lamp head, cool glow spilling from the laptop screen
+    const lampPool = buildGlowPool("rgba(255,170,90,1)", 8.5, 7.5);
+    lampPool.position.set(-3.95, 0.85, 0.95); // pool of light over the journal
+    const screenPool = buildGlowPool("rgba(190,215,255,0.8)", 6.0, 4.2);
+    screenPool.position.set(0.1, 0.9, 0.95);
+    handles.deskGroup.add(lampPool, screenPool);
+    // Light layers float above the props; never let them catch hovers or clicks
+    for (const m of [lampPool, screenPool, handles.windowLightMesh]) m.raycast = () => {};
+    const envMats: THREE.MeshStandardMaterial[] = [];
+    scene.traverse((o) => {
+      const mm = (o as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
+      if (mm && mm.envMap && mm.userData.baseEnv !== undefined && !envMats.includes(mm)) envMats.push(mm);
+    });
 
     // Map object names to top-level object groups
     const nameToObjectMap: Record<string, THREE.Object3D> = {
@@ -189,8 +653,17 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       car: handles.miataGroup
     };
 
+
+    const MOONLIGHT = new THREE.Color(0xd2ddff); // cool, bright moonlight through the big windows
+    const SUNLIGHT = new THREE.Color(0xffffff);
+    const matBottom = new THREE.Vector3();
+    let lastMatBottom = -1;
+
     // Raycaster Setup & Drag State Variables
     const raycaster = new THREE.Raycaster();
+    // Lines (like the Miata case's bright edges) are hit-tested within this distance; the default of
+    // a whole desk unit made the case grab hovers meant for the jewelry and the AirPods next to it
+    raycaster.params.Line = { threshold: 0.02 };
     const pointer = new THREE.Vector2();
 
     let isDragging = false;
@@ -319,6 +792,9 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
       targetMouseRef.current = { x, y };
+      if (tooltipRef.current) {
+        tooltipRef.current.style.transform = `translate3d(${event.clientX - rect.left + 16}px, ${event.clientY - rect.top + 18}px, 0)`;
+      }
       if (isFirstPointerMove) {
         mouseRef.current = { x, y };
         isFirstPointerMove = false;
@@ -354,7 +830,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         for (const hit of intersects) {
           let current: THREE.Object3D | null = hit.object;
           while (current && current !== handles.deskGroup) {
-            if (current.name) {
+            if (current.name && nameToObjectMap[current.name]) {
               foundObject = current.name;
               break;
             }
@@ -403,12 +879,45 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       }
     };
 
+    const openWorks = () => {
+      onBeforeNavigate?.();
+      setTimeout(() => window.history.pushState({}, "", "/works"), 80);
+    };
+
+
+    const markFound = (objName: string) => {
+      const id = ALIAS[objName];
+      if (!id || foundRef.current.has(id)) return;
+      foundRef.current.add(id);
+      const next = Array.from(foundRef.current);
+      setFound(next);
+      if (next.length === ALL_IDS.length) {
+        setTimeout(() => {
+          setAllFoundToast(true);
+          setIsEasterEggOpen(true);
+        }, 1400);
+      }
+    };
+
     const triggerObjectAction = (objName: string, zoneName: string | null) => {
       playClickSound();
       closeAllOverlays();
+      markFound(objName);
 
       if (objName === "macbook" || objName === "keyboard") {
-        setIsLaptopOpen(true);
+        // Click pins the lid open; click again closes it
+        const pinned = !handles.macbookLid.userData.pinned;
+        handles.macbookLid.userData.pinned = pinned;
+        if (!pinned) {
+          handles.macbookLid.userData.suppressHover = true; // close now, even though the pointer is still on it
+          return;
+        }
+        setInfo({
+          title: "Check out the projects I've been working on!",
+          actions: [{ label: "Open the works archive", primary: true, onClick: () => { setInfo(null); openWorks(); } }],
+        });
+      } else if (objName === "plant") {
+        // no card: the plant is just a plant
       } else if (objName === "journal") {
         setIsJournalOpen(true);
       } else if (objName === "coffeeMug" || objName === "matcha" || objName === "matchaMug" || objName === "mug" || objName === "cup") {
@@ -418,7 +927,10 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       } else if (objName === "phone" || objName === "ipad" || objName === "tablet") {
         setIsPhoneOpen(true);
       } else if (objName === "pencil") {
-        setIsBlueprintActive(true);
+        const pg = handles.pencilGroup;
+        pg.userData.isOut = !pg.userData.isOut;
+        pg.userData.slideTo = pg.userData.isOut ? pg.userData.outPos : pg.userData.home;
+        if (pg.userData.isOut) setIsBlueprintActive(true);
       } else if (objName === "stickyNotes") {
         setIsEasterEggOpen(true);
       } else if (objName === "earbuds" || objName === "airpods" || objName === "airpod") {
@@ -431,7 +943,9 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         setIsLampOn(nextState);
         playToggleSound(nextState);
       } else if (objName === "pictureFrame" || objName === "frame" || objName === "photoFrame") {
-        setIsPictureFrameOpen(true);
+        const stack = handles.pictureFrameGroup.userData.polaroids as THREE.Group | undefined;
+        const toggle = stack?.userData.toggle as (() => boolean) | undefined;
+        if (toggle && toggle()) setTimeout(() => setIsPictureFrameOpen(true), 380);
       } else if (objName === "chess" || objName === "chessPieces" || objName === "pawn" || objName === "knight" || objName === "queen") {
         setIsChessOpen(true);
       } else if (objName === "globe" || objName === "globeSphere") {
@@ -441,7 +955,10 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       } else if (objName === "jewelry" || objName === "silverJewelry" || objName === "jewelries" || objName === "rings" || objName === "necklace") {
         setIsSilverOpen(true);
       } else if (objName === "rubiksCube" || objName === "rubiks" || objName === "cube" || objName === "rubik") {
-        setIsRubiksOpen(true);
+        // first click scrambles it, the next one solves it again (and asks what's next)
+        const cube = handles.rubiksCubeGroup.userData.cube as THREE.Group | undefined;
+        const toggle = cube?.userData.toggle as (() => boolean) | undefined;
+        if (toggle && toggle()) setTimeout(() => setIsRubiksOpen(true), 420);
       } else if (objName === "miata" || objName === "miataCar" || objName === "toyMiata" || objName === "toyCar" || objName === "car") {
         setIsMiataOpen(true);
       }
@@ -468,6 +985,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       const width = container.clientWidth;
       const height = container.clientHeight;
       const newAspect = width / height;
+      d = fitD(newAspect);
 
       camera.left = -d * newAspect;
       camera.right = d * newAspect;
@@ -504,8 +1022,10 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
 
       // MacBook: Lid opens & screen light activates ONLY on hover
       const isMacbookHovered = hoveredObj === "macbook" || hoveredObj === "keyboard";
-      const targetLidAngle = isMacbookHovered ? -1.65 : 0;
-      const targetLightIntensity = isMacbookHovered ? 1.0 : 0;
+      if (!isMacbookHovered) handles.macbookLid.userData.suppressHover = false;
+      const lidOpen = Boolean(handles.macbookLid.userData.pinned) || (isMacbookHovered && !handles.macbookLid.userData.suppressHover);
+      const targetLidAngle = lidOpen ? -2.25 : 0;
+      const targetLightIntensity = 0;
 
       handles.macbookLid.rotation.x += (targetLidAngle - handles.macbookLid.rotation.x) * 0.1;
       handles.screenLight.intensity += (targetLightIntensity - handles.screenLight.intensity) * 0.1;
@@ -529,8 +1049,23 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
 
       // Staedtler Blue Pencil Hover Lift & Float Animation
       const isPencilHovered = hoveredObj === "pencil";
-      const targetPencilZ = isPencilHovered ? 0.28 : 0.05;
-      const targetPencilRotZ = isPencilHovered ? -0.06 : -0.14;
+      const slideTo = handles.pencilGroup.userData.slideTo as THREE.Vector2 | undefined;
+      const home = handles.pencilGroup.userData.home as THREE.Vector2 | undefined;
+      const inCase = home ? Math.hypot(handles.pencilGroup.position.x - home.x, handles.pencilGroup.position.y - home.y) < 0.25 : false;
+      const targetPencilZ = slideTo ? 0.45 : isPencilHovered ? (inCase ? 0.3 : 0.2) : inCase ? 0.07 : 0.05;
+      if (slideTo) {
+        if (isDragging && draggedObjectName === "pencil") {
+          handles.pencilGroup.userData.slideTo = undefined;
+        } else {
+          handles.pencilGroup.position.x += (slideTo.x - handles.pencilGroup.position.x) * 0.12;
+          handles.pencilGroup.position.y += (slideTo.y - handles.pencilGroup.position.y) * 0.12;
+          if (Math.hypot(slideTo.x - handles.pencilGroup.position.x, slideTo.y - handles.pencilGroup.position.y) < 0.01) {
+            handles.pencilGroup.userData.slideTo = undefined;
+          }
+        }
+      }
+      const pencilBase = (handles.pencilGroup.userData.baseRotZ as number | undefined) ?? -0.14;
+      const targetPencilRotZ = pencilBase + (isPencilHovered && !inCase ? 0.08 : 0);
       if (!isDragging || draggedObjectName !== "pencil") {
         handles.pencilGroup.position.z += (targetPencilZ - handles.pencilGroup.position.z) * 0.1;
         handles.pencilGroup.rotation.z += (targetPencilRotZ - handles.pencilGroup.rotation.z) * 0.1;
@@ -557,7 +1092,8 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       const isAirpodsHovered = hoveredObj === "earbuds" || hoveredObj === "airpods" || hoveredObj === "airpod";
       const targetEarbudsZ = isAirpodsHovered ? 0.38 : 0.05;
       const targetEarbudsScale = isAirpodsHovered ? 1.05 : 1.0;
-      const targetEarbudsRotZ = isAirpodsHovered ? -0.22 : -0.3;
+      const earbudsBase = (handles.earbudsGroup.userData.baseRotZ as number | undefined) ?? -0.3;
+      const targetEarbudsRotZ = earbudsBase + (isAirpodsHovered ? 0.08 : 0);
 
       if (!isDragging || (draggedObjectName !== "earbuds" && draggedObjectName !== "airpods" && draggedObjectName !== "airpod")) {
         handles.earbudsGroup.position.z += (targetEarbudsZ - handles.earbudsGroup.position.z) * 0.1;
@@ -669,13 +1205,15 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         const lampY = handles.lampGroup.position.y;
         const lampZ = handles.lampGroup.position.z;
 
-        const bulbX = lampX + 0.4;
-        const bulbY = lampY - 0.8;
+        // the shade sits at (1.6, -1.2) in the lamp's own frame
+        const lr = handles.lampGroup.rotation.z;
+        const bulbX = lampX + 1.6 * Math.cos(lr) + 1.2 * Math.sin(lr);
+        const bulbY = lampY + 1.6 * Math.sin(lr) - 1.2 * Math.cos(lr);
         const bulbZ = lampZ + 1.25;
 
         handles.cozyCornerLight.position.set(bulbX, bulbY, bulbZ);
         handles.lampLight.position.set(bulbX, bulbY, bulbZ + 2.0);
-        handles.lampTarget.position.set(lampX + 0.8, lampY - 1.8, 0);
+        handles.lampTarget.position.set(handles.journalGroup.position.x, handles.journalGroup.position.y, 0);
         handles.lampTarget.updateMatrixWorld();
 
         const targetSpotIntensity = isLampOnRef.current ? 5.5 : 0;
@@ -697,7 +1235,8 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         const isFrameHovered = hoveredObj === "pictureFrame" || hoveredObj === "frame" || hoveredObj === "photoFrame";
         const targetFrameZ = isFrameHovered ? 0.42 : 0.04;
         const targetFrameScale = isFrameHovered ? 1.05 : 1.0;
-        const targetFrameRotZ = isFrameHovered ? 0.08 : 0.04;
+        const frameBase = (handles.pictureFrameGroup.userData.baseRotZ as number | undefined) ?? 0.04;
+        const targetFrameRotZ = frameBase + (isFrameHovered ? 0.04 : 0);
 
         if (!isDragging || (draggedObjectName !== "pictureFrame" && draggedObjectName !== "frame")) {
           handles.pictureFrameGroup.position.z += (targetFrameZ - handles.pictureFrameGroup.position.z) * 0.1;
@@ -728,7 +1267,8 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         const isChessHovered = hoveredObj === "chess" || hoveredObj === "chessPieces" || hoveredObj === "pawn" || hoveredObj === "knight" || hoveredObj === "queen";
         const targetChessZ = isChessHovered ? 0.42 : 0.05;
         const targetChessScale = isChessHovered ? 1.06 : 1.0;
-        const targetChessRotZ = isChessHovered ? -0.05 : -0.15;
+        const chessBase = (handles.chessGroup.userData.baseRotZ as number | undefined) ?? -0.15;
+        const targetChessRotZ = chessBase + (isChessHovered ? 0.1 : 0);
 
         if (!isDragging || (draggedObjectName !== "chess" && draggedObjectName !== "pawn" && draggedObjectName !== "knight" && draggedObjectName !== "queen")) {
           handles.chessGroup.position.z += (targetChessZ - handles.chessGroup.position.z) * 0.1;
@@ -816,9 +1356,8 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
         const targetMiataZ = 0.05;
         if (!isDragging || (draggedObjectName !== "miata" && draggedObjectName !== "miataCar" && draggedObjectName !== "toyMiata" && draggedObjectName !== "toyCar")) {
           handles.miataGroup.position.z += (targetMiataZ - handles.miataGroup.position.z) * 0.1;
-          if (isMiataHovered) {
-            handles.miataGroup.rotation.z += 0.006;
-          }
+          const glare = handles.miataGroup.userData.glare as THREE.Mesh | undefined;
+          if (glare) glare.position.x += ((isMiataHovered ? 0.35 : 0) - glare.position.x) * 0.06;
         }
       }
 
@@ -836,8 +1375,47 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       }
       handles.dustParticles.geometry.attributes.position.needsUpdate = true;
 
+      // Day / night lighting follows the site theme
+      const night = themeRef.current === "dark";
+      const wmat = handles.windowLightMesh.material as THREE.MeshBasicMaterial;
+      wmat.opacity += ((night ? 0.95 : 0.5) - wmat.opacity) * 0.05;
+      wmat.color.lerp(night ? MOONLIGHT : SUNLIGHT, 0.05);
+      ambientLight.intensity += ((night ? 0.7 : dayLight.ambient) - ambientLight.intensity) * 0.05;
+      hemiLight.intensity += ((night ? 0.35 : dayLight.hemi) - hemiLight.intensity) * 0.05;
+      sunLight.intensity += ((night ? 0.12 : dayLight.sun) - sunLight.intensity) * 0.05;
+      renderer.toneMappingExposure += ((night ? 1.15 : dayLight.exposure) - renderer.toneMappingExposure) * 0.05;
+      const lpm = lampPool.material as THREE.MeshBasicMaterial;
+      lpm.opacity += ((night && isLampOnRef.current ? 1 : 0) - lpm.opacity) * 0.05;
+      const spm = screenPool.material as THREE.MeshBasicMaterial;
+      spm.opacity += ((night ? 0.45 * Math.min(1, Math.max(0, -handles.macbookLid.rotation.x / 2.25)) : 0) - spm.opacity) * 0.05;
+      const dm = handles.dustParticles.material as THREE.PointsMaterial;
+      dm.transparent = true;
+      dm.opacity += ((night ? 0 : 0.8) - dm.opacity) * 0.05;
+      for (const em of envMats) {
+        const base = em.userData.baseEnv as number;
+        em.envMapIntensity += ((night ? base * 0.3 : base) - em.envMapIntensity) * 0.05;
+      }
+
+
+      // Where the mat's bottom edge lands on screen → CSS var for the dialogues
+      matBottom.set(0, -3.5, 0).project(camera);
+      const px = Math.round((1 - (matBottom.y + 1) / 2) * container.clientHeight);
+      if (px !== lastMatBottom) {
+        lastMatBottom = px;
+        container.parentElement?.style.setProperty("--mat-bottom", `${px}px`);
+      }
+
       renderer.render(scene, camera);
     };
+
+    // Warm-up: the first render of a scene compiles every shader, uploads every texture and builds
+    // the shadow map, which stalls for a moment. Do that once now, while the desk is still off
+    // screen, instead of on the frame it scrolls into view.
+    const warmTimer = window.setTimeout(() => {
+      if (isIntersecting) return;
+      renderer.compile(scene, camera);
+      renderer.render(scene, camera);
+    }, 60);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -855,7 +1433,8 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
           }
         }
       },
-      { threshold: 0.01 }
+      // start drawing a little before the desk is on screen, so it's already running when it appears
+      { threshold: 0, rootMargin: "200px 0px" }
     );
 
     if (container) {
@@ -863,6 +1442,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
     }
 
     return () => {
+      window.clearTimeout(warmTimer);
       observer.disconnect();
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
@@ -881,7 +1461,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       }
       renderer.dispose();
     };
-  }, [onEnterLab]);
+  }, [onEnterLab, onBeforeNavigate]);
 
   // Audio effect on hover state change
   useEffect(() => {
@@ -891,11 +1471,19 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
   }, [hoveredObjectName, hoveredZoneName]);
 
   return (
-    <div className="relative w-full h-screen bg-[#160c07] overflow-hidden select-none font-mono">
+    <div className="relative w-full h-full bg-[#6b4a2c] overflow-hidden select-none font-mono">
       {/* Soft Cozy Warm Window Light & Ambient Amber Overlays */}
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-bl from-amber-600/15 via-orange-950/10 to-transparent z-0" />
-      <div className="absolute top-0 right-0 w-[35rem] h-[35rem] pointer-events-none bg-gradient-radial from-amber-400/20 via-orange-600/5 to-transparent blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[30rem] h-[30rem] pointer-events-none bg-gradient-radial from-amber-800/15 via-amber-950/5 to-transparent blur-3xl" />
+      {/* Nostalgic film finish: warm tint, lifted shadows, vignette, grain */}
+      <div className={`pointer-events-none absolute inset-0 z-[2] bg-[#ffb36b] mix-blend-soft-light transition-opacity duration-1000 ${theme === "dark" ? "opacity-0" : "opacity-40"}`} />
+      <div className={`pointer-events-none absolute inset-0 z-[2] bg-[#503723] mix-blend-lighten transition-opacity duration-1000 ${theme === "dark" ? "opacity-0" : "opacity-20"}`} />
+      {/* Night: deep blue hour wash; the lamp and screen pools stay warm/bright in the 3D scene */}
+      <div className={`pointer-events-none absolute inset-0 z-[2] bg-[#24345e] mix-blend-multiply transition-opacity duration-1000 ${theme === "dark" ? "opacity-45" : "opacity-0"}`} />
+      <div className={`pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_55%_42%,transparent_52%,rgba(60,30,10,0.5)_100%)] transition-opacity duration-1000 ${theme === "dark" ? "opacity-0" : "opacity-100"}`} />
+      <div className={`pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_50%_45%,transparent_35%,rgba(5,8,20,0.7)_100%)] transition-opacity duration-1000 ${theme === "dark" ? "opacity-100" : "opacity-0"}`} />
+      <div
+        className="pointer-events-none absolute inset-0 z-[2] opacity-40 mix-blend-overlay"
+        style={{ backgroundImage: GRAIN_URL }}
+      />
 
       {/* 3D WebGL Canvas Container */}
       <div 
@@ -911,6 +1499,26 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
 
 
 
+
+      {/* Night tint (dark theme) */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-indigo-950/40 via-indigo-950/20 to-black/30 transition-opacity duration-1000"
+        style={{ opacity: theme === "dark" ? 1 : 0 }}
+      />
+
+
+      {/* Hover label that follows the cursor */}
+      <div
+        ref={tooltipRef}
+        className="pointer-events-none absolute left-0 top-0 z-20 transition-opacity duration-200"
+        style={{ opacity: hoveredObjectName && ALIAS[hoveredObjectName] && !isDraggingState ? 1 : 0 }}
+      >
+        <span className="whitespace-nowrap rounded-full bg-[#fbf7ef] px-3 py-1.5 font-mono text-[11px] font-semibold text-zinc-900 shadow-lg">
+          {hoveredObjectName && ALIAS[hoveredObjectName] ? LABELS[ALIAS[hoveredObjectName]] : ""}
+        </span>
+      </div>
+
+      <InfoCard content={info} onClose={() => setInfo(null)} />
 
       {/* Blur Overlay on initial load */}
       <div 
@@ -945,7 +1553,7 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       <EasterEggModal isOpen={isEasterEggOpen} onClose={() => setIsEasterEggOpen(false)} />
       <EarbudsModal isOpen={isEarbudsOpen} onClose={() => setIsEarbudsOpen(false)} />
       <PictureFrameDialogue isOpen={isPictureFrameOpen} onClose={() => setIsPictureFrameOpen(false)} />
-      <GlobeDialogue isOpen={isGlobeOpen} onClose={() => setIsGlobeOpen(false)} />
+      <MapModal isOpen={isGlobeOpen} onClose={() => setIsGlobeOpen(false)} />
       <ScissorsDialogue isOpen={isScissorsOpen} onClose={() => setIsScissorsOpen(false)} />
       <CatDialogue isOpen={isCatOpen} onClose={() => setIsCatOpen(false)} />
       <SilverDialogue isOpen={isSilverOpen} onClose={() => setIsSilverOpen(false)} />
@@ -953,7 +1561,6 @@ export default function WorkbenchCanvas({ onEnterLab }: WorkbenchCanvasProps) {
       <MatchaDialogue isOpen={isMatchaOpen} onClose={() => setIsMatchaOpen(false)} />
       <RubiksDialogue isOpen={isRubiksOpen} onClose={() => setIsRubiksOpen(false)} />
       <ChessDialogue isOpen={isChessOpen} onClose={() => setIsChessOpen(false)} />
-      <LaptopDialogue isOpen={isLaptopOpen} onClose={() => setIsLaptopOpen(false)} />
     </div>
   );
 }

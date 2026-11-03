@@ -1,15 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  Mail,
-  Wifi,
-  Signal,
-  Camera,
-  Zap,
-  MessageCircle,
-  Lock
-} from "lucide-react";
+import { X, Mail, Camera, Flashlight, MessageCircle, Pause, Play, SkipBack, SkipForward, ArrowUpRight } from "lucide-react";
 import { InstagramIcon } from "../Icons";
 import { playClickSound } from "../../utils/audio";
 
@@ -18,295 +9,224 @@ interface PhoneModalProps {
   onClose: () => void;
 }
 
+// Liquid-glass card used for widgets and notifications on the lock screen
+const glass =
+  "bg-white/18 backdrop-blur-xl border border-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_8px_24px_-10px_rgba(60,20,40,0.45)]";
+
 export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
-  const [isFlashlightOn, setIsFlashlightOn] = useState(false);
-  const [isCameraActive, setIsCameraActive] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [torch, setTorch] = useState(false);
+  const [flash, setFlash] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const [now, setNow] = useState(new Date());
+  const [progress, setProgress] = useState(0.38);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+    if (!isOpen) return;
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, [isOpen]);
 
-  const formattedDate = currentTime.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  // Gentle fake playback so the Now Playing bar moves while open
+  useEffect(() => {
+    if (!isOpen || !playing) return;
+    const t = setInterval(() => setProgress((p) => (p >= 1 ? 0 : p + 1 / 209)), 1000);
+    return () => clearInterval(t);
+  }, [isOpen, playing]);
 
-  const formattedTime = currentTime.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).replace(/\s?[AP]M/i, "");
+  const date = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  const time = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).replace(/\s?[AP]M/i, "");
+  const elapsed = Math.round(progress * 209);
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
-  const handleFlashlightToggle = () => {
+  const close = () => {
     playClickSound();
-    setIsFlashlightOn(!isFlashlightOn);
-  };
-
-  const handleCameraSnap = () => {
-    playClickSound();
-    setIsCameraActive(true);
-    setTimeout(() => setIsCameraActive(false), 400);
+    onClose();
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl select-none font-sans cursor-pointer"
-          onClick={() => {
-            playClickSound();
-            onClose();
-          }}
-        >
-        {/* iPhone 12 Outer Aluminum Enclosure Shell (Exact 390x844 Aspect Ratio) */}
         <motion.div
-          onClick={(e) => e.stopPropagation()}
-          initial={{ opacity: 0, scale: 0.82, y: 35 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.82, y: 35 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-[390px] aspect-[390/844] max-h-[88vh] bg-[#05070d] text-white border-[8px] border-[#2c2c2e] rounded-[48px] shadow-[0_32px_90px_rgba(0,0,0,0.95)] p-4 pt-2.5 flex flex-col justify-between overflow-hidden ring-1 ring-white/15 cursor-default"
-          data-lenis-prevent
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1a0f0a]/60 backdrop-blur-md select-none font-sans cursor-pointer"
+          onClick={close}
         >
-          {/* Camera Flash Effect Overlay */}
-          {isCameraActive && (
-            <motion.div
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 z-50 bg-white pointer-events-none"
-            />
-          )}
+          {/* Burgundy titanium frame with side buttons */}
+          <motion.div
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.9, y: 40, rotate: -2 }}
+            animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 40, rotate: 2 }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            className="relative h-[min(86vh,820px)] aspect-[440/956] rounded-[58px] p-[10px] cursor-default bg-gradient-to-br from-[#7a2a36] via-[#4a1522] to-[#2c0b13] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.85),inset_0_0_0_1.5px_rgba(255,255,255,0.18)]"
+            data-lenis-prevent
+          >
+            <span className="absolute -left-[3px] top-[19%] h-[5%] w-[3px] rounded-l bg-[#5a1b28]" />
+            <span className="absolute -left-[3px] top-[27%] h-[8%] w-[3px] rounded-l bg-[#5a1b28]" />
+            <span className="absolute -left-[3px] top-[37%] h-[8%] w-[3px] rounded-l bg-[#5a1b28]" />
+            <span className="absolute -right-[3px] top-[30%] h-[12%] w-[3px] rounded-r bg-[#5a1b28]" />
+            <span className="absolute -right-[3px] top-[55%] h-[7%] w-[3px] rounded-r bg-[#3f1019]" />
 
-          {/* iOS Dynamic Ambient Lockscreen Wallpaper */}
-          <div
-            className={`absolute inset-0 transition-opacity duration-700 pointer-events-none ${
-              isFlashlightOn
-                ? "bg-gradient-to-b from-amber-500/20 via-zinc-950 to-black opacity-100"
-                : "bg-gradient-to-b from-indigo-950/60 via-[#9333ea]/30 via-slate-950 to-black opacity-95"
-            }`}
-          />
+            {/* Screen */}
+            <div className="relative h-full w-full overflow-hidden rounded-[48px] bg-black text-white">
+              {/* Wallpaper */}
+              <img src="/phone-wallpaper.webp" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/35" />
+              {torch && <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,244,214,0.55),transparent_60%)]" />}
+              {flash && (
+                <motion.div initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ duration: 0.35 }} className="absolute inset-0 z-50 bg-white" />
+              )}
 
-          {/* Glowing Ambient Wallpaper Orbs */}
-          <div className="absolute top-12 -left-12 w-48 h-48 bg-indigo-500/25 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-44 -right-12 w-48 h-48 bg-[#9333ea]/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-20 left-6 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
-
-          {/* Flashlight Beam Ambient Glow */}
-          {isFlashlightOn && (
-            <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-amber-300/25 via-amber-500/10 to-transparent pointer-events-none blur-2xl animate-pulse" />
-          )}
-
-          {/* Top Section Container */}
-          <div className="relative z-20">
-            {/* 1. iPhone 12 Top Status Bar & Classic Notch */}
-            <div className="relative flex items-center justify-between px-2 pt-1 mb-1">
-              {/* iOS Clock */}
-              <span className="text-[13px] font-semibold tracking-tight text-white !text-white font-sans pl-1" style={{ color: "#ffffff" }}>
-                {formattedTime}
-              </span>
-
-              {/* Classic iPhone 12 Notch */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[165px] h-[27px] bg-black rounded-b-[20px] border-b border-x border-white/10 flex items-center justify-between px-3 pt-0.5 shadow-md z-30 pointer-events-none">
-                {/* Ear Speaker */}
-                <div className="absolute top-1 left-1/2 -translate-x-1/2 w-10 h-1 bg-[#1a1a1e] rounded-full border border-white/5" />
-                {/* Camera Lens */}
-                <div className="flex items-center gap-1.5 mt-1.5 ml-0.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#080a10] border border-zinc-800 flex items-center justify-center">
-                    <span className="w-1 h-1 rounded-full bg-[#0f2342]" />
-                  </span>
-                </div>
-                {/* Sensor Array */}
-                <div className="flex items-center gap-1 mt-1.5 mr-0.5">
-                  <span className="w-2 h-2 rounded-full bg-[#0a0d14] border border-zinc-800" />
-                </div>
-              </div>
-
-              {/* iOS Status Indicators (Signal, Wi-Fi, Battery) */}
-              <div className="flex items-center gap-1.5 pr-1 text-white/90">
-                <Signal className="w-3.5 h-3.5" />
-                <Wifi className="w-3.5 h-3.5" />
-                {/* iOS Battery Pill */}
-                <div className="flex items-center gap-0.5 pl-0.5">
-                  <div className="w-5 h-2.5 rounded-[3px] border border-white/80 p-0.5 flex items-center">
-                    <div className="w-full h-full bg-emerald-400 rounded-[1px]" />
-                  </div>
-                  <div className="w-0.5 h-1 bg-white/80 rounded-r-full" />
-                </div>
-              </div>
-            </div>
-
-            {/* Close Modal Button (iOS Overlay Style) */}
-            <button
-              onClick={() => {
-                playClickSound();
-                onClose();
-              }}
-              className="absolute top-8 right-2 z-30 p-1.5 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full border border-white/10 backdrop-blur-md transition-colors cursor-pointer"
-              title="Close iPhone"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            {/* 2. iOS Lock Screen Header (Lock Icon, Date & Big Clock) */}
-            <div className="text-center mt-2 mb-3">
-              <div className="flex justify-center mb-1">
-                <Lock className="w-4 h-4 text-white/80 drop-shadow" />
-              </div>
-              <p className="text-[13px] font-medium text-white/80 tracking-wide" style={{ color: "rgba(255, 255, 255, 0.9)" }}>
-                {formattedDate}
-              </p>
-              <h1 
-                className="text-6xl font-extrabold tracking-tight text-white !text-white my-0.5 font-sans drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]"
-                style={{ color: "#ffffff" }}
-              >
-                {formattedTime}
-              </h1>
-            </div>
-
-            {/* 3. iOS Lockscreen Notification Stack */}
-            <div className="space-y-2 mb-2 overflow-y-auto max-h-[42vh] pr-0.5 scrollbar-none">
-              
-              {/* iMessage Lockscreen Notification Card (Featured) */}
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0, y: 8 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                transition={{ duration: 0.25 }}
-                className="p-3.5 bg-[#1c1c1e]/85 hover:bg-[#2c2c2e]/90 border border-white/15 rounded-[22px] shadow-lg shadow-black/40 backdrop-blur-xl transition-all cursor-default"
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-md bg-[#34c759] flex items-center justify-center shadow-sm shrink-0">
-                      <MessageCircle className="w-3.5 h-3.5 text-white fill-white" />
-                    </div>
-                    <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">
-                      MESSAGES
+              <div className="relative z-10 flex h-full flex-col px-4 pt-3 pb-2">
+                {/* Status bar + Dynamic Island */}
+                <div className="relative flex h-8 items-center justify-between px-3 text-[13px] font-semibold">
+                  <span>{time}</span>
+                  <div className="absolute left-1/2 top-0.5 h-[30px] w-[108px] -translate-x-1/2 rounded-full bg-black" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="flex items-end gap-[2px]">
+                      {[4, 6, 8, 10].map((h) => (
+                        <span key={h} className="w-[3px] rounded-sm bg-white" style={{ height: h }} />
+                      ))}
+                    </span>
+                    <span className="ml-1 flex h-[11px] w-[22px] items-center rounded-[3px] border border-white/80 p-[1.5px]">
+                      <span className="h-full w-[78%] rounded-[1px] bg-white" />
                     </span>
                   </div>
-                  <span className="text-[10px] text-white/40 font-medium">now</span>
                 </div>
-                
-                <div className="pl-0.5">
-                  <h4 className="text-[14px] font-bold text-white tracking-tight">
-                    baba
-                  </h4>
-                  <p className="text-[12px] text-white/90 font-normal leading-snug mt-0.5">
-                    dont forget to take a break
-                  </p>
-                </div>
-              </motion.div>
 
-              {/* Instagram iOS Card */}
-              <a
-                href="https://www.instagram.com/myriellej/"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => playClickSound()}
-                className="group flex items-center justify-between p-3 bg-[#1c1c1e]/75 hover:bg-[#2c2c2e]/90 border border-white/10 rounded-[20px] transition-all shadow-md active:scale-[0.98] cursor-pointer backdrop-blur-md"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-[#C45A3C] border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow">
-                    <InstagramIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-bold text-pink-400/90 uppercase tracking-wider">
-                        INSTAGRAM
-                      </span>
-                      <span className="text-[9px] text-white/40">• 2m ago</span>
-                    </div>
-                    <div className="font-semibold text-white text-xs truncate">
-                      @myriellej
-                    </div>
-                    <div className="text-[10px] text-zinc-400 truncate">
-                      Photos & Updates
-                    </div>
-                  </div>
-                </div>
-                <span className="shrink-0 px-2.5 py-1 text-[10px] font-semibold bg-white/10 group-hover:bg-pink-600 group-hover:text-white text-pink-400 rounded-full border border-white/10 transition-colors">
-                  OPEN ↗
-                </span>
-              </a>
+                <button
+                  onClick={close}
+                  className="absolute right-4 top-12 z-30 rounded-full bg-black/25 p-1.5 text-white/85 backdrop-blur-md transition hover:bg-black/40 cursor-pointer"
+                  aria-label="Close phone"
+                >
+                  <X className="h-4 w-4" />
+                </button>
 
-              {/* Gmail iOS Card */}
-              <a
-                href="mailto:myrielle.work@gmail.com"
-                onClick={() => playClickSound()}
-                className="group flex items-center justify-between p-3 bg-[#1c1c1e]/75 hover:bg-[#2c2c2e]/90 border border-white/10 rounded-[20px] transition-all shadow-md active:scale-[0.98] cursor-pointer backdrop-blur-md"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow">
-                    <Mail className="w-4 h-4 text-emerald-400" />
+                {/* Date and clock */}
+                <div className="mt-5 text-center [text-shadow:0_2px_16px_rgba(60,20,40,0.35)]">
+                  <p className="text-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>{date}</p>
+                  <h1 className="mt-0.5 text-[88px] leading-none font-semibold tracking-[-0.04em]" style={{ color: "rgba(255,255,255,0.95)" }}>{time}</h1>
+                </div>
+
+                {/* Now playing widget */}
+                <div className={`mt-6 rounded-[26px] p-3.5 ${glass}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 shrink-0 rounded-xl bg-[linear-gradient(135deg,#e7c9a0,#8c5a3c_55%,#2e1c16)] shadow-md" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[14px] font-semibold">Best Part (feat. H.E.R.)</p>
+                      <p className="truncate text-[12px] text-white/75">Daniel Caesar</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-bold text-emerald-400/80 uppercase tracking-wider">
-                        GMAIL
-                      </span>
-                      <span className="text-[9px] text-white/40">• 10m ago</span>
-                    </div>
-                    <div className="font-semibold text-white text-xs truncate">
-                      myrielle.work@gmail.com
-                    </div>
-                    <div className="text-[10px] text-zinc-400 truncate">
-                      Direct inquiries & contact
-                    </div>
+                  <div className="mt-3 h-1 rounded-full bg-white/30">
+                    <div className="h-full rounded-full bg-white" style={{ width: `${progress * 100}%` }} />
+                  </div>
+                  <div className="mt-1 flex justify-between text-[10px] font-medium text-white/70">
+                    <span>{fmt(elapsed)}</span>
+                    <span>-{fmt(209 - elapsed)}</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-center gap-8">
+                    <SkipBack className="h-5 w-5 fill-white" />
+                    <button
+                      onClick={() => { playClickSound(); setPlaying((p) => !p); }}
+                      className="cursor-pointer"
+                      aria-label={playing ? "Pause" : "Play"}
+                    >
+                      {playing ? <Pause className="h-7 w-7 fill-white" /> : <Play className="h-7 w-7 fill-white" />}
+                    </button>
+                    <SkipForward className="h-5 w-5 fill-white" />
                   </div>
                 </div>
-                <span className="shrink-0 px-2.5 py-1 text-[10px] font-semibold bg-white/10 group-hover:bg-emerald-600 group-hover:text-white text-emerald-400 rounded-full border border-white/10 transition-colors">
-                  SEND ✉
-                </span>
-              </a>
+
+                {/* Notifications */}
+                <div className="mt-auto space-y-2 overflow-y-auto pb-2 scrollbar-none">
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.35 }}
+                    className={`flex items-start gap-3 rounded-[22px] px-3.5 py-3 ${glass}`}
+                  >
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-b from-[#5bf675] to-[#2cc84d]">
+                      <MessageCircle className="h-5 w-5 fill-white text-white" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between">
+                        <p className="text-[14px] font-semibold">baba</p>
+                        <span className="text-[11px] text-white/70">now</span>
+                      </div>
+                      <p className="text-[13px] leading-snug text-white/90">dont forget to take a break</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.a
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.28, duration: 0.35 }}
+                    href="https://www.instagram.com/myriellej/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => playClickSound()}
+                    className={`group flex items-center gap-3 rounded-[22px] px-3.5 py-3 transition hover:bg-white/28 cursor-pointer ${glass}`}
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-tr from-[#f9b04a] via-[#e1306c] to-[#833ab4]">
+                      <InstagramIcon className="h-5 w-5 text-white" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between">
+                        <p className="text-[14px] font-semibold">Instagram</p>
+                        <span className="text-[11px] text-white/70">2m ago</span>
+                      </div>
+                      <p className="truncate text-[13px] text-white/90">@myriellej · photos & updates</p>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-white/70 transition group-hover:text-white" />
+                  </motion.a>
+
+                  <motion.a
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.36, duration: 0.35 }}
+                    href="mailto:myrielle.work@gmail.com"
+                    onClick={() => playClickSound()}
+                    className={`group flex items-center gap-3 rounded-[22px] px-3.5 py-3 transition hover:bg-white/28 cursor-pointer ${glass}`}
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-b from-[#4fa8ff] to-[#1a6dff]">
+                      <Mail className="h-5 w-5 text-white" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between">
+                        <p className="text-[14px] font-semibold">Mail</p>
+                        <span className="text-[11px] text-white/70">10m ago</span>
+                      </div>
+                      <p className="truncate text-[13px] text-white/90">myrielle.work@gmail.com · say hi</p>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-white/70 transition group-hover:text-white" />
+                  </motion.a>
+                </div>
+
+                {/* Torch + camera, home indicator */}
+                <div className="flex items-center justify-between px-5 pb-3 pt-1">
+                  <button
+                    onClick={() => { playClickSound(); setTorch((t) => !t); }}
+                    className={`flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-xl transition cursor-pointer ${torch ? "bg-white text-[#4a1522]" : "bg-black/25 text-white"}`}
+                    aria-label="Flashlight"
+                  >
+                    <Flashlight className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => { playClickSound(); setFlash(true); setTimeout(() => setFlash(false), 400); }}
+                    className="flex h-12 w-12 items-center justify-center rounded-full bg-black/25 text-white backdrop-blur-xl transition active:scale-90 cursor-pointer"
+                    aria-label="Camera"
+                  >
+                    <Camera className="h-5 w-5" />
+                  </button>
+                </div>
+                <button onClick={close} className="mx-auto mb-1 h-[5px] w-32 rounded-full bg-white/85 cursor-pointer" aria-label="Close" />
+              </div>
             </div>
-          </div>
-
-          {/* Bottom Section Container */}
-          <div className="relative z-20 pt-1">
-            {/* 4. iOS Bottom Lockscreen Quick Action Controls (Flashlight & Camera) */}
-            <div className="flex items-center justify-between px-3 pt-1 pb-1">
-              {/* Flashlight Button */}
-              <button
-                onClick={handleFlashlightToggle}
-                className={`p-3 rounded-full border backdrop-blur-md transition-all cursor-pointer ${
-                  isFlashlightOn
-                    ? "bg-amber-400 text-black border-amber-300 shadow-lg shadow-amber-400/40 scale-105"
-                    : "bg-white/15 hover:bg-white/25 text-white/90 border-white/15"
-                }`}
-                title="Toggle Torch"
-              >
-                <Zap className={`w-5 h-5 ${isFlashlightOn ? "fill-black" : ""}`} />
-              </button>
-
-              {/* Camera Button */}
-              <button
-                onClick={handleCameraSnap}
-                className="p-3 bg-white/15 hover:bg-white/25 text-white/90 border border-white/15 rounded-full backdrop-blur-md transition-all active:scale-90 cursor-pointer"
-                title="Take Photo"
-              >
-                <Camera className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* 5. iPhone Home Bar Indicator */}
-            <div
-              onClick={() => {
-                playClickSound();
-                onClose();
-              }}
-              className="w-32 h-1 bg-white/50 hover:bg-white/90 rounded-full mx-auto mt-2 mb-1 cursor-pointer transition-colors"
-              title="Swipe up to close"
-            />
-          </div>
+          </motion.div>
         </motion.div>
-      </div>
       )}
     </AnimatePresence>
   );
 }
-
-

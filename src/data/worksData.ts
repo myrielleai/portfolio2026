@@ -1,3 +1,5 @@
+export type WorkCategoryId = "ai" | "websites" | "design" | "models3d" | "artworks" | "achievements";
+
 export interface WorkItem {
   id: string;
   title: string;
@@ -9,113 +11,164 @@ export interface WorkItem {
   githubUrl?: string;
   date?: string;
   featured?: boolean;
-  category: "websites" | "models3d" | "artworks" | "achievements";
+  /** Award / recognition, shown as a gold badge (e.g. "Top 3 · Hackathon"). */
+  award?: string;
+  /** One-line pitch at the top of the project's case study. */
+  pitch?: string;
+  /** What I did on it (only where it's on record). */
+  role?: string;
+  /** Proof points listed in the case study: results, features, facts. */
+  highlights?: string[];
+  category: WorkCategoryId;
 }
 
 export interface WorkCategory {
-  id: "websites" | "models3d" | "artworks" | "achievements";
+  id: WorkCategoryId;
   index: string;
   title: string;
   description: string;
-  countLabel: string;
   items: WorkItem[];
 }
 
+// Works Archive (/works). Each category becomes a tab; empty categories are hidden automatically.
 export const worksCategories: WorkCategory[] = [
   {
-    id: "websites",
+    id: "ai",
     index: "01",
+    title: "AI & Machine Learning",
+    description: "Models I've annotated data for, trained, evaluated and deployed.",
+    items: [
+      {
+        id: "ai-1",
+        title: "DeepLeaf",
+        subtitle: "Tomato Foliar Disease Detection via YOLO26 Instance Segmentation",
+        description: "An instance segmentation model that detects and outlines individual lesions of four tomato leaf diseases. I led the team, hand-annotated the lesion dataset and trained the YOLO26 model (0.569 mask mAP@0.5 on an unseen holdout set). Written up as an IEEE-format paper and deployed as a Streamlit app.",
+        tags: ["YOLO26", "PyTorch", "Roboflow", "OpenCV", "Streamlit"],
+        image: "/deepleaf.webp",
+        pitch: "An AI model that finds and outlines every lesion on a tomato leaf.",
+        role: "Team lead · dataset annotation · model training",
+        highlights: [
+          "0.569 mask mAP@0.5 on an unseen holdout set",
+          "Segments lesions from four tomato leaf diseases, one by one",
+          "Written up as an IEEE-format paper",
+          "Deployed as a live Streamlit app",
+        ],
+        demoUrl: "https://deepleafai2.streamlit.app/",
+        githubUrl: "https://github.com/myrielleai/DeepLeaf",
+        date: "2026",
+        featured: true,
+        category: "ai"
+      }
+    ]
+  },
+  {
+    id: "websites",
+    index: "02",
     title: "Websites",
-    description: "Production web applications, cloud backends, logistics engines, and interactive web platforms.",
-    countLabel: "7 Projects",
+    description: "Full-stack web apps, cloud backends and interactive sites.",
     items: [
       {
         id: "web-1",
-        title: "Makati Human Milk Bank System",
-        subtitle: "Cloud Database & Healthcare Management System",
-        description: "Designed and deployed a cloud-based PostgreSQL database using Render, featuring relational data modeling, schema optimizations, and SQL queries. Restructured milk inventory management for medical staff.",
-        tags: ["PostgreSQL", "Render", "Express", "SQL", "Tailwind CSS"],
-        image: "/project1.webp",
-        demoUrl: "https://hmbms-server.onrender.com/",
-        githubUrl: "https://github.com/KadenYohan/MilkBank-Group-Seven",
-        date: "2025",
-        category: "websites",
-        featured: true
+        title: "BookSwap",
+        subtitle: "Peer-to-Peer Book Exchange",
+        description: "A community platform for trading physical books, with verified listings, moderated meetup handovers and separate dashboards for readers, volunteer moderators and admins, including participation reports and printable exchange receipts.",
+        tags: ["React", "Tailwind CSS", "PHP", "MySQL", "Google OAuth"],
+        image: "/bookswap.webp",
+        pitch: "A community platform for trading physical books, safely.",
+        highlights: [
+          "Verified listings and moderated meetup handovers",
+          "Separate dashboards for readers, volunteer moderators and admins",
+          "Participation reports and printable exchange receipts",
+          "Google sign-in",
+        ],
+        demoUrl: "https://bookswap-eta.vercel.app",
+        githubUrl: "https://github.com/myrielleai/BookSwap",
+        date: "2026",
+        category: "websites"
       },
       {
         id: "web-2",
-        title: "ReliefSync: Disaster Logistics Engine",
-        subtitle: "Real-time Task & Inventory Coordinator",
-        description: "An ultra-fast, local-first disaster response engine. Features instant local-first state persistence, optimistic UI updates, keyboard-driven navigation, and real-time operational dashboard.",
+        title: "ReliefSync",
+        subtitle: "Disaster Logistics Engine",
+        description: "A local-first disaster response engine for coordinating relief tasks and inventory, with instant offline state, optimistic updates, keyboard-driven navigation and a real-time operations dashboard. Placed top 3 at a hackathon.",
         tags: ["React", "Tailwind CSS", "LocalForage", "Framer Motion", "Vite"],
         image: "/project2.webp",
+        pitch: "Coordinating disaster relief, even when the connection drops.",
+        highlights: [
+          "Placed top 3 at a hackathon",
+          "Local-first: works offline with instant state",
+          "Optimistic updates and keyboard-driven navigation",
+          "Real-time operations dashboard for tasks and inventory",
+        ],
         demoUrl: "https://reliefsync-frontend-d3sw.onrender.com/index.html",
         githubUrl: "https://github.com/myrielleai/ReliefSync",
         date: "2025",
-        category: "websites",
-        featured: true
+        award: "Top 3 · Hackathon",
+        featured: true,
+        category: "websites"
       },
       {
         id: "web-3",
-        title: "UChannel Interactive Experience",
-        subtitle: "Web3/Creative Interactive Platform",
-        description: "Interactive visual web experience built with React and Three.js. Includes custom gesture handling, 3D physics spring dynamics, and dynamic canvas lighting for an engaging user experience.",
-        tags: ["React", "Three.js", "TypeScript", "GSAP", "Tailwind CSS"],
-        image: "/project3.webp",
-        demoUrl: "https://uchannel.ph",
-        githubUrl: "https://github.com",
+        title: "Makati Human Milk Bank System",
+        subtitle: "Cloud Database & Healthcare Management System",
+        description: "Designed and deployed a cloud-based PostgreSQL database on Render, with relational data modeling, schema design and SQL queries, restructuring milk inventory management for medical staff.",
+        tags: ["PostgreSQL", "Render", "Express", "SQL"],
+        image: "/project1.webp",
+        pitch: "A clean, reliable database behind a hospital milk bank.",
+        role: "Database design and deployment",
+        highlights: [
+          "Cloud PostgreSQL database deployed on Render",
+          "Relational schema and data modelling for milk inventory",
+          "SQL queries that give medical staff a clearer picture of stock",
+        ],
+        demoUrl: "https://hmbms-server.onrender.com/",
+        githubUrl: "https://github.com/KadenYohan/MilkBank-Group-Seven",
         date: "2025",
         category: "websites"
       },
       {
         id: "web-4",
-        title: "Endlezz Market Website",
-        subtitle: "E-Commerce & Layout Engineering Engine",
-        description: "A high-performance modern web application featuring responsive grid architecture, fluid product filtering, dynamic cart management, and dark mode interface.",
-        tags: ["React", "CSS Grid", "TypeScript", "Vite", "Framer Motion"],
-        image: "/project4.webp",
-        demoUrl: "https://endlezz-market.vercel.app/",
-        githubUrl: "https://github.com/myrielleai/EndlezzMarket",
+        title: "UChannel",
+        subtitle: "Interactive Web Experience",
+        description: "An immersive company site built with React and Three.js, with gesture handling, spring physics and smooth scroll-driven motion, translated pixel-for-pixel from Figma.",
+        tags: ["React", "Three.js", "TypeScript", "GSAP", "Tailwind CSS"],
+        image: "/uchannel.webp",
+        pitch: "An immersive company site for an LED and billboard brand.",
+        highlights: [
+          "React and Three.js, with scroll-driven motion",
+          "Gesture handling and spring physics",
+          "Translated pixel-for-pixel from Figma",
+        ],
+        demoUrl: "https://uchannel.ph",
         date: "2025",
         category: "websites"
       },
       {
         id: "web-5",
-        title: "Neural Studio & AI Design Lab",
-        subtitle: "Autonomous AI & Intelligent Canvas Suite",
-        description: "An intelligent generative workspace combining agentic workflow orchestration, real-time node graphs, and low-latency canvas rendering.",
-        tags: ["React", "TypeScript", "AI Logic", "Tailwind CSS", "Canvas API"],
-        image: "/about.webp",
-        demoUrl: "https://github.com/myrielleai",
-        githubUrl: "https://github.com/myrielleai",
-        date: "2026",
-        category: "websites"
-      },
-      {
-        id: "web-6",
-        title: "Creation of Adam Digital Archive",
-        subtitle: "Interactive Masterpiece & Shader Canvas",
-        description: "High-resolution dynamic WebGL canvas renderer showcasing classical art digital preservation, fragment shaders, and depth map parallax.",
-        tags: ["WebGL", "Three.js", "GLSL Shaders", "TypeScript", "Framer Motion"],
-        image: "/creation-adam-bg.webp",
-        demoUrl: "https://github.com/myrielleai",
-        githubUrl: "https://github.com/myrielleai",
-        date: "2026",
-        category: "websites"
-      },
-      {
-        id: "web-7",
-        title: "HyperScale Logistics & Grid Dashboard",
-        subtitle: "High-Velocity Analytics & Operations Portal",
-        description: "Enterprise logistics and telemetry dashboard supporting real-time data streaming, interactive data visualization, and responsive grid monitoring.",
-        tags: ["React", "D3.js", "TypeScript", "PostgreSQL", "Tailwind CSS"],
-        image: "/project1.webp",
-        demoUrl: "https://github.com/myrielleai",
-        githubUrl: "https://github.com/myrielleai",
+        title: "Endlezz Market",
+        subtitle: "E-Commerce Storefront",
+        description: "A responsive streetwear storefront with a shop, product pages, a lookbook, search and a cart, backed by a Supabase catalogue.",
+        tags: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Supabase", "Framer Motion"],
+        image: "/endlezz.webp",
+        pitch: "A streetwear storefront, from lookbook to cart.",
+        highlights: [
+          "Shop, product pages, lookbook and search",
+          "Cart drawer and product filtering",
+          "Catalogue, orders and reviews backed by Supabase",
+        ],
+        demoUrl: "https://endlezz-market.vercel.app/",
+        githubUrl: "https://github.com/myrielleai/EndlezzMarket",
         date: "2025",
         category: "websites"
       }
     ]
+  },
+  {
+    id: "design",
+    index: "03",
+    title: "Graphic Design",
+    description: "Branding, posters and visual design.",
+    // Add pieces here (images in /public/design/) — the tab appears once this list isn't empty.
+    items: []
   }
 ];
-

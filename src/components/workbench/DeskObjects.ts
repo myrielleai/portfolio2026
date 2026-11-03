@@ -63,7 +63,7 @@ export interface WorkbenchObjectHandles {
   earbudsShadowMesh?: THREE.Mesh;
 }
 
-function createAppleLogoShape(): { body: THREE.Shape; leaf: THREE.Shape } {
+export function createAppleLogoShape(): { body: THREE.Shape; leaf: THREE.Shape } {
   const body = new THREE.Shape();
   
   // Top center dip

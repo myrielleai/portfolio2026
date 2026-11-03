@@ -66,7 +66,8 @@ export default function SketchbookBackground({ onEggFound }: SketchbookBackgroun
       pX: number,
       pY: number
     ) => {
-      const faintDetailColor = isIlluminated ? "rgba(24, 24, 27, 0.7)" : "rgba(161, 161, 170, 0.3)";
+      const dark = document.documentElement.classList.contains("dark");
+      const faintDetailColor = isIlluminated ? (dark ? "rgba(228, 228, 231, 0.7)" : "rgba(24, 24, 27, 0.7)") : "rgba(161, 161, 170, 0.3)";
 
 
       // 6. EASTER EGG LOCATION

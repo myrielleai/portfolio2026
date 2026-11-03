@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import type { MouseEvent } from "react";
 import { motion } from "framer-motion";
 import SketchbookBackground from "./SketchbookBackground";
+import { useTheme } from "./ThemeContext";
 
 interface Particle {
   id: number;
@@ -18,10 +19,15 @@ const PARTICLE_CHARS = ["✨", "✦", "★", "✹", "⚡︎", "♦"];
 const ACCENT_COLORS = ["#9333ea", "#f59e0b", "#ec4899", "#3b82f6", "#10b981"];
 
 export default function ArchiveFooter() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  // the sketch is dark ink on white: multiply it onto a light page, invert and screen it onto a dark one
+  const ink = isDark ? "invert mix-blend-screen" : "mix-blend-multiply";
   const [particles, setParticles] = useState<Particle[]>([]);
   const [isHovering, setIsHovering] = useState(false);
   const [isFullRevealed, setIsFullRevealed] = useState(false);
   const footerRef = useRef<HTMLDivElement>(null);
+  const bgLayerRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const spotlightImgLayerRef = useRef<HTMLDivElement>(null);
   const spotlightRingRef = useRef<HTMLDivElement>(null);
@@ -35,11 +41,23 @@ export default function ArchiveFooter() {
   };
 
   // Track mouse movement inside footer with direct DOM manipulation (no React re-render churn)
+  // Mouse events can arrive several times per frame; the effects are only redrawn once per frame
+  const pointerRef = useRef({ x: 0, y: 0 });
+  const frameRef = useRef<number | null>(null);
+  useEffect(() => () => { if (frameRef.current) cancelAnimationFrame(frameRef.current); }, []);
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    pointerRef.current = { x: e.clientX, y: e.clientY };
+    if (frameRef.current) return;
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = null;
+      applyPointer(pointerRef.current.x, pointerRef.current.y);
+    });
+  };
+  const applyPointer = (clientX: number, clientY: number) => {
     if (!footerRef.current) return;
     const rect = footerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     const xPct = (x / rect.width) * 100;
     const yPct = (y / rect.height) * 100;
 
@@ -129,26 +147,26 @@ export default function ArchiveFooter() {
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="w-full min-h-screen border-t border-zinc-200 px-4 sm:px-8 lg:px-16 py-8 sm:py-12 relative z-10 overflow-hidden transition-colors duration-300 select-none flex flex-col justify-center items-center bg-white cursor-pointer"
+      className="w-full min-h-screen border-t border-[var(--border)] px-4 sm:px-8 lg:px-16 py-8 sm:py-12 relative z-10 overflow-hidden transition-colors duration-300 select-none flex flex-col justify-center items-center bg-[var(--bg)] cursor-pointer"
     >
       {/* Base Dimmed Background Drawing Image */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+      <div ref={bgLayerRef} className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
         <img
-          src="/drawing.png"
+          src="/drawing.webp"
           alt="Works Archive Sketch Background"
-          className={`w-full h-full object-cover object-center transition-opacity duration-500 mix-blend-multiply filter contrast-100 brightness-95 ${
+          className={`w-full h-full object-cover object-center transition-opacity duration-500 ${ink} filter contrast-100 brightness-95 ${
             isFullRevealed ? "opacity-90 contrast-125 brightness-100" : "opacity-25"
           }`}
         />
         {/* Soft paper vignette gradient overlay for readability & artistic depth */}
         <div
-          className={`absolute inset-0 bg-gradient-to-b from-white/70 via-white/35 to-white/80 pointer-events-none transition-opacity duration-500 ${
+          className={`absolute inset-0 bg-gradient-to-b ${isDark ? "from-black/70 via-black/35 to-black/80" : "from-white/70 via-white/35 to-white/80"} pointer-events-none transition-opacity duration-500 ${
             isFullRevealed ? "opacity-30" : "opacity-100"
           }`}
         />
       </div>
 
-      {/* High-Definition Dynamic Spotlight Layer for drawing.png (active when not full revealed) */}
+      {/* High-Definition Dynamic Spotlight Layer for drawing.webp (active when not full revealed) */}
       <div
         ref={spotlightImgLayerRef}
         className={`absolute inset-0 z-0 pointer-events-none overflow-hidden select-none transition-opacity duration-300 ${
@@ -160,9 +178,9 @@ export default function ArchiveFooter() {
         }}
       >
         <img
-          src="/drawing.png"
+          src="/drawing.webp"
           alt="Works Archive Sketch Spotlight"
-          className="w-full h-full object-cover object-center opacity-100 mix-blend-multiply filter contrast-135 brightness-105 scale-[1.01]"
+          className={`w-full h-full object-cover object-center opacity-100 ${ink} filter contrast-135 brightness-105 scale-[1.01]`}
         />
       </div>
 
@@ -216,7 +234,7 @@ export default function ArchiveFooter() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="font-mono text-sm sm:text-base md:text-lg font-bold tracking-[0.25em] text-purple-700 uppercase mb-4 sm:mb-6 text-center select-none relative -top-[10px] pointer-events-auto"
+          className="font-mono text-sm sm:text-base md:text-lg font-bold tracking-[0.25em] text-[var(--accent)] uppercase mb-4 sm:mb-6 text-center select-none relative -top-[10px] pointer-events-auto"
         >
           Got something exciting in mind?
         </motion.p>
@@ -227,7 +245,7 @@ export default function ArchiveFooter() {
           className="text-center cursor-pointer group/headline py-2 flex flex-col items-center justify-center pointer-events-auto"
         >
           {/* Line 1: Let's work */}
-          <div className="flex flex-wrap items-center justify-center tracking-tight leading-[0.9] font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[110px] xl:text-[130px] text-zinc-900">
+          <div className="flex flex-wrap items-center justify-center tracking-tight leading-[0.9] font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[110px] xl:text-[130px] text-[var(--heading)]">
             {line1.map((char, index) => (
               <motion.span
                 key={index}
@@ -248,7 +266,7 @@ export default function ArchiveFooter() {
           </div>
 
           {/* Line 2: together! */}
-          <div className="flex flex-wrap items-center justify-center tracking-tight leading-[0.9] font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[110px] xl:text-[130px] text-purple-700 group-hover/headline:text-zinc-900 transition-colors duration-500">
+          <div className="flex flex-wrap items-center justify-center tracking-tight leading-[0.9] font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[110px] xl:text-[130px] text-[var(--accent)] group-hover/headline:text-[var(--heading)] transition-colors duration-500">
             {line2.map((char, index) => (
               <motion.span
                 key={index}

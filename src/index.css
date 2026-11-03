@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;600;700&family=Rock+Salt&family=Reenie+Beanie&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -36,6 +35,9 @@
   --border-strong: #d4d4d8; /* zinc-300 */
   --accent: #9333ea;      /* purple-600 */
   --accent-glow: rgba(147, 51, 234, 0.15);
+  --on-accent: #ffffff;
+  --ai-band: #ede4ff;      /* light purple behind the AI section */
+  --on-ai-band: #1e0b3a;
   --scrim: rgba(255, 255, 255, 0.55);
 }
 
@@ -51,6 +53,9 @@
   --border-strong: #27272a; /* zinc-800 */
   --accent: #c084fc;      /* purple-400 */
   --accent-glow: rgba(192, 132, 252, 0.15);
+  --on-accent: #0a0a0a;
+  --ai-band: #d8c4fb;
+  --on-ai-band: #1e0b3a;
   --scrim: rgba(0, 0, 0, 0.55);
 }
 
@@ -327,6 +332,30 @@ h1, h2, h3, .heading-editorial {
   transform: scale(1.04);
 }
 
+.card .card__art {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  padding: 0;
+}
+.card .card__classic {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* fill the frame, original colours */
+}
+/* the accent line draws itself on hover */
+.card:hover .card__art .draw {
+  stroke-dasharray: 400;
+  animation: card-draw 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes card-draw {
+  from { stroke-dashoffset: 400; }
+  to { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card:hover .card__art .draw { animation: none; }
+}
+
 .card .card__text {
   margin-bottom: 0;
 }
@@ -353,4 +382,30 @@ h1, h2, h3, .heading-editorial {
 .bg-dot-mesh {
   background-image: radial-gradient(var(--border-strong) 1.2px, transparent 1.2px);
   background-size: 28px 28px;
+}
+
+/* ----------------------------------------------------------------
+   Motion accessibility — honour the OS "reduce motion" setting
+   ---------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Little captions under the workbench desk ("i miss them...", "what to solve next?").
+   Black in light mode, warm cream with a dark glow in dark mode. */
+.desk-caption {
+  color: #0a0a0a;
+  text-shadow: 0 1px 2px rgba(255, 248, 236, 0.85), 0 2px 12px rgba(255, 244, 228, 0.6);
+}
+.dark .desk-caption {
+  color: #fff6e6;
+  text-shadow: 0 1px 2px rgba(40, 20, 8, 0.9), 0 2px 14px rgba(40, 20, 8, 0.7);
 }

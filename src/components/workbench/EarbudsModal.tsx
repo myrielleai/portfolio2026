@@ -32,9 +32,9 @@ export default function EarbudsModal({ isOpen, onClose }: EarbudsModalProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIdx, setCurrentTrackIdx] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [volume, setVolume] = useState(0.7);
+  const [volume, setVolume] = useState(0.25);
   const [isMuted, setIsMuted] = useState(false);
-  const [prevVolume, setPrevVolume] = useState(0.7);
+  const [prevVolume, setPrevVolume] = useState(0.25);
   const [isLiked, setIsLiked] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
@@ -103,8 +103,8 @@ export default function EarbudsModal({ isOpen, onClose }: EarbudsModalProps) {
     playClickSound();
     if (isMuted) {
       setIsMuted(false);
-      setVolume(prevVolume || 0.7);
-      musicSynth.setVolume(prevVolume || 0.7);
+      setVolume(prevVolume || 0.25);
+      musicSynth.setVolume(prevVolume || 0.25);
     } else {
       setPrevVolume(volume);
       setIsMuted(true);
@@ -133,16 +133,15 @@ export default function EarbudsModal({ isOpen, onClose }: EarbudsModalProps) {
   };
 
   // Determine current active lyric based on song progress ratio
-  const activeLyricIndex = Math.min(
-    Math.floor((currentTime / currentTrack.duration) * currentTrack.lyrics.length),
-    currentTrack.lyrics.length - 1
-  );
+  const query = encodeURIComponent(`${currentTrack.title.replace(/\s*\(.*\)\s*/, " ")} ${currentTrack.artist}`.trim());
+  const spotifyUrl = `https://open.spotify.com/search/${query}`;
+  const geniusUrl = `https://genius.com/search?q=${query}`;
 
   return (
     <AnimatePresence>
       {isOpen && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-2xl cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1a0f0a]/60 backdrop-blur-md cursor-pointer"
           onClick={() => {
             playClickSound();
             onClose();
@@ -157,6 +156,15 @@ export default function EarbudsModal({ isOpen, onClose }: EarbudsModalProps) {
           className="relative w-full max-w-md bg-zinc-950/90 text-white border border-white/15 rounded-[36px] shadow-[0_32px_64px_rgba(0,0,0,0.8)] p-6 md:p-7 overflow-hidden font-sans select-none cursor-default"
           data-lenis-prevent
         >
+          {/* Blurred album art fills the card, like Apple Music */}
+          {currentTrack.coverImage && (
+            <img
+              src={currentTrack.coverImage}
+              alt=""
+              aria-hidden
+              className="absolute inset-0 h-full w-full scale-150 object-cover opacity-60 blur-3xl pointer-events-none"
+            />
+          )}
           {/* Apple Music Dynamic Animated Fluid Mesh Glow Background */}
           <div
             className="absolute inset-0 transition-all duration-1000 ease-out opacity-40 pointer-events-none filter blur-3xl scale-125"
@@ -271,21 +279,21 @@ export default function EarbudsModal({ isOpen, onClose }: EarbudsModalProps) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="w-full h-[300px] flex flex-col justify-center px-4 py-6 space-y-4 overflow-y-auto no-scrollbar"
               >
-                {currentTrack.lyrics.map((line, idx) => {
-                  const isActive = idx === activeLyricIndex;
-                  return (
-                    <p
-                      key={idx}
-                      className={`text-xl font-bold transition-all duration-500 leading-snug cursor-pointer ${
-                        isActive
-                          ? "text-white scale-105 opacity-100"
-                          : "text-white/30 scale-95 opacity-50 hover:text-white/60"
-                      }`}
-                    >
-                      {line}
-                    </p>
-                  );
-                })}
+                {/* The lyrics belong to the artist, so they live on the official pages */}
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <p className="text-lg font-bold leading-snug text-white">{currentTrack.title}</p>
+                  <p className="max-w-[260px] text-sm text-white/60">
+                    You're hearing a lo-fi desk version. Read the lyrics or play the real song here:
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <a href={geniusUrl} target="_blank" rel="noreferrer" className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-zinc-900 transition-opacity hover:opacity-85">
+                      Read the lyrics on Genius
+                    </a>
+                    <a href={spotifyUrl} target="_blank" rel="noreferrer" className="rounded-full bg-white/15 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/25">
+                      Play it on Spotify
+                    </a>
+                  </div>
+                </div>
               </motion.div>
             ) : (
               /* Standard Apple Music Album Artwork */

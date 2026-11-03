@@ -1,148 +1,341 @@
-import { useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail } from "lucide-react";
-import WorkbenchCanvas from "./workbench/WorkbenchCanvas";
+import { Mail, Maximize2, Minimize2 } from "lucide-react";
 import { playClickSound, playHoverSound } from "../utils/audio";
+
+// The 3D desk is heavy — load its code only when the section gets close to the screen
+const WorkbenchCanvas = lazy(() => import("./workbench/WorkbenchCanvas"));
 
 interface LabTeaserProps {
   onEnterLab?: () => void;
   onExitLab?: () => void;
 }
 
-export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
-  const [isCoverDismissed, setIsCoverDismissed] = useState(false);
+type LenisLike = { stop: () => void; start: () => void };
+const getLenis = () => (window as unknown as { lenis?: LenisLike }).lenis;
 
-  // Today's date scribbled in the corner
-  const todayDateStr = new Date().toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+export default function LabTeaser({ onEnterLab }: LabTeaserProps) {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [shouldMount, setShouldMount] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
+  // "You got a note" notification: slides in once the desk is on screen, until it's read or dismissed
+  const [notifShown, setNotifShown] = useState(false);
+  const [noteRead, setNoteRead] = useState(false);
+
+  const todayDateStr = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  // Mount the 3D scene once the frame is within ~1 screen of the viewport
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el || shouldMount) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldMount(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "100% 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [shouldMount]);
+
+  // Build the 3D desk ahead of time, in a quiet moment after the intro, instead of in the middle
+  // of a scroll (setting it up takes a few hundred ms, which shows as a stutter)
+  useEffect(() => {
+    if (shouldMount) return;
+    type IdleWin = { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+    const w = window as unknown as IdleWin;
+    let idleId: number | undefined;
+    const timer = window.setTimeout(() => {
+      if (w.requestIdleCallback) idleId = w.requestIdleCallback(() => setShouldMount(true), { timeout: 3000 });
+      else setShouldMount(true);
+    }, 3500);
+    return () => {
+      window.clearTimeout(timer);
+      if (idleId !== undefined) w.cancelIdleCallback?.(idleId);
+    };
+  }, [shouldMount]);
+
+  // Deliver the notification a moment after the desk scrolls into view
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el || noteRead) return;
+    let timer: number | undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          timer = window.setTimeout(() => setNotifShown(true), 1600);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(timer);
+    };
+  }, [noteRead]);
+
+  const openNote = () => {
+    playClickSound();
+    setNotifShown(false);
+    setNoteRead(true);
+    setNoteOpen(true);
+  };
+
+  // Fullscreen mode: lock page scroll, close on Escape, and tell the renderer to resize
+  useEffect(() => {
+    const lenis = getLenis();
+    if (expanded) {
+      lenis?.stop();
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      lenis?.start();
+      document.documentElement.style.overflow = "";
+    }
+    const raf = requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExpanded(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [expanded]);
+
+  useEffect(
+    () => () => {
+      getLenis()?.start();
+      document.documentElement.style.overflow = "";
+    },
+    []
+  );
+
+  const leaveFullscreen = useCallback(() => setExpanded(false), []);
 
   return (
-    <section 
+    <section
       id="lab-teaser"
-      className="relative w-full bg-[var(--bg)] border-b border-[var(--border)] transition-colors duration-300"
+      className="relative w-full border-b border-[var(--border)] bg-[var(--bg)] transition-colors duration-300"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-24 pb-16">
-        <div className="flex flex-col md:flex-row md:items-end justify-between pb-8 border-b border-[var(--border)] gap-6">
+      <div className="mx-auto max-w-7xl px-6 pb-24 pt-24 lg:px-12">
+        <div className="mb-10 flex flex-col justify-between gap-6 border-b border-[var(--border)] pb-8 md:flex-row md:items-end">
           <div>
-            <span className="font-mono text-xs text-[var(--accent)] tracking-widest block mb-3 uppercase">
+            <span className="mb-3 block font-mono text-xs uppercase tracking-widest text-[var(--accent)]">
               02 // Playground
             </span>
-            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-display text-[var(--heading)] tracking-tight leading-[1.05]">
+            <h2 className="font-display text-5xl font-bold leading-[1.05] tracking-tight text-[var(--heading)] sm:text-6xl lg:text-7xl">
               Workbench
             </h2>
           </div>
-          <p className="font-mono text-xs text-[var(--text-muted)] max-w-sm leading-relaxed">
-            An interactive 3D studio of personal tools, creative experiments, and everyday artifacts.
-          </p>
         </div>
-      </div>
 
-      <div className="relative w-full h-screen bg-[#160c07] text-white font-mono overflow-hidden">
-        <WorkbenchCanvas onEnterLab={onEnterLab} />
+        {/* Framed window (becomes fullscreen when expanded) */}
+        <div
+          ref={frameRef}
+          className={
+            expanded
+              ? "fixed inset-0 z-[70] bg-[#160c07]"
+              : "relative h-[80vh] min-h-[480px] overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[#160c07] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.5)]"
+          }
+          data-lenis-prevent={expanded ? "" : undefined}
+        >
+          {shouldMount ? (
+            <Suspense fallback={<FramePlaceholder />}>
+              <WorkbenchCanvas onEnterLab={onEnterLab} onBeforeNavigate={leaveFullscreen} />
+            </Suspense>
+          ) : (
+            <FramePlaceholder />
+          )}
 
-        {/* Floating Read Letter button when cover is dismissed */}
-        <AnimatePresence>
-          {isCoverDismissed && (
-            <motion.button
-              initial={{ opacity: 0, y: -20, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
+          {/* Top-right controls */}
+          <div className="absolute right-4 top-4 z-30 flex items-center gap-2">
+            {/* Small envelope stays after the banner is gone, so the note can be reopened */}
+            {!notifShown && (
+              <button
+                onMouseEnter={() => playHoverSound()}
+                onClick={openNote}
+                aria-label="Open the note"
+                className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[#9333ea] text-white shadow-lg transition-colors hover:bg-[#7c3aed]"
+              >
+                <Mail className="h-4 w-4" />
+                {!noteRead && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#ff453a] ring-2 ring-black/60" />}
+              </button>
+            )}
+            <button
               onMouseEnter={() => playHoverSound()}
               onClick={() => {
                 playClickSound();
-                setIsCoverDismissed(false);
+                setExpanded((v) => !v);
               }}
-              className="absolute top-6 right-6 z-30 flex items-center gap-2 px-4 py-2 bg-amber-100/90 hover:bg-amber-100 text-amber-950 font-sans text-xs font-semibold rounded-full border border-amber-900/20 shadow-lg backdrop-blur-sm transition-all cursor-pointer hover:scale-105"
+              aria-label={expanded ? "Exit fullscreen" : "Open the workbench fullscreen"}
+              className={`flex items-center gap-2 rounded-full bg-black/60 py-2 font-mono ${expanded ? "px-4" : "px-2.5"} text-[11px] font-semibold uppercase tracking-wider text-amber-50 backdrop-blur-sm transition-colors hover:bg-black/80`}
             >
-              <Mail className="w-3.5 h-3.5 text-amber-700" />
-              <span>read note ✉️</span>
-            </motion.button>
-          )}
-        </AnimatePresence>
+              {expanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+              {expanded && <span className="hidden sm:inline">Exit</span>}
+            </button>
+          </div>
 
-        {/* Cover Overlay Note */}
-        <AnimatePresence>
-          {!isCoverDismissed && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.4 } }}
-              className="absolute inset-0 z-40 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md"
-            >
+          {/* Incoming notification banner */}
+          <AnimatePresence>
+            {notifShown && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.92, y: 30, rotate: -2 }}
-                animate={{ opacity: 1, scale: 1, y: 0, rotate: -1 }}
-                exit={{ opacity: 0, scale: 0.85, y: -50, rotate: -4 }}
-                transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                className="relative w-full max-w-lg bg-[#fbf7ef] text-zinc-900 p-8 sm:p-10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] cursor-default select-none border border-amber-900/10"
-                style={{
-                  clipPath:
-                    "polygon(0% 1.5%, 4% 0%, 9% 1.8%, 15% 0.3%, 21% 2.2%, 27% 0%, 33% 1.6%, 40% 0.2%, 46% 2%, 53% 0%, 60% 1.8%, 66% 0.3%, 73% 2.2%, 79% 0%, 86% 1.6%, 92% 0.2%, 100% 1.5%, 98.5% 12%, 100% 25%, 98.2% 38%, 100% 50%, 98.5% 63%, 100% 75%, 98.2% 88%, 100% 100%, 93% 98.5%, 86% 100%, 80% 98.2%, 73% 100%, 66% 98.4%, 59% 100%, 52% 98.2%, 45% 100%, 38% 98.5%, 31% 100%, 24% 98.2%, 17% 100%, 10% 98.4%, 4% 100%, 0% 98.5%, 1.5% 85%, 0% 70%, 1.8% 55%, 0% 40%, 1.5% 25%)",
+                initial={{ opacity: 0, y: -80, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -60, scale: 0.97, transition: { duration: 0.25 } }}
+                transition={{ type: "spring", stiffness: 320, damping: 26 }}
+                drag="y"
+                dragConstraints={{ top: 0, bottom: 0 }}
+                dragElastic={{ top: 0.6, bottom: 0.1 }}
+                onDragEnd={(_, info) => {
+                  if (info.offset.y < -30) setNotifShown(false);
                 }}
+                className="absolute left-1/2 top-4 z-40 w-[min(92%,380px)] -translate-x-1/2"
               >
-                {/* Washi tape accent on top center */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-32 h-8 bg-amber-100/70 border border-amber-200/50 backdrop-blur-xs shadow-xs -rotate-1 pointer-events-none" />
-
-                {/* Faint paper grid / texture pattern */}
-                <div className="absolute inset-0 bg-[radial-gradient(#b45309_0.5px,transparent_0.5px)] [background-size:20px_20px] opacity-10 pointer-events-none" />
-
-                {/* Today's date scribbled in the top right corner */}
-                <div className="absolute top-6 right-7 sm:top-8 sm:right-9 font-reenie text-2xl sm:text-3xl text-red-700/80 -rotate-6 select-none pointer-events-none">
-                  {todayDateStr}
-                </div>
-
-                {/* Letter Body in Handwriting Font */}
-                <div className="relative z-10 font-caveat text-2xl sm:text-3xl text-zinc-900 leading-relaxed space-y-4 pt-2">
-                  <p className="text-3xl sm:text-4xl font-bold text-amber-950">hi!</p>
-                  
-                  <p className="text-zinc-800">thanks for stopping by.</p>
-
-                  <p className="text-zinc-800">
-                    everything you see here<br />
-                    represents a piece of my journey.
-                  </p>
-
-                  <p className="text-zinc-800">feel free to explore around.</p>
-
-                  <p className="text-amber-950 font-semibold pt-1">have fun!</p>
-
-                  <p className="text-amber-950 font-bold text-3xl sm:text-4xl pt-1 text-right">
-                    -myrielle
-                  </p>
-                </div>
-
-                {/* Bottom Section with Centered Handwritten Button */}
-                <div className="relative z-10 mt-8 pt-6 border-t border-amber-900/15 flex justify-center">
-                  {/* Button: pull up a chair → */}
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    onMouseEnter={() => playHoverSound()}
-                    onClick={() => {
-                      playClickSound();
-                      setIsCoverDismissed(true);
-                    }}
-                    className="group inline-flex items-center gap-2.5 px-7 py-3 bg-zinc-900 hover:bg-zinc-800 text-amber-50 font-caveat text-xl sm:text-2xl font-bold rounded-full shadow-md shadow-zinc-900/20 transition-all cursor-pointer border border-amber-500/20"
-                  >
-                    <span>pull up a chair</span>
-                    <motion.span
-                      animate={{ x: [0, 6, 0] }}
-                      transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                      className="inline-block text-amber-400 font-sans"
-                    >
-                      →
-                    </motion.span>
-                  </motion.button>
-                </div>
+                <button
+                  onClick={openNote}
+                  className="flex w-full items-center gap-3 rounded-[22px] border border-white/25 bg-[#9333ea]/90 px-3.5 py-3 text-left shadow-[0_18px_40px_-12px_rgba(40,10,80,0.6)] backdrop-blur-xl cursor-pointer"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] bg-white shadow-sm">
+                    <Mail className="h-5 w-5 text-[#9333ea]" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-baseline justify-between gap-2">
+                      <span className="truncate font-sans text-[14px] font-semibold text-white">myrielle</span>
+                      <span className="shrink-0 font-sans text-[11px] text-white/70">now</span>
+                    </span>
+                    <span className="block truncate font-sans text-[13px] text-white/90">left you a note on the desk · tap to read</span>
+                  </span>
+                </button>
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </AnimatePresence>
+
+          {/* Personal letter on my own stationery */}
+          <AnimatePresence>
+            {noteOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                className="absolute inset-0 z-40 flex items-center justify-center bg-[#1a0f0a]/55 p-4 backdrop-blur-sm sm:p-6"
+                onClick={() => setNoteOpen(false)}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 60, rotateX: 55, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1, rotate: -1.2 }}
+                  exit={{ opacity: 0, y: 40, rotateX: 30, scale: 0.92 }}
+                  transition={{ type: "spring", stiffness: 180, damping: 20 }}
+                  style={{ transformPerspective: 1200, transformOrigin: "50% 0%" }}
+                  onClick={(e) => e.stopPropagation()}
+                  data-lenis-prevent
+                  className="relative w-full max-w-[500px] cursor-default select-none text-[#2b2118]"
+                >
+                  {/* torn paper: a pale fibrous rim peeks out past the tear, under the sheet itself */}
+                  <div className="relative [filter:drop-shadow(0_24px_30px_rgba(20,8,0,0.45))_drop-shadow(0_2px_3px_rgba(20,8,0,0.25))]">
+                  <div aria-hidden className="absolute inset-x-0 -bottom-[3px] -top-[3px] bg-[#fffdf8]" style={{ clipPath: TORN_PAPER }} />
+                  <div
+                    className="relative px-8 pb-10 pt-9 sm:px-11 sm:pb-11 sm:pt-10"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.7), transparent 60%), linear-gradient(180deg, #fbf7ef 0%, #f6efe2 100%)",
+                      clipPath: TORN_PAPER,
+                    }}
+                  >
+                    {/* dotted notebook grid across the whole sheet */}
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        backgroundImage: "radial-gradient(circle, rgba(60,45,30,0.28) 1.1px, transparent 1.5px)",
+                        backgroundSize: "18px 18px",
+                        backgroundPosition: "9px 12px",
+                      }}
+                    />
+
+                    {/* letterhead */}
+                    <div className="relative flex justify-end">
+                      <span className="-rotate-3 font-reenie text-2xl text-red-700/80 sm:text-3xl">{todayDateStr}</span>
+                    </div>
+
+                    {/* the letter */}
+                    <div className="relative mt-3 space-y-[2px] font-caveat text-[24px] leading-[36px] sm:text-[26px]">
+                      <p className="text-[32px] font-bold text-[#1a120b]">hi!</p>
+                      <p>thanks for stopping by.</p>
+                      <p>
+                        everything you see here
+                        <br />
+                        represents a piece of my journey.
+                      </p>
+                      <p>feel free to explore around.</p>
+                      <p className="font-semibold">have fun!</p>
+                    </div>
+
+                    {/* signature */}
+                    <div className="relative mt-4 flex items-end justify-end gap-3">
+                      <div className="flex items-end gap-3">
+                      <span className="font-caveat text-[40px] font-bold leading-none text-[#1a120b]">-myrielle</span>
+                      </div>
+                    </div>
+
+                    {/* back to the desk */}
+                    <div className="relative mt-5 flex justify-center">
+                      <button
+                        onMouseEnter={() => playHoverSound()}
+                        onClick={() => {
+                          playClickSound();
+                          setNoteOpen(false);
+                        }}
+                        className="group inline-flex items-center gap-2 font-caveat text-2xl font-bold text-[#7c3aed] transition-colors hover:text-[#5b21b6]"
+                      >
+                        <span className="relative">
+                          back to the desk
+                          <span className="absolute -bottom-0.5 left-0 h-[2px] w-full origin-left scale-x-50 rounded-full bg-current transition-transform duration-300 group-hover:scale-x-100" />
+                        </span>
+                        <span className="font-sans transition-transform duration-300 group-hover:translate-x-1">→</span>
+                      </button>
+                    </div>
+                  </div>
+                  </div>
+
+
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </section>
+  );
+}
+
+// A sheet torn out of a notebook: ragged along the top and bottom, cut clean down the sides.
+// Built once from a fixed seed so the tear is the same every time.
+const TORN_PAPER = (() => {
+  let s = 7;
+  const rnd = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
+  const edge = (y0: number, depth: number, down: boolean) => {
+    const pts: string[] = [];
+    for (let x = 0; x <= 100; x += 1.6 + rnd() * 1.8) {
+      const dip = rnd() * depth + (rnd() < 0.18 ? depth * 0.8 : 0); // the odd deeper bite
+      pts.push(`${Math.min(100, x).toFixed(2)}% ${down ? `calc(100% - ${(y0 + dip).toFixed(1)}px)` : `${(y0 + dip).toFixed(1)}px`}`);
+    }
+    pts.push(`100% ${down ? `calc(100% - ${y0}px)` : `${y0}px`}`);
+    return pts;
+  };
+  const top = edge(0, 7, false);
+  const bottom = edge(0, 8, true).reverse();
+  return `polygon(${[...top, ...bottom].join(", ")})`;
+})();
+
+function FramePlaceholder() {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-[#160c07] bg-[radial-gradient(ellipse_at_top_right,rgba(251,191,36,0.15),transparent_60%)]">
+      <span className="font-mono text-[11px] uppercase tracking-widest text-amber-100/60">setting up the desk…</span>
+    </div>
   );
 }

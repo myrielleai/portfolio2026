@@ -1,11 +1,172 @@
-import { useState, useRef } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
-import { worksCategories, type WorkCategory } from "../data/worksData";
+import { GithubIcon } from "./Icons";
+import { worksCategories, type WorkItem } from "../data/worksData";
 import ArchiveFooter from "./ArchiveFooter";
 import Footer from "./Footer";
-import UnseenProjectsShowcase from "./UnseenProjectsShowcase";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+// Every work, in archive order
+const categoryTitle = Object.fromEntries(worksCategories.map((c) => [c.id, c.title]));
+const allWorks: WorkItem[] = worksCategories.flatMap((c) => c.items);
+
+const hostOf = (item: WorkItem) => {
+  try {
+    return new URL(item.demoUrl || item.githubUrl || "").hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+};
+
+// Smooth-scroll to a case study (through Lenis when it's running)
+const goTo = (id: string) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const lenis = (window as unknown as { lenis?: { scrollTo: (t: HTMLElement, o?: { offset?: number }) => void } }).lenis;
+  if (lenis) lenis.scrollTo(el, { offset: -96 });
+  else el.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+/* A compact index of everything at the top: tap one to jump to its case study */
+function WorksIndex({ ready }: { ready: boolean }) {
+  return (
+    <nav aria-label="Projects" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {allWorks.map((item, i) => (
+        <motion.button
+          key={item.id}
+          type="button"
+          onClick={() => goTo(`work-${item.id}`)}
+          initial={{ opacity: 0, y: 16 }}
+          animate={ready ? { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE, delay: 0.35 + i * 0.05 } } : undefined}
+          className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-left transition-colors hover:border-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+        >
+          <span className="relative block aspect-[16/10] overflow-hidden bg-[var(--surface-muted)]">
+            {item.image && (
+              <img src={item.image} alt="" loading="eager" decoding="async" className="absolute inset-0 h-full w-full object-cover object-left-top transition-transform duration-700 group-hover:scale-105" />
+            )}
+          </span>
+          <span className="flex items-baseline gap-2 px-3 py-2.5">
+            <span className="font-mono text-[10px] text-[var(--text-muted)]">{String(i + 1).padStart(2, "0")}</span>
+            <span className="truncate text-sm font-semibold text-[var(--heading)] transition-colors group-hover:text-[var(--accent)]">{item.title}</span>
+          </span>
+        </motion.button>
+      ))}
+    </nav>
+  );
+}
+
+/* One project per section: the full screenshot beside its story, alternating sides */
+function CaseStudy({ item, index, ready }: { item: WorkItem; index: number; ready: boolean }) {
+  const flip = index % 2 === 1;
+  const host = hostOf(item);
+  return (
+    <motion.article
+      id={`work-${item.id}`}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={ready ? { opacity: 1, y: 0 } : undefined}
+      viewport={{ once: true, margin: "0px 0px -12% 0px" }}
+      transition={{ duration: 0.9, ease: EASE }}
+      className="grid scroll-mt-28 grid-cols-1 items-center gap-8 border-t border-[var(--border)] py-16 lg:grid-cols-12 lg:gap-14 lg:py-24"
+    >
+      {/* the work itself: the whole screenshot, uncropped, in a light browser frame */}
+      <a
+        href={item.demoUrl || item.githubUrl}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`Open ${item.title}`}
+        className={`group block overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] shadow-[0_30px_70px_-35px_rgba(0,0,0,0.45)] transition-transform duration-500 hover:-translate-y-1 lg:col-span-7 ${flip ? "lg:order-2" : ""}`}
+      >
+        <span className="flex h-8 items-center gap-2 border-b border-[var(--border)] bg-[var(--surface-muted)] px-3">
+          <span className="flex gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+          </span>
+          <span className="mx-auto truncate font-mono text-[11px] text-[var(--text-muted)]">{host}</span>
+          <span className="w-[42px]" />
+        </span>
+        {item.image && (
+          <img src={item.image} alt={`${item.title} screenshot`} loading={index < 2 ? "eager" : "lazy"} decoding="async" className="block h-auto w-full transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]" />
+        )}
+      </a>
+
+      {/* the story */}
+      <div className={`lg:col-span-5 ${flip ? "lg:order-1" : ""}`}>
+        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--text-muted)]">
+          <span className="text-[var(--accent)]">{String(index + 1).padStart(2, "0")}</span>
+          <span>/</span>
+          <span>{categoryTitle[item.category]}</span>
+          {item.date && <span>· {item.date}</span>}
+        </div>
+        <h2 className="mt-3 font-display text-4xl font-bold leading-[1.05] tracking-tight text-[var(--heading)] sm:text-5xl">{item.title}</h2>
+        {item.award && (
+          <span className="mt-4 inline-block rounded-full bg-[var(--accent)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--on-accent)]">
+            {item.award}
+          </span>
+        )}
+        <p className="mt-4 text-xl leading-snug text-[var(--heading)] sm:text-2xl">{item.pitch ?? item.subtitle}</p>
+        <p className="mt-4 leading-relaxed text-[var(--text)]">{item.description}</p>
+
+        {item.role && (
+          <p className="mt-5 text-sm">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)]">My role · </span>
+            <span className="font-semibold text-[var(--heading)]">{item.role}</span>
+          </p>
+        )}
+
+        {item.highlights && item.highlights.length > 0 && (
+          <ul className="mt-5 space-y-2">
+            {item.highlights.map((h) => (
+              <li key={h} className="flex gap-3 text-sm text-[var(--text)]">
+                <span aria-hidden className="mt-[7px] h-1.5 w-1.5 flex-none rounded-full bg-[var(--accent)]" />
+                <span>{h}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="mt-6 flex flex-wrap gap-1.5">
+          {item.tags.map((t) => (
+            <span key={t} className="rounded-md border border-[var(--border)] bg-[var(--surface-muted)] px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+              {t}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-7 flex flex-wrap gap-3">
+          {item.demoUrl && (
+            <a href={item.demoUrl} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-2 rounded-full bg-[var(--heading)] px-5 py-3 font-mono text-xs font-semibold tracking-wider text-[var(--bg)] transition-colors hover:bg-[var(--accent)] hover:text-[var(--on-accent)]">
+              {item.category === "ai" ? "TRY THE DEMO" : "VISIT THE SITE"}
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
+          )}
+          {item.githubUrl && (
+            <a href={item.githubUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] px-5 py-3 font-mono text-xs font-semibold tracking-wider text-[var(--heading)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]">
+              <GithubIcon className="h-4 w-4" />
+              CODE
+            </a>
+          )}
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
+function WorksShowcase({ ready }: { ready: boolean }) {
+  return (
+    <div>
+      <WorksIndex ready={ready} />
+      <div className="mt-14 lg:mt-20">
+        {allWorks.map((item, i) => (
+          <CaseStudy key={item.id} item={item} index={i} ready={ready} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function WorksFooterSection() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,9 +179,9 @@ function WorksFooterSection() {
   const y = useTransform(scrollYProgress, [0, 0.85], [0, -30]);
 
   return (
-    <div ref={containerRef} className="relative w-full bg-white">
+    <div ref={containerRef} className="relative w-full bg-[var(--bg)]">
       {/* Sticky Previous Section: "Let's work together!" */}
-      <div className="sticky top-0 z-10 w-full min-h-screen flex flex-col justify-center items-center overflow-hidden bg-white">
+      <div className="sticky top-0 z-10 w-full min-h-screen flex flex-col justify-center items-center overflow-hidden bg-[var(--bg)]">
         <motion.div style={{ opacity, y }} className="w-full flex flex-col justify-center items-center">
           <ArchiveFooter />
         </motion.div>
@@ -30,55 +191,38 @@ function WorksFooterSection() {
       <div className="h-[120vh] pointer-events-none" />
 
       {/* Homepage Footer sliding UP over the previous section like a photo card */}
-      <div className="relative z-20 bg-white border-t border-zinc-200 shadow-[0_-25px_60px_rgba(0,0,0,0.06)]">
+      <div className="relative z-20 bg-[var(--bg)] border-t border-[var(--border)] shadow-[0_-25px_60px_rgba(0,0,0,0.06)]">
         <Footer />
       </div>
     </div>
   );
 }
 
-export default function AllWorksPage() {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>("websites");
-  const [fullscreenCategoryId, setFullscreenCategoryId] = useState<string | null>(null);
-
+export default function AllWorksPage({ ready = true }: { ready?: boolean }) {
   const handleBackToHome = () => {
     window.history.pushState({}, "", "/");
   };
 
-  const activeFullscreenCategory = worksCategories.find((cat) => cat.id === fullscreenCategoryId);
-
   return (
     <div
-      className="min-h-screen w-full font-sans selection:bg-purple-600 selection:text-white antialiased transition-colors duration-300 flex flex-col relative overflow-x-clip bg-white text-zinc-900"
-      style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}
+      className="min-h-screen w-full font-sans selection:bg-purple-600 selection:text-white antialiased transition-colors duration-300 flex flex-col relative overflow-x-clip bg-[var(--bg)] text-[var(--text)]"
+      style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
     >
-      {/* Fullscreen Unseen Studio 3D Showcase overlay when activated */}
-      <AnimatePresence>
-        {activeFullscreenCategory && (
-          <UnseenProjectsShowcase
-            category={activeFullscreenCategory}
-            categories={worksCategories}
-            onSelectCategory={(id) => setFullscreenCategoryId(id)}
-            onClose={() => setFullscreenCategoryId(null)}
-          />
-        )}
-      </AnimatePresence>
-
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-12 pt-4 pointer-events-none">
-        <div className="max-w-7xl mx-auto rounded-2xl border border-zinc-200 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300 pointer-events-auto overflow-hidden">
+        <div className="max-w-7xl mx-auto rounded-2xl border border-[var(--border)] bg-[var(--scrim)] backdrop-blur-md shadow-sm transition-all duration-300 pointer-events-auto overflow-hidden">
           <div className="px-6 lg:px-8 h-16 flex items-center justify-between">
             
             {/* Left: Back to Home & Title */}
             <div className="flex items-center gap-4 sm:gap-6">
               <button
                 onClick={handleBackToHome}
-                className="inline-flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-zinc-600 hover:text-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 bg-zinc-50 transition-all duration-200 group"
+                className="inline-flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-[var(--text-muted)] hover:text-[var(--heading)] px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--surface-muted)] transition-all duration-200 group"
               >
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
                 <span>HOME</span>
               </button>
-              <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-zinc-900">
+              <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--heading)]">
                 works archive
               </span>
             </div>
@@ -92,16 +236,16 @@ export default function AllWorksPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-12 py-10 lg:py-14 flex flex-col justify-start relative z-10 bg-white">
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-12 py-10 lg:py-14 flex flex-col justify-start relative z-10 bg-[var(--bg)]">
         
         {/* Page Intro Header - Big PROJECTS matching navbar length */}
-        <div className="mb-8 lg:mb-12 w-full flex items-center justify-between font-display font-black text-[120px] sm:text-[150px] md:text-[186px] lg:text-[200px] xl:text-[220px] leading-none text-zinc-900 uppercase select-none tracking-tight">
+        <div className="mb-8 lg:mb-12 w-full flex items-center justify-between font-display font-black text-[120px] sm:text-[150px] md:text-[186px] lg:text-[200px] xl:text-[220px] leading-none text-[var(--heading)] uppercase select-none tracking-tight">
           {"PROJECTS".split("").map((char, index) => (
             <motion.span
               key={index}
               initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.04 }}
+              animate={ready ? { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.15 + index * 0.04 } } : undefined}
+              transition={{ type: "spring", stiffness: 400, damping: 18 }}
               whileHover={{
                 y: -10,
                 scale: 1.15,
@@ -114,55 +258,8 @@ export default function AllWorksPage() {
           ))}
         </div>
 
-        {/* Categories List */}
-        <div className="w-full flex flex-col gap-6">
-          {worksCategories.map((category: WorkCategory) => {
-            const isSelected = selectedCategoryId === category.id;
-            const isAnySelected = selectedCategoryId !== null;
-            const isFaded = isAnySelected && !isSelected;
-
-            return (
-              <motion.div
-                key={category.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{
-                  opacity: isFaded ? 0.45 : 1,
-                  scale: isFaded ? 0.98 : 1,
-                }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full relative z-30 py-2 bg-white"
-              >
-                {/* Expanded Area */}
-                <AnimatePresence>
-                  {isSelected && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                      className="relative z-10"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {/* Embedded Unseen Studio 3D Multi-Plane Scene */}
-                      <div className="mb-0">
-                        <UnseenProjectsShowcase
-                          category={category}
-                          categories={worksCategories}
-                          onSelectCategory={(id) => {
-                            setSelectedCategoryId(id);
-                          }}
-                          onClose={() => setSelectedCategoryId(null)}
-                          embedded={true}
-                          onToggleFullscreen={() => setFullscreenCategoryId(category.id)}
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        </div>
+        {/* An index of everything, then one case study per project */}
+        <WorksShowcase ready={ready} />
       </main>
 
       {/* Big Interactive "Let's Work Together" & Sliding Homepage Footer Curtain */}

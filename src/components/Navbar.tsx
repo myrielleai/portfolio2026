@@ -15,7 +15,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-12 pt-4 transition-all duration-300 pointer-events-none">
-      <div className="max-w-7xl mx-auto rounded-2xl border border-[var(--border)]/80 bg-[var(--scrim)] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(196,90,60,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all duration-300 pointer-events-auto overflow-hidden">
+      <div className="max-w-7xl mx-auto rounded-2xl border border-[var(--border)]/80 bg-[var(--scrim)] backdrop-blur-md shadow-[0_8px_32px_0_rgba(196,90,60,0.03)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all duration-300 pointer-events-auto overflow-hidden">
         <div className="px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Left side: Brand identity */}
@@ -28,7 +28,7 @@ export default function Navbar() {
               }}
               className="font-display text-2xl lg:text-3xl font-bold tracking-tight text-[var(--heading)] hover:text-[var(--accent)] transition-colors"
             >
-              {portfolioData.name.toLowerCase()}
+              {portfolioData.name.toLowerCase()}<span className="text-[var(--accent)]">.</span>
             </a>
           </div>
 
@@ -72,7 +72,7 @@ export default function Navbar() {
 
         {/* Mobile Drawer */}
         {isOpen && (
-          <div className="md:hidden border-t border-[var(--border)]/80 bg-[var(--scrim)] backdrop-blur-xl px-6 py-6 space-y-4 flex flex-col animate-fadeIn">
+          <div className="md:hidden border-t border-[var(--border)]/80 bg-[var(--scrim)] backdrop-blur-md px-6 py-6 space-y-4 flex flex-col animate-fadeIn">
             {navLinks.map((link) => (
               <a
                 key={link.href}

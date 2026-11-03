@@ -89,6 +89,8 @@ const fragmentShader = `
 
 // Category-themed fallback RGB color tones for meshes before texture load
 const fallbackColors: Record<string, THREE.Vector3> = {
+  ai: new THREE.Vector3(0.57, 0.20, 0.92),
+  design: new THREE.Vector3(0.95, 0.35, 0.55),
   websites: new THREE.Vector3(0.57, 0.20, 0.92),
   models3d: new THREE.Vector3(0.20, 0.70, 0.95),
   artworks: new THREE.Vector3(0.95, 0.35, 0.55),
@@ -527,7 +529,7 @@ export default function UnseenProjectsShowcase({
     };
   }, [category, embedded]);
 
-  const trackHeightVh = Math.max(250, category.items.length * 60);
+  const trackHeightVh = Math.max(category.items.length <= 2 ? 160 : 250, category.items.length * 60);
 
   return (
     <div
@@ -657,7 +659,12 @@ export default function UnseenProjectsShowcase({
                     {category.title}
                   </span>
                   <span className="text-zinc-500 font-semibold">{activeItem.date || "2026"}</span>
-                  {activeItem.featured && (
+                  {activeItem.award && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 font-bold text-amber-800">
+                      🏆 {activeItem.award}
+                    </span>
+                  )}
+                  {activeItem.featured && !activeItem.award && (
                     <span className="inline-flex items-center gap-1 text-amber-700 font-bold">
                       <Sparkles className="w-3 h-3" /> FEATURED
                     </span>
