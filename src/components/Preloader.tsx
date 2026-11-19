@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { portfolioData } from "../data/portfolioData";
 
@@ -24,6 +24,36 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const [weatherTemp, setWeatherTemp] = useState<string>("--°");
   const doneRef = useRef(onComplete);
   doneRef.current = onComplete;
+  // width of "yrielle", so the [m] can glide to the centre as the rest of the name fades
+  const restRef = useRef<HTMLSpanElement>(null);
+  const mRef = useRef<HTMLSpanElement>(null);
+  const [restWidth, setRestWidth] = useState(0);
+  // the square box, measured from the m's actual ink so the letter sits dead centre in it
+  const [box, setBox] = useState<{ left: number; top: number; size: number; cx: number; adv: number } | null>(null);
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (!restRef.current || !mRef.current) return;
+      setRestWidth(restRef.current.offsetWidth);
+      const cs = getComputedStyle(mRef.current);
+      const fs = parseFloat(cs.fontSize) || 0;
+      const g = document.createElement("canvas").getContext("2d");
+      if (!g || !fs) return;
+      g.font = `${cs.fontWeight} ${fs}px ${cs.fontFamily}`;
+      const m = g.measureText("m");
+      // where the baseline sits inside a line box of height 1em
+      const fa = m.fontBoundingBoxAscent ?? fs * 0.8, fd = m.fontBoundingBoxDescent ?? fs * 0.2;
+      const baseline = (fs - (fa + fd)) / 2 + fa;
+      const inkL = -m.actualBoundingBoxLeft, inkR = m.actualBoundingBoxRight;
+      const inkT = baseline - m.actualBoundingBoxAscent, inkB = baseline + m.actualBoundingBoxDescent;
+      const cx = (inkL + inkR) / 2, cy = (inkT + inkB) / 2;
+      const size = Math.max(inkR - inkL, inkB - inkT) + fs * 0.3; // the ink plus even breathing room
+      setBox({ left: cx - size / 2, top: cy - size / 2, size, cx, adv: mRef.current.offsetWidth });
+    };
+    measure();
+    document.fonts?.ready.then(measure);
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
 
   // Progress follows the real loading: each asset is a step, and while one is in flight the
   // counter creeps toward it without reaching it. A time curve keeps the count from racing ahead,
@@ -115,6 +145,14 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   }, [isComplete]);
 
   const ease = [0.76, 0, 0.24, 1] as const;
+  const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+  const smooth = (v: number) => v * v * (3 - 2 * v);
+  // the count climbs fast early on, so the stages sit late: 0–45% just the name · 45–62% the box
+  // snaps onto the m · 68–96% the rest fades and the [m] glides to the centre
+  const boxIn = smooth(clamp01((progress - 45) / 17));
+  const restGone = smooth(clamp01((progress - 68) / 28));
+  // how far the rest of the name moves over so the box clears the y, with a small gap
+  const room = box ? Math.max(0, box.left + box.size - box.adv) + box.size * 0.08 : 0;
 
   return (
     <AnimatePresence>
@@ -125,33 +163,59 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           transition={{ duration: 0.85, ease }}
           className="fixed inset-0 z-[200] bg-[var(--bg)] text-[var(--heading)] pointer-events-auto select-none transition-colors duration-300"
         >
+          {/* Centre: the logo with the city below it. The logo starts as the
+              plain word "myrielle". Then a purple detection box snaps onto
+              its "m", the rest of the name ("yrielle") fades away, and the boxed [m] glides to the
+              centre, where it stays as the screen lifts. */}
           <motion.div
-            className="h-full w-full flex justify-between items-start p-6 sm:p-10 lg:p-12"
-            initial={{ opacity: 0, y: 8 }}
-            animate={leaving ? { opacity: 0, y: -14 } : { opacity: 1, y: 0 }}
-            transition={{ duration: leaving ? 0.3 : 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-8 sm:gap-12"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={leaving ? { opacity: 0, scale: 1.04 } : { opacity: 1, scale: 1 }}
+            transition={{ duration: leaving ? 0.3 : 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Left: name and city */}
-            <div className="flex flex-col items-start gap-1">
-              <div className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[var(--heading)]">
-                {portfolioData.name.toLowerCase()}
-                <span className="text-[var(--accent)]">.</span>
-              </div>
-              <span className="font-mono text-xs tracking-[0.2em] text-[var(--text-muted)] uppercase font-medium">
-                Makati City
+            <div
+              className="flex items-baseline font-display text-[56px] font-extrabold leading-none tracking-[-0.05em] text-[var(--heading)] will-change-transform sm:text-[120px]"
+              style={{ transform: `translate3d(${box ? ((box.adv + restWidth) / 2 - box.cx) * restGone : 0}px, 0, 0)` }}
+              role="img"
+              aria-label={`${portfolioData.name}, loading ${progress}%`}
+            >
+              <span ref={mRef} className="relative">
+                m
+                {/* the detection box: arrives a touch large and settles onto the letter */}
+                <svg
+                  viewBox="0 0 240 240"
+                  aria-hidden="true"
+                  className="absolute overflow-visible"
+                  style={{
+                    // a square centred on the m's own ink (measured above)
+                    left: box ? `${box.left}px` : "-0.07em",
+                    top: box ? `${box.top}px` : "0.07em",
+                    width: box ? `${box.size}px` : "1em",
+                    height: box ? `${box.size}px` : "1em",
+                    opacity: boxIn,
+                    transform: `scale(${1 + (1 - boxIn) * 0.35})`,
+                  }}
+                >
+                  <path
+                    d="M4 44 V4 H44 M196 4 H236 V44 M236 196 V236 H196 M44 236 H4 V196"
+                    fill="none"
+                    stroke="var(--accent)"
+                    vectorEffect="non-scaling-stroke"
+                    strokeLinecap="square"
+                    className="[stroke-width:4px] sm:[stroke-width:8px]"
+                  />
+                </svg>
+              </span>
+              {/* "yrielle" steps aside a little as the box lands, so the box doesn't sit on the y */}
+              <span ref={restRef} className="will-change-[opacity,transform]" style={{ opacity: 1 - restGone, transform: `translate3d(${room * boxIn}px, 0, 0)` }}>
+                {portfolioData.name.toLowerCase().slice(1)}
               </span>
             </div>
 
-            {/* Right: counter and weather */}
-            <div className="flex flex-col items-end gap-1">
-              <div className="font-mono text-4xl sm:text-6xl md:text-7xl font-medium tracking-tight text-[var(--heading)] tabular-nums leading-none">
-                {progress}
-                <span className="text-[0.5em] align-top ml-1 text-[var(--text-muted)]">%</span>
-              </div>
-              <span className="font-mono text-xs sm:text-sm tracking-widest text-[var(--text-muted)] uppercase font-medium">
-                {weatherTemp}
-              </span>
-            </div>
+            {/* where I am, below the logo */}
+            <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-[var(--text-muted)]">
+              Makati City <span className="opacity-60">·</span> {weatherTemp}
+            </span>
           </motion.div>
 
           {/* A hairline along the bottom edge that fills with the count */}

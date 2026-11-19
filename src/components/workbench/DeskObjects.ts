@@ -2727,8 +2727,8 @@ export function buildWorkbenchScene(scene: THREE.Scene): WorkbenchObjectHandles 
   lampLight.position.set(-5.2, 2.4, 3.25);
   lampLight.target = lampTarget;
   lampLight.castShadow = true;
-  lampLight.shadow.mapSize.width = 2048;
-  lampLight.shadow.mapSize.height = 2048;
+  lampLight.shadow.mapSize.width = 1024;
+  lampLight.shadow.mapSize.height = 1024;
   lampLight.shadow.bias = -0.0001;
   scene.add(lampLight);
 

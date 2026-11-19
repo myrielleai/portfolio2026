@@ -52,7 +52,9 @@ function ScrollStatement() {
     >
       <div className="sticky top-0 h-screen w-full flex items-center justify-center px-6 lg:px-16 overflow-hidden">
         {/* Ambient atmospheric glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#9333ea]/10 rounded-full blur-3xl pointer-events-none" />
+        {/* (a soft radial gradient rather than a blur filter: same glow, but the browser doesn't re-blur it
+            on every frame while the words light up) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[760px] h-[760px] rounded-full pointer-events-none bg-[radial-gradient(circle,rgba(147,51,234,0.1)_0%,rgba(147,51,234,0.06)_35%,rgba(147,51,234,0)_70%)]" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-display leading-[1.35] tracking-tight text-center">

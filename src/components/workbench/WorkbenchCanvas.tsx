@@ -222,7 +222,7 @@ export default function WorkbenchCanvas({ onEnterLab, onBeforeNavigate }: Workbe
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setSize(container.clientWidth, container.clientHeight);
     const isCoarse = window.matchMedia("(pointer: coarse)").matches;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isCoarse ? 1.5 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // 1.5× looks the same here and draws far fewer pixels than 2×
     renderer.shadowMap.enabled = !isCoarse; // phones/tablets: skip soft shadows for smoother frames
     renderer.shadowMap.type = THREE.PCFShadowMap; // supports the soft shadow radius below
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -244,8 +244,9 @@ export default function WorkbenchCanvas({ onEnterLab, onBeforeNavigate }: Workbe
     const sunLight = new THREE.DirectionalLight(0xffa238, 2.2); // Warm Golden Sunlight
     sunLight.position.set(7, 6, 9);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
+    // the shadows are blurred soft anyway, so a 1024 map looks the same at a quarter of the cost
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
     sunLight.shadow.bias = -0.0001;
     scene.add(sunLight);
 

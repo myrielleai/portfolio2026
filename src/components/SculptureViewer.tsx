@@ -312,7 +312,9 @@ export default function SculptureViewer() {
 
     const isCoarse = window.matchMedia("(pointer: coarse)").matches;
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-    const maxDpr = Math.min(window.devicePixelRatio, isCoarse ? 1.5 : 2);
+    // 1.5× looks the same for soft painted hands and drifting dots, and draws ~45% fewer pixels
+    // than 2× on Retina screens, which is most of the hero's cost
+    const maxDpr = Math.min(window.devicePixelRatio, 1.5);
     renderer.setPixelRatio(maxDpr);
     renderer.setClearColor(0x000000, 0);
     renderer.autoClear = false;
@@ -404,7 +406,7 @@ export default function SculptureViewer() {
       const cx = cv.getContext("2d", { willReadFrequently: true })!;
       cx.drawImage(godImg, 0, 0);
       const px = cx.getImageData(0, 0, iw, ih).data;
-      const SX = isCoarse ? 260 : 420;
+      const SX = isCoarse ? 220 : 320; // coarser grid: the relief looks the same, and building it no longer stalls the intro
       const { geo } = sculpt(iw, ih, SX, 0, (u, yf) => {
         const ix = Math.min(iw - 1, Math.round(u * (iw - 1))), iy = Math.min(ih - 1, Math.round(yf * (ih - 1)));
         return px[(iy * iw + ix) * 4 + 3] > 120;
@@ -548,7 +550,7 @@ export default function SculptureViewer() {
         // Resolution steps down when frames run slow and only creeps back after a sustained run of
         // fast frames (and gives up after it has had to drop twice), so it doesn't flip back and
         // forth: every change reallocates the canvas and causes a hitch of its own
-        if (avg > 1 / 48 && dpr > 1) { dpr = Math.max(1, dpr - 0.25); goodRuns = 0; drops++; }
+        if (avg > 1 / 52 && dpr > 1) { dpr = Math.max(1, dpr - 0.25); goodRuns = 0; drops++; }
         else if (avg < 1 / 58) { if (++goodRuns >= 4 && drops < 2 && dpr < maxDpr) { dpr = Math.min(maxDpr, dpr + 0.25); goodRuns = 0; } }
         else goodRuns = 0;
         if (renderer.getPixelRatio() !== dpr) {

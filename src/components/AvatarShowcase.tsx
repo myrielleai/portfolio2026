@@ -70,7 +70,10 @@ export default function AvatarShowcase() {
         <p className="mt-4 sm:mt-6 text-right font-mono text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-[var(--text-muted)]" style={{ textShadow: "0 0 16px var(--bg), 0 0 8px var(--bg), 0 0 3px var(--bg)" }}>
           <span className="text-[var(--accent)]">computer vision</span>
           <span className="mx-3 text-[var(--text-muted)] opacity-60">|</span>
-          <span className="text-[var(--accent)]">machine learning</span>
+          {/* kept as "LLMs" (not "LLMS") inside the all-caps line */}
+          <span className="text-[var(--accent)]"><span className="normal-case">LLMs</span></span>
+          <span className="mx-3 text-[var(--text-muted)] opacity-60">|</span>
+          <span className="text-[var(--accent)]">full-stack</span>
         </p>
         </div>
       </motion.div>
