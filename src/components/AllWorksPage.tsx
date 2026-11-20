@@ -33,7 +33,7 @@ const goTo = (id: string) => {
 /* A compact index of everything at the top: tap one to jump to its case study */
 function WorksIndex({ ready }: { ready: boolean }) {
   return (
-    <nav aria-label="Projects" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+    <nav aria-label="Projects" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
       {allWorks.map((item, i) => (
         <motion.button
           key={item.id}
@@ -44,8 +44,10 @@ function WorksIndex({ ready }: { ready: boolean }) {
           className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-left transition-colors hover:border-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           <span className="relative block aspect-[16/10] overflow-hidden bg-[var(--surface-muted)]">
-            {item.image && (
+            {item.image ? (
               <img src={item.image} alt="" loading="eager" decoding="async" className="absolute inset-0 h-full w-full object-cover object-left-top transition-transform duration-700 group-hover:scale-105" />
+            ) : (
+              <span className="absolute inset-0"><TitleCard item={item} small /></span>
             )}
           </span>
           <span className="flex items-baseline gap-2 px-3 py-2.5">
@@ -58,10 +60,46 @@ function WorksIndex({ ready }: { ready: boolean }) {
   );
 }
 
+/* For work that has no screenshot yet: a simple title card in the same frame */
+function TitleCard({ item, small = false }: { item: WorkItem; small?: boolean }) {
+  return (
+    <span className="relative flex aspect-[16/10] w-full flex-col items-center justify-center gap-3 overflow-hidden bg-[#0b0b10] px-6 text-center">
+      <span aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(147,51,234,0.28),rgba(147,51,234,0)_60%)]" />
+      <span className={`relative font-display font-extrabold tracking-[-0.04em] text-white ${small ? "text-lg" : "text-5xl sm:text-6xl"}`}>{item.title}</span>
+      {!small && <span className="relative max-w-md text-sm text-white/70">{item.subtitle}</span>}
+      {item.inProgress && (
+        <span className={`relative rounded-full border border-[#c084fc]/60 font-mono font-semibold uppercase tracking-widest text-[#d8b4fe] ${small ? "px-2 py-0.5 text-[8px]" : "px-3 py-1 text-[10px]"}`}>
+          In progress
+        </span>
+      )}
+    </span>
+  );
+}
+
 /* One project per section: the full screenshot beside its story, alternating sides */
 function CaseStudy({ item, index, ready }: { item: WorkItem; index: number; ready: boolean }) {
   const flip = index % 2 === 1;
   const host = hostOf(item);
+  const href = item.demoUrl || item.githubUrl;
+  const frameClass = `group block overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] shadow-[0_30px_70px_-35px_rgba(0,0,0,0.45)] transition-transform duration-500 lg:col-span-7 ${href ? "hover:-translate-y-1" : ""} ${flip ? "lg:order-2" : ""}`;
+  const frameInner = (
+    <>
+      <span className="flex h-8 items-center gap-2 border-b border-[var(--border)] bg-[var(--surface-muted)] px-3">
+        <span className="flex gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+        </span>
+        <span className="mx-auto truncate font-mono text-[11px] text-[var(--text-muted)]">{host}</span>
+        <span className="w-[42px]" />
+      </span>
+      {item.image ? (
+        <img src={item.image} alt={`${item.title} screenshot`} loading={index < 2 ? "eager" : "lazy"} decoding="async" className="block h-auto w-full transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]" />
+      ) : (
+        <TitleCard item={item} />
+      )}
+    </>
+  );
   return (
     <motion.article
       id={`work-${item.id}`}
@@ -71,27 +109,15 @@ function CaseStudy({ item, index, ready }: { item: WorkItem; index: number; read
       transition={{ duration: 0.9, ease: EASE }}
       className="grid scroll-mt-28 grid-cols-1 items-center gap-8 border-t border-[var(--border)] py-16 lg:grid-cols-12 lg:gap-14 lg:py-24"
     >
-      {/* the work itself: the whole screenshot, uncropped, in a light browser frame */}
-      <a
-        href={item.demoUrl || item.githubUrl}
-        target="_blank"
-        rel="noreferrer"
-        aria-label={`Open ${item.title}`}
-        className={`group block overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] shadow-[0_30px_70px_-35px_rgba(0,0,0,0.45)] transition-transform duration-500 hover:-translate-y-1 lg:col-span-7 ${flip ? "lg:order-2" : ""}`}
-      >
-        <span className="flex h-8 items-center gap-2 border-b border-[var(--border)] bg-[var(--surface-muted)] px-3">
-          <span className="flex gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-          </span>
-          <span className="mx-auto truncate font-mono text-[11px] text-[var(--text-muted)]">{host}</span>
-          <span className="w-[42px]" />
-        </span>
-        {item.image && (
-          <img src={item.image} alt={`${item.title} screenshot`} loading={index < 2 ? "eager" : "lazy"} decoding="async" className="block h-auto w-full transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]" />
-        )}
-      </a>
+      {/* the work itself: the whole screenshot, uncropped, in a light browser frame (a plain frame,
+          not a link, for work that isn't online yet) */}
+      {href ? (
+        <a href={href} target="_blank" rel="noreferrer" aria-label={`Open ${item.title}`} className={frameClass}>
+          {frameInner}
+        </a>
+      ) : (
+        <div className={frameClass}>{frameInner}</div>
+      )}
 
       {/* the story */}
       <div className={`lg:col-span-5 ${flip ? "lg:order-1" : ""}`}>
@@ -102,6 +128,11 @@ function CaseStudy({ item, index, ready }: { item: WorkItem; index: number; read
           {item.date && <span>· {item.date}</span>}
         </div>
         <h2 className="mt-3 font-display text-4xl font-bold leading-[1.05] tracking-tight text-[var(--heading)] sm:text-5xl">{item.title}</h2>
+        {item.inProgress && (
+          <span className="mt-4 mr-2 inline-block rounded-full border border-[var(--accent)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--accent)]">
+            In progress
+          </span>
+        )}
         {item.award && (
           <span className="mt-4 inline-block rounded-full bg-[var(--accent)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--on-accent)]">
             {item.award}
@@ -148,6 +179,9 @@ function CaseStudy({ item, index, ready }: { item: WorkItem; index: number; read
               <GithubIcon className="h-4 w-4" />
               CODE
             </a>
+          )}
+          {!item.demoUrl && !item.githubUrl && (
+            <span className="font-mono text-xs tracking-wider text-[var(--text-muted)]">DEMO COMING SOON</span>
           )}
         </div>
       </div>

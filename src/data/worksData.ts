@@ -13,6 +13,8 @@ export interface WorkItem {
   featured?: boolean;
   /** Award / recognition, shown as a gold badge (e.g. "Top 3 · Hackathon"). */
   award?: string;
+  /** Still being built: shows an "In progress" badge, and a title card in place of a screenshot. */
+  inProgress?: boolean;
   /** One-line pitch at the top of the project's case study. */
   pitch?: string;
   /** What I did on it (only where it's on record). */
@@ -57,6 +59,25 @@ export const worksCategories: WorkCategory[] = [
         githubUrl: "https://github.com/myrielleai/DeepLeaf",
         date: "2026",
         featured: true,
+        category: "ai"
+      },
+      {
+        id: "ai-2",
+        title: "ATE TALA",
+        subtitle: "A Trusted Advocacy & Legal Assistant for Barangay VAW and GBV Safe Spaces",
+        description: "An LLM assistant that gives advocacy and legal guidance to barangay Violence Against Women (VAW) and gender-based violence (GBV) safe spaces. It answers case-handling questions, in English or Filipino, from the Philippine laws and guidelines loaded into it, and cites the document each answer comes from. The first working version is fine-tuned from Qwen2.5-3B, and more models are being trained to benchmark against each other.",
+        tags: ["LLM", "Qwen2.5-3B", "Fine-tuning", "RAG"],
+        image: "/atetala.webp",
+        pitch: "An AI assistant for barangay VAW and GBV safe spaces.",
+        role: "Project lead · model training",
+        highlights: [
+          "Answers grounded in Philippine laws and guidelines, with the source cited",
+          "Handles questions in English and Filipino",
+          "First working model fine-tuned from Qwen2.5-3B",
+          "More models in training, to benchmark and pick the best assistant",
+        ],
+        date: "2026 – Present",
+        inProgress: true,
         category: "ai"
       }
     ]

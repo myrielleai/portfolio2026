@@ -144,15 +144,15 @@ export const portfolioData: PortfolioData = {
       skills: ["React", "TypeScript", "Node.js", "PostgreSQL", "Tailwind CSS", "GSAP"]
     },
     {
-      role: "Frontend Developer",
+      role: "Full-Stack Developer & Brand Designer",
       company: "UChannel",
-      duration: "2025",
+      duration: "2025 — 2026",
       points: [
-        "Built interactive UI components with React and Three.js for an immersive web experience",
-        "Implemented smooth scroll animations and responsive layouts with modern CSS techniques",
-        "Collaborated with designers to translate Figma mockups into pixel-perfect interfaces"
+        "Designed the company's brand identity, from logo use and colours to collateral",
+        "Built the company website with scroll-driven motion (GSAP, Lenis) and animated LED panels on canvas",
+        "Built a locations page for its 177 billboard sites across the Philippines"
       ],
-      skills: ["React", "Three.js", "TypeScript", "Tailwind CSS", "Figma"]
+      skills: ["HTML", "CSS", "JavaScript", "GSAP", "Lenis", "Figma"]
     }
   ],
 
@@ -188,6 +188,7 @@ export const portfolioData: PortfolioData = {
       subtitle: "Peer-to-Peer Book Exchange",
       year: "2026",
       isNew: true,
+      role: ["Full-stack developer"],
       description: "A community platform for trading physical books, with verified listings, moderated meetup handovers and separate dashboards for readers, volunteer moderators and admins — including participation reports and printable exchange receipts.",
       tags: ["React", "Tailwind CSS", "PHP", "MySQL", "Google OAuth"],
       demoUrl: "https://bookswap-eta.vercel.app",
@@ -198,8 +199,9 @@ export const portfolioData: PortfolioData = {
       title: "ReliefSync",
       category: "web",
       subtitle: "Disaster Logistics Engine",
-      year: "2025",
-      award: "Top 3 · Hackathon",
+      year: "2026",
+      award: "3rd of 37 · Hackathon",
+      role: ["Frontend developer", "Led the research paper and pitch"],
       description: "A local-first disaster response engine for coordinating relief tasks and inventory. Instant offline state, optimistic updates, keyboard-driven navigation and a real-time operations dashboard.",
       tags: ["React", "Tailwind CSS", "LocalForage", "Framer Motion"],
       demoUrl: "https://reliefsync-frontend-d3sw.onrender.com/index.html",
@@ -210,7 +212,8 @@ export const portfolioData: PortfolioData = {
       title: "Makati Human Milk Bank",
       category: "web",
       subtitle: "Cloud Database · Healthcare",
-      year: "2025",
+      year: "2026",
+      role: ["Database designer"],
       description: "Designed and deployed a cloud-based PostgreSQL database on Render — schema design, relational modeling and SQL queries — giving the milk bank's backend a clean, reliable data structure.",
       tags: ["PostgreSQL", "Render", "SQL"],
       demoUrl: "https://hmbms-server.onrender.com/",
@@ -220,10 +223,11 @@ export const portfolioData: PortfolioData = {
     {
       title: "UChannel",
       category: "web",
-      subtitle: "Interactive Web Experience",
-      year: "2025",
-      description: "An immersive company site built with React and Three.js, with gesture handling, spring physics and smooth scroll-driven motion, translated pixel-for-pixel from Figma.",
-      tags: ["React", "Three.js", "TypeScript", "Tailwind CSS"],
+      subtitle: "Brand Identity & Company Website",
+      year: "2025 – 2026",
+      role: ["Full-stack developer", "Brand designer"],
+      description: "A new brand identity and company website for an LED screen and billboard company, with scroll-driven motion, animated LED panels drawn on canvas and a locations page for its 177 billboard sites.",
+      tags: ["HTML", "CSS", "JavaScript", "GSAP", "Lenis"],
       demoUrl: "https://uchannel.ph",
       image: "/uchannel.webp"
     },
@@ -232,6 +236,7 @@ export const portfolioData: PortfolioData = {
       category: "web",
       subtitle: "E-Commerce Storefront",
       year: "2025",
+      role: ["Project lead", "Full-stack developer"],
       description: "A responsive streetwear storefront with a shop, product pages, a lookbook, search and a cart, backed by a Supabase catalogue.",
       tags: ["Next.js", "TypeScript", "Tailwind CSS", "Supabase"],
       demoUrl: "https://endlezz-market.vercel.app/",
