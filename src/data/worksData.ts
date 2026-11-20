@@ -45,7 +45,7 @@ export const worksCategories: WorkCategory[] = [
         title: "DeepLeaf",
         subtitle: "Tomato Foliar Disease Detection via YOLO26 Instance Segmentation",
         description: "An instance segmentation model that detects and outlines individual lesions of four tomato leaf diseases. I led the team, hand-annotated the lesion dataset and trained the YOLO26 model (0.569 mask mAP@0.5 on an unseen holdout set). Written up as an IEEE-format paper and deployed as a Streamlit app.",
-        tags: ["YOLO26", "PyTorch", "Roboflow", "OpenCV", "Streamlit"],
+        tags: ["Computer Vision", "YOLO26", "PyTorch", "Roboflow", "OpenCV", "Streamlit"],
         image: "/deepleaf.webp",
         pitch: "An AI model that finds and outlines every lesion on a tomato leaf.",
         role: "Team lead · dataset annotation · model training",

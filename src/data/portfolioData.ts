@@ -23,6 +23,8 @@ export interface Project {
   demoUrl?: string;
   githubUrl?: string;
   image?: string;
+  /** The area of AI/engineering it belongs to, shown as a chip above the title (e.g. "Computer Vision"). */
+  field?: string;
   /** Describes the image for screen readers. */
   imageAlt?: string;
   /** The image has its own dark backdrop: show it edge to edge on dark instead of padded on white. */
@@ -169,6 +171,7 @@ export const portfolioData: PortfolioData = {
       title: "DeepLeaf",
       category: "ai",
       subtitle: "AI · Computer Vision",
+      field: "Computer Vision",
       year: "2026",
       featured: true,
       isNew: true,
@@ -193,6 +196,7 @@ export const portfolioData: PortfolioData = {
       title: "Ate TALA",
       category: "ai",
       subtitle: "AI · LLM",
+      field: "LLM",
       year: "2026",
       featured: true,
       isNew: true,

@@ -42,15 +42,24 @@ export default function FeaturedWork({ project }: { project: Project; number?: s
         {/* Copy */}
         <div className="flex flex-col justify-center border-t border-[var(--border)] p-6 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
 
+          {(project.field || project.inProgress) && (
+            <div className="mb-5 flex flex-wrap gap-2">
+              {project.field && (
+                <span className="inline-flex items-center rounded-full bg-[var(--accent)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--on-accent)]">
+                  {project.field}
+                </span>
+              )}
+              {project.inProgress && (
+                <span className="inline-flex items-center rounded-full border border-[var(--accent)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--accent)]">
+                  In progress
+                </span>
+              )}
+            </div>
+          )}
+
           <h3 className="font-display text-5xl font-bold leading-none tracking-tight text-[var(--heading)] sm:text-6xl">
             {project.title}
           </h3>
-
-          {project.inProgress && (
-            <span className="mt-4 inline-flex w-fit items-center rounded-full border border-[var(--accent)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--accent)]">
-              In progress
-            </span>
-          )}
 
           <p className="mt-4 max-w-md font-display text-xl font-medium leading-snug text-[var(--text)] sm:text-2xl">
             {project.tagline ?? project.description}
