@@ -153,7 +153,7 @@ export const worksCategories: WorkCategory[] = [
         id: "web-4",
         title: "UChannel",
         subtitle: "Brand Identity & Company Website",
-        description: "A new brand identity and company website for U Channel, an LED screen and billboard company. The site has a hero wall of LED-style blocks, a process section that builds itself as you scroll, a sideways reel of advertising solutions, animated LED panels drawn on canvas and a locations page for its 177 billboard sites.",
+        description: "A new brand identity and company website for U Channel, an LED screen and billboard company. The site has a night-billboard hero with blinking LED-style blocks, a process section that builds itself as you scroll, a sideways reel of advertising solutions, animated LED panels drawn on canvas and a locations page for its 177 billboard sites.",
         tags: ["HTML", "CSS", "JavaScript", "GSAP", "Lenis", "Canvas"],
         image: "/uchannel.webp",
         pitch: "A brand and a website for an LED screen and billboard company.",
