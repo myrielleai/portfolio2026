@@ -63,7 +63,7 @@ export const worksCategories: WorkCategory[] = [
       },
       {
         id: "ai-2",
-        title: "ATE TALA",
+        title: "Ate TALA",
         subtitle: "A Trusted Advocacy & Legal Assistant for Barangay VAW and GBV Safe Spaces",
         description: "An LLM assistant that gives advocacy and legal guidance to barangay Violence Against Women (VAW) and gender-based violence (GBV) safe spaces. It answers case-handling questions, in English or Filipino, from the Philippine laws and guidelines loaded into it, and cites the document each answer comes from. The first working version is fine-tuned from Qwen2.5-3B, and more models are being trained to benchmark against each other.",
         tags: ["LLM", "Qwen2.5-3B", "Fine-tuning", "RAG"],

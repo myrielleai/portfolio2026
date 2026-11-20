@@ -190,17 +190,16 @@ export const portfolioData: PortfolioData = {
       imageAlt: "DeepLeaf: original leaf next to the model's segmented output"
     },
     {
-      title: "ATE TALA",
+      title: "Ate TALA",
       category: "ai",
       subtitle: "AI · LLM",
       year: "2026",
       featured: true,
       isNew: true,
       inProgress: true,
-      tagline: "An AI assistant that gives legal and advocacy guidance to barangay VAW and GBV safe spaces.",
+      tagline: "A Trusted Advocacy & Legal Assistant for Barangay VAW and GBV Safe Spaces.",
       description: "A Trusted Advocacy & Legal Assistant for Barangay VAW and GBV Safe Spaces. It answers case-handling questions in English or Filipino from Philippine laws and guidelines, citing its source.",
       role: [
-        "Leading the project",
         "Fine-tuned the first working model from Qwen2.5-3B",
         "Training more models to benchmark against each other"
       ],
@@ -210,7 +209,7 @@ export const portfolioData: PortfolioData = {
       ],
       tags: ["LLM", "Qwen2.5-3B", "Fine-tuning"],
       image: "/atetala.webp",
-      imageAlt: "ATE TALA app answering a Filipino question about a VAWC case, citing the guideline it used",
+      imageAlt: "Ate TALA app answering a Filipino question about a VAWC case, citing the guideline it used",
       darkImage: true
     },
     {
