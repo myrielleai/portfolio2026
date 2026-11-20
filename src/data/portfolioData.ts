@@ -23,6 +23,12 @@ export interface Project {
   demoUrl?: string;
   githubUrl?: string;
   image?: string;
+  /** Describes the image for screen readers. */
+  imageAlt?: string;
+  /** The image has its own dark backdrop: show it edge to edge on dark instead of padded on white. */
+  darkImage?: boolean;
+  /** Still being built: shows an "In progress" badge (and "Demo coming soon" when there are no links). */
+  inProgress?: boolean;
   /** Optional tall, full-page screenshot: hovering the browser window scrolls through it */
   pageImage?: string;
 }
@@ -180,7 +186,32 @@ export const portfolioData: PortfolioData = {
       tags: ["YOLO26", "PyTorch", "Roboflow", "Streamlit"],
       demoUrl: "https://deepleafai2.streamlit.app/",
       githubUrl: "https://github.com/myrielleai/DeepLeaf",
-      image: "/deepleaf.webp"
+      image: "/deepleaf.webp",
+      imageAlt: "DeepLeaf: original leaf next to the model's segmented output"
+    },
+    {
+      title: "ATE TALA",
+      category: "ai",
+      subtitle: "AI · LLM",
+      year: "2026",
+      featured: true,
+      isNew: true,
+      inProgress: true,
+      tagline: "An AI assistant that gives legal and advocacy guidance to barangay VAW and GBV safe spaces.",
+      description: "A Trusted Advocacy & Legal Assistant for Barangay VAW and GBV Safe Spaces. It answers case-handling questions in English or Filipino from Philippine laws and guidelines, citing its source.",
+      role: [
+        "Leading the project",
+        "Fine-tuned the first working model from Qwen2.5-3B",
+        "Training more models to benchmark against each other"
+      ],
+      stats: [
+        { value: "Qwen2.5-3B", label: "base model" },
+        { value: "EN + FIL", label: "questions" }
+      ],
+      tags: ["LLM", "Qwen2.5-3B", "Fine-tuning"],
+      image: "/atetala.webp",
+      imageAlt: "ATE TALA app answering a Filipino question about a VAWC case, citing the guideline it used",
+      darkImage: true
     },
     {
       title: "BookSwap",

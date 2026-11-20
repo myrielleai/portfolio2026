@@ -5,9 +5,21 @@ import type { Project } from "../data/portfolioData";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** Big, simple highlight card for the one project marked `featured`. */
+/** Big, simple highlight card for each project marked `featured`. */
 export default function FeaturedWork({ project }: { project: Project; number?: string }) {
   const primaryUrl = project.demoUrl || project.githubUrl;
+  // a dark cover (like an app screenshot on its own backdrop) fills the frame; a light one sits padded on white
+  const darkCover = !!project.darkImage;
+  const img = project.image && (
+    <img
+      src={project.image}
+      alt={project.imageAlt ?? `${project.title} screenshot`}
+      loading="lazy"
+      decoding="async"
+      className={`absolute inset-0 h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03] ${darkCover ? "object-cover" : "object-contain p-3 sm:p-6"}`}
+    />
+  );
+  const frame = `relative block aspect-[16/10] overflow-hidden lg:aspect-auto lg:min-h-[480px] ${darkCover ? "bg-[#0b0b10]" : "bg-white"}`;
 
   return (
     <motion.article
@@ -15,27 +27,17 @@ export default function FeaturedWork({ project }: { project: Project; number?: s
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 1, ease: EASE }}
-      className="group relative overflow-hidden rounded-3xl border border-white/20 bg-[var(--surface)] shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)]"
+      className="group relative overflow-hidden rounded-3xl [&+&]:mt-8 sm:[&+&]:mt-10 border border-white/20 bg-[var(--surface)] shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)]"
     >
       <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         {/* Image — clicks through to the live demo */}
-        <a
-          href={primaryUrl}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Open ${project.title} live demo`}
-          className="relative block aspect-[16/10] overflow-hidden bg-white lg:aspect-auto lg:min-h-[480px]"
-        >
-          {project.image && (
-            <img
-              src={project.image}
-              alt={`${project.title}: original leaf next to the model's segmented output`}
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 h-full w-full object-contain p-3 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03] sm:p-6"
-            />
-          )}
-        </a>
+        {primaryUrl ? (
+          <a href={primaryUrl} target="_blank" rel="noreferrer" aria-label={`Open ${project.title} live demo`} className={frame}>
+            {img}
+          </a>
+        ) : (
+          <div className={frame}>{img}</div>
+        )}
 
         {/* Copy */}
         <div className="flex flex-col justify-center border-t border-[var(--border)] p-6 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
@@ -43,6 +45,12 @@ export default function FeaturedWork({ project }: { project: Project; number?: s
           <h3 className="font-display text-5xl font-bold leading-none tracking-tight text-[var(--heading)] sm:text-6xl">
             {project.title}
           </h3>
+
+          {project.inProgress && (
+            <span className="mt-4 inline-flex w-fit items-center rounded-full border border-[var(--accent)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--accent)]">
+              In progress
+            </span>
+          )}
 
           <p className="mt-4 max-w-md font-display text-xl font-medium leading-snug text-[var(--text)] sm:text-2xl">
             {project.tagline ?? project.description}
@@ -82,6 +90,11 @@ export default function FeaturedWork({ project }: { project: Project; number?: s
                 TRY THE LIVE DEMO
                 <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
               </a>
+            )}
+            {!project.demoUrl && !project.githubUrl && project.inProgress && (
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+                Demo coming soon
+              </span>
             )}
             {project.githubUrl && (
               <a
