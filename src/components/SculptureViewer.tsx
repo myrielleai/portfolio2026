@@ -255,13 +255,23 @@ float fbm(vec2 p) {
 void main() {
   vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
   float r2 = dot(p, p);
-  float t = uTime * 0.035;
-  // domain-warped noise: slow, smoky filaments that drift and fold into each other
-  vec2 q = p * 2.4;
+  float t = uTime * 0.05;
+  // the glow wanders: its centre drifts on a slow, looping path around the fingertips, and it
+  // stretches and leans as it goes, so the light feels alive rather than pinned in place
+  vec2 c = vec2(0.11 * sin(uTime * 0.21) + 0.05 * sin(uTime * 0.53 + 1.3),
+                0.07 * cos(uTime * 0.17) + 0.04 * sin(uTime * 0.41 + 2.1));
+  float lean = 0.5 * sin(uTime * 0.13);
+  vec2 d = p - c;
+  d = mat2(cos(lean), -sin(lean), sin(lean), cos(lean)) * d;
+  d *= vec2(0.82 + 0.12 * sin(uTime * 0.31), 1.12 + 0.1 * cos(uTime * 0.27));
+  float hr2 = dot(d, d);
+  // domain-warped noise: smoky filaments that slowly swirl round the centre and fold into each other
+  float sw = 0.35 * sin(uTime * 0.07) + 0.6 * exp(-r2 * 3.0) * sin(uTime * 0.11);
+  vec2 q = mat2(cos(sw), -sin(sw), sin(sw), cos(sw)) * p * 2.4;
   vec2 w = vec2(fbm(q + vec2(t, -t)), fbm(q + vec2(5.2, 1.3) - t));
   float n = fbm(q + 2.2 * w + vec2(0.0, t * 2.0));
   float fil = smoothstep(0.5, 0.82, n) * (1.0 - smoothstep(0.82, 0.98, n) * 0.4);
-  float halo = exp(-r2 * mix(7.5, 2.2, uGlow));
+  float halo = exp(-hr2 * mix(7.5, 2.2, uGlow));
   float core = exp(-r2 * mix(900.0, 70.0, uGlow * uGlow));
   float breathe = 0.92 + 0.08 * sin(uTime * 0.8);
   vec3 col = mix(uBg, uNeb, clamp(halo * (0.45 + 0.75 * n), 0.0, 1.0));
