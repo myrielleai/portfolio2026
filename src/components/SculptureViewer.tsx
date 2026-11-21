@@ -405,6 +405,21 @@ export default function SculptureViewer() {
     const voidScene = new THREE.Scene();
     voidScene.add(voidMesh);
     const voidCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    // The nebula is soft, so it's drawn at a quarter of the screen's size and stretched to fill it:
+    // 1/16 of the pixels, and it looks the same
+    const VOID_SCALE = 0.25;
+    const voidRT = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false, stencilBuffer: false });
+    const blitMat = new THREE.ShaderMaterial({
+      uniforms: { uTex: { value: voidRT.texture } },
+      vertexShader: "varying vec2 vUv; void main() { vUv = position.xy * 0.5 + 0.5; gl_Position = vec4(position.xy, 0.0, 1.0); }",
+      fragmentShader: "uniform sampler2D uTex; varying vec2 vUv; void main() { gl_FragColor = texture2D(uTex, vUv); }",
+      depthWrite: false,
+      depthTest: false,
+    });
+    const blitMesh = new THREE.Mesh(voidTri, blitMat);
+    blitMesh.frustumCulled = false;
+    const blitScene = new THREE.Scene();
+    blitScene.add(blitMesh);
     // the glow's colour on the hands' edges (soft violet in the dark, barely there in the light)
     const rimCol = hex3(isDark ? 0x7a4fd0 : 0x6d4bb8).multiplyScalar(isDark ? 0.55 : 0.12);
 
@@ -575,7 +590,9 @@ export default function SculptureViewer() {
       sparkMat.uniforms.uD.value = D;
       sparkMat.uniforms.uVolR.value = Math.max(W, H) * 0.6;
       sparkMat.uniforms.uAspect.value = W / H;
-      voidMat.uniforms.uRes.value.set(W * renderer.getPixelRatio(), H * renderer.getPixelRatio());
+      const vw = Math.max(2, Math.round(W * VOID_SCALE)), vh = Math.max(2, Math.round(H * VOID_SCALE));
+      voidRT.setSize(vw, vh);
+      voidMat.uniforms.uRes.value.set(vw, vh);
     };
     build();
 
@@ -636,7 +653,6 @@ export default function SculptureViewer() {
           renderer.setPixelRatio(dpr);
           renderer.setSize(W, H);
           dprU.value = dpr;
-          voidMat.uniforms.uRes.value.set(W * dpr, H * dpr);
         }
         frameAcc = 0;
         frameN = 0;
@@ -698,7 +714,11 @@ export default function SculptureViewer() {
       if (flash) flash.style.opacity = (sstep(p, 0.2, 0.31) * (1 - sstep(p, 0.33, 0.5)) * (isDark ? 0.85 : 0.9)).toFixed(3);
 
       renderer.clear();
+      renderer.setRenderTarget(voidRT);
+      renderer.clear();
       renderer.render(voidScene, voidCam);
+      renderer.setRenderTarget(null);
+      renderer.render(blitScene, voidCam);
       renderer.render(scene, camera);
     };
 
@@ -740,6 +760,8 @@ export default function SculptureViewer() {
       }
       voidTri.dispose();
       voidMat.dispose();
+      blitMat.dispose();
+      voidRT.dispose();
       adamTex.dispose();
       godTex.dispose();
       try {
