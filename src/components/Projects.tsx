@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, Lock } from "lucide-react";
+import { ArrowUpRight, Lock, Trophy } from "lucide-react";
 import { GithubIcon } from "./Icons";
 import FeaturedWork from "./FeaturedWork";
 import { portfolioData, type Project } from "../data/portfolioData";
@@ -131,11 +131,37 @@ function WebStory({ projects }: { projects: Project[] }) {
   }, [projects.length]);
 
   const p = projects[active];
+  // an award-winning project lights the whole story up in gold while it's the one being told
+  // ("3rd of 37 · Hackathon" → a big "3rd" with "of 37 teams · Hackathon" under it)
+  const winner = projects.find((x) => x.award);
+  const aw = winner?.award?.match(/^(\S+)\s+of\s+(\d+)\s*·?\s*(.*)$/);
+  const awardOn = !!p.award;
 
   return (
     <>
       {/* Wide screens: the sticky story */}
-      <div className="hidden lg:grid lg:grid-cols-12 lg:gap-14">
+      <div className="relative hidden lg:block">
+      {winner && (
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2">
+          <div
+            className={`sticky top-0 h-screen overflow-hidden transition-opacity duration-[900ms] ease-out ${awardOn ? "opacity-100" : "opacity-0"}`}
+            style={{
+              background:
+                "radial-gradient(ellipse 60% 70% at 30% 45%, var(--award-glow) 0%, transparent 70%), radial-gradient(ellipse 50% 60% at 75% 60%, var(--award-glow-2) 0%, transparent 70%), var(--award-bg)",
+            }}
+          >
+            {/* the placing, huge and faint, behind the story */}
+            <div className={`absolute bottom-[3vh] right-[3vw] select-none transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${awardOn ? "translate-y-0" : "translate-y-16"}`}>
+              <span className="block font-display text-[34vh] font-extrabold leading-[0.8] tracking-[-0.06em] text-transparent [-webkit-text-stroke:2px_var(--award-ink)] opacity-60">
+                {aw ? aw[1] : "Top 3"}
+              </span>
+            </div>
+            {/* a slow shimmer of gold flecks */}
+            <div className="award-flecks absolute inset-0" />
+          </div>
+        </div>
+      )}
+      <div className="relative z-10 lg:grid lg:grid-cols-12 lg:gap-14">
         <div className="lg:col-span-5">
           <div className="sticky top-0 flex h-screen flex-col justify-center py-24">
             {/* where you are in the list; each name jumps to its screenshot */}
@@ -145,9 +171,9 @@ function WebStory({ projects }: { projects: Project[] }) {
                   <button
                     type="button"
                     onClick={() => scrollToEl(frames.current[i])}
-                    className={`group flex items-center gap-3 font-mono text-[11px] uppercase tracking-widest transition-colors ${i === active ? "text-[var(--accent)]" : "text-[var(--text-muted)] hover:text-[var(--heading)]"}`}
+                    className={`group flex items-center gap-3 font-mono text-[11px] uppercase tracking-widest transition-colors ${i === active ? (proj.award ? "text-[var(--award-text)]" : "text-[var(--accent)]") : "text-[var(--text-muted)] hover:text-[var(--heading)]"}`}
                   >
-                    <span className={`h-px transition-all duration-500 ${i === active ? "w-10 bg-[var(--accent)]" : "w-4 bg-[var(--border-strong)] group-hover:w-6"}`} />
+                    <span className={`h-px transition-all duration-500 ${i === active ? (proj.award ? "w-10 bg-[var(--award-solid)]" : "w-10 bg-[var(--accent)]") : "w-4 bg-[var(--border-strong)] group-hover:w-6"}`} />
                     {String(i + 1).padStart(2, "0")} {proj.title}
                   </button>
                 </li>
@@ -169,9 +195,21 @@ function WebStory({ projects }: { projects: Project[] }) {
                   )}
                 </div>
                 {p.award && (
-                  <span className="mt-4 inline-block rounded-full bg-[var(--accent)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--on-accent)]">
-                    {p.award}
-                  </span>
+                  <div className="mt-5 flex items-center gap-4">
+                    <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-[var(--award-solid)] text-[#2a1a00] shadow-[0_0_30px_var(--award-glow)]">
+                      <Trophy className="h-6 w-6" strokeWidth={2.2} />
+                    </span>
+                    <span className="leading-tight">
+                      <span className="block font-display text-2xl font-bold text-[var(--heading)]">
+                        {aw ? `${aw[1]} place` : p.award}
+                      </span>
+                      {aw && (
+                        <span className="block font-mono text-[11px] uppercase tracking-widest text-[var(--award-text)]">
+                          out of {aw[2]} teams{aw[3] ? ` · ${aw[3]}` : ""}
+                        </span>
+                      )}
+                    </span>
+                  </div>
                 )}
                 <p className="mt-4 text-xl leading-snug text-[var(--heading)]">{p.subtitle}</p>
                 <p className="mt-3 line-clamp-4 leading-relaxed text-[var(--text)]">{p.description}</p>
@@ -215,7 +253,7 @@ function WebStory({ projects }: { projects: Project[] }) {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={`Open ${proj.title}`}
-                className={`group block w-full overflow-hidden rounded-2xl border bg-[var(--surface)] shadow-[0_30px_70px_-35px_rgba(0,0,0,0.45)] transition-[transform,opacity,border-color] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${i === active ? "border-[var(--accent)] opacity-100" : "scale-[0.96] border-[var(--border-strong)] opacity-50"}`}
+                className={`group block w-full overflow-hidden rounded-2xl border bg-[var(--surface)] shadow-[0_30px_70px_-35px_rgba(0,0,0,0.45)] transition-[transform,opacity,border-color] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${i === active ? (proj.award ? "border-[var(--award-solid)] opacity-100 shadow-[0_30px_90px_-30px_var(--award-glow)]" : "border-[var(--accent)] opacity-100") : "scale-[0.96] border-[var(--border-strong)] opacity-50"}`}
               >
                 <span className="flex h-8 items-center gap-2 border-b border-[var(--border)] bg-[var(--surface-muted)] px-3">
                   <span className="flex gap-1.5">
@@ -236,6 +274,7 @@ function WebStory({ projects }: { projects: Project[] }) {
             </div>
           ))}
         </div>
+      </div>
       </div>
 
       {/* Phones and tablets: a plain stack of cards */}

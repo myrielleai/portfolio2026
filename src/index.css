@@ -24,6 +24,13 @@
    when <html> has the .dark class, toggled via ThemeContext.
    ---------------------------------------------------------------- */
 :root {
+  /* the gold that lights the story up for an award-winning project */
+  --award-bg: #fffaf0;
+  --award-glow: rgba(245, 180, 60, 0.32);
+  --award-glow-2: rgba(255, 210, 120, 0.3);
+  --award-ink: rgba(190, 130, 20, 0.45);
+  --award-solid: #f2b33d;
+  --award-text: #a8700f;
   --bg: #ffffff;
   --bg-secondary: #f7f7f8;
   --surface: #ffffff;
@@ -42,6 +49,11 @@
 }
 
 .dark {
+  --award-bg: #0d0a04;
+  --award-glow: rgba(245, 180, 60, 0.26);
+  --award-glow-2: rgba(200, 120, 40, 0.16);
+  --award-ink: rgba(245, 190, 80, 0.55);
+  --award-text: #e8b65a;
   --bg: #000000;
   --bg-secondary: #09090b;
   --surface: #09090b;
@@ -408,4 +420,23 @@ h1, h2, h3, .heading-editorial {
 .dark .desk-caption {
   color: #fff6e6;
   text-shadow: 0 1px 2px rgba(40, 20, 8, 0.9), 0 2px 14px rgba(40, 20, 8, 0.7);
+}
+
+/* gold flecks drifting up behind an award-winning project */
+.award-flecks {
+  background-image:
+    radial-gradient(circle, var(--award-ink) 1.2px, transparent 1.6px),
+    radial-gradient(circle, var(--award-ink) 0.8px, transparent 1.2px);
+  background-size: 90px 110px, 140px 170px;
+  background-position: 0 0, 40px 60px;
+  opacity: 0.55;
+  animation: award-drift 18s linear infinite;
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 40% 50%, #000 30%, transparent 80%);
+  mask-image: radial-gradient(ellipse 70% 70% at 40% 50%, #000 30%, transparent 80%);
+}
+@keyframes award-drift {
+  to { background-position: 0 -110px, 40px -110px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .award-flecks { animation: none; }
 }
