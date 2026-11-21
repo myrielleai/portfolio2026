@@ -243,6 +243,8 @@ ${NOISE_GLSL}
 uniform vec2 uRes;
 uniform float uTime;
 uniform float uGlow;
+uniform vec2 uPath;   // where scrolling has carried the glow (screen heights from the centre)
+uniform vec2 uCorePath; // where the bright spark is (it trails just under the words, never behind them)
 uniform vec3 uBg;
 uniform vec3 uNeb;
 uniform vec3 uFil;
@@ -258,8 +260,9 @@ void main() {
   float t = uTime * 0.05;
   // the glow wanders: its centre drifts on a slow, looping path around the fingertips, and it
   // stretches and leans as it goes, so the light feels alive rather than pinned in place
-  vec2 c = vec2(0.11 * sin(uTime * 0.21) + 0.05 * sin(uTime * 0.53 + 1.3),
-                0.07 * cos(uTime * 0.17) + 0.04 * sin(uTime * 0.41 + 2.1));
+  // on top of that, scrolling carries it across the screen (uPath), so the light travels with you
+  vec2 c = uPath + vec2(0.11 * sin(uTime * 0.21) + 0.05 * sin(uTime * 0.53 + 1.3),
+                        0.07 * cos(uTime * 0.17) + 0.04 * sin(uTime * 0.41 + 2.1));
   float lean = 0.5 * sin(uTime * 0.13);
   vec2 d = p - c;
   d = mat2(cos(lean), -sin(lean), sin(lean), cos(lean)) * d;
@@ -272,7 +275,8 @@ void main() {
   float n = fbm(q + 2.2 * w + vec2(0.0, t * 2.0));
   float fil = smoothstep(0.5, 0.82, n) * (1.0 - smoothstep(0.82, 0.98, n) * 0.4);
   float halo = exp(-hr2 * mix(7.5, 2.2, uGlow));
-  float core = exp(-r2 * mix(900.0, 70.0, uGlow * uGlow));
+  vec2 pc = p - uCorePath;
+  float core = exp(-dot(pc, pc) * mix(900.0, 70.0, uGlow * uGlow));
   float breathe = 0.92 + 0.08 * sin(uTime * 0.8);
   vec3 col = mix(uBg, uNeb, clamp(halo * (0.45 + 0.75 * n), 0.0, 1.0));
   col = mix(col, uFil, clamp(fil * halo * (0.55 + 0.35 * uGlow), 0.0, 1.0));
@@ -398,6 +402,8 @@ export default function SculptureViewer() {
         uRes: { value: new THREE.Vector2(1, 1) },
         uTime: { value: 0 },
         uGlow: { value: 0 },
+        uPath: { value: new THREE.Vector2() },
+        uCorePath: { value: new THREE.Vector2() },
         uBg: { value: hex3(isDark ? 0x000000 : 0xffffff) },
         uNeb: { value: hex3(isDark ? 0x1d0b3a : 0xeee5ff) },
         uFil: { value: hex3(isDark ? 0x7c3aed : 0xd8c8ff) },
@@ -720,7 +726,22 @@ export default function SculptureViewer() {
 
       // the nebula brightens as the camera nears the gap, flares as it passes through, then settles
       voidMat.uniforms.uTime.value = time;
-      voidMat.uniforms.uGlow.value = 0.15 + 0.85 * zoom - 0.35 * calm;
+      voidMat.uniforms.uGlow.value = 0.15 + 0.85 * zoom - 0.2 * calm;
+      // The glow's journey down the screen: it starts behind the fingertips, leans in as the
+      // camera does, bursts through the centre, then rises to sit behind "Code is logic." /
+      // "Design is emotion." up top, and sinks to settle behind "I build with both." below.
+      // It sweeps a little side to side on the way, like a light being carried.
+      {
+        const up = sstep(p, 0.4, 0.56), down = sstep(p, 0.7, 0.9);
+        const lean = sstep(p, 0.04, 0.3) * (1 - sstep(p, 0.3, 0.42));
+        const aspect = W / H;
+        const px = (-0.18 * lean + 0.16 * up * (1 - down) - 0.08 * down) * Math.min(aspect, 1.6) * 0.6;
+        const py = 0.06 * lean + 0.27 * up - 0.5 * down;
+        voidMat.uniforms.uPath.value.set(px, py);
+        // the spark rides along a little below the glow, so it lights the words without sitting on them
+        const k = sstep(p, 0.38, 0.55);
+        voidMat.uniforms.uCorePath.value.set(px * k, (py - 0.16 * up * (1 - down) - 0.12 * down) * k);
+      }
       if (flash) flash.style.opacity = (sstep(p, 0.2, 0.31) * (1 - sstep(p, 0.33, 0.5)) * (isDark ? 0.85 : 0.9)).toFixed(3);
 
       renderer.clear();
