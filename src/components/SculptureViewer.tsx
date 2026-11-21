@@ -10,6 +10,9 @@ import { useTheme } from "./ThemeContext";
   top right. Both are cut from the fresco and sculpted into lit relief, so they read as solid
   forms rather than flat paint. Soft particles drift out of the gap.
 
+  They float in a quiet void: a slow nebula of light gathers behind the fingertips, with a bright
+  spark where they almost touch. The glow catches the edges of the hands like a rim light.
+
   As you scroll, the camera flies into the gap: the painted hands fade,
   and the particles stream out until they fill the whole view, then slow into a quiet drift
   behind the quote. World units are CSS pixels on the z = 0 plane at the starting view.
@@ -56,6 +59,7 @@ uniform float uTint;
 uniform float uBottom[11];
 uniform float uShade;
 uniform float uSat;
+uniform vec3 uRim;
 varying vec2 vUv;
 varying vec3 vN;
 varying vec3 vV;
@@ -109,6 +113,8 @@ void main() {
   lit = mix(lit, lit * vec3(0.8, 0.72, 0.68), edge * 0.32 * uShade);
   // the fresco's colour, pulled back so the skin reads as a soft, natural tone rather than saturated orange
   lit = mix(vec3(dot(lit, vec3(0.299, 0.587, 0.114))), lit, uSat);
+  // the glow behind the hands catches their turned edges, like a rim light
+  lit += uRim * pow(edge, 1.4) * uShade;
   gl_FragColor = vec4(lit * uTint, c.a * uAlpha);
 }
 `;
@@ -121,6 +127,7 @@ uniform float uAlpha;
 uniform float uTint;
 uniform float uShade;
 uniform float uSat;
+uniform vec3 uRim;
 varying vec2 vUv;
 varying vec3 vN;
 varying vec3 vV;
@@ -140,6 +147,8 @@ void main() {
   lit = mix(lit, lit * vec3(0.8, 0.72, 0.68), edge * 0.32 * uShade);
   // the fresco's colour, pulled back so the skin reads as a soft, natural tone rather than saturated orange
   lit = mix(vec3(dot(lit, vec3(0.299, 0.587, 0.114))), lit, uSat);
+  // the glow behind the hands catches their turned edges, like a rim light
+  lit += uRim * pow(edge, 1.4) * uShade;
   gl_FragColor = vec4(lit * uTint, c.a * uAlpha);
 }
 `;
@@ -223,6 +232,45 @@ void main() {
 }
 `;
 
+// The void behind the hands: the page colour at the edges, deepening into a slow nebula that
+// gathers round the gap, with a bright spark where the fingertips almost touch. uGlow grows as the
+// camera flies in. Drawn as one full-screen triangle before everything else.
+const voidVert = /* glsl */ `
+void main() { gl_Position = vec4(position.xy, 0.0, 1.0); }
+`;
+const voidFrag = /* glsl */ `
+${NOISE_GLSL}
+uniform vec2 uRes;
+uniform float uTime;
+uniform float uGlow;
+uniform vec3 uBg;
+uniform vec3 uNeb;
+uniform vec3 uFil;
+uniform vec3 uCore;
+float fbm(vec2 p) {
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 4; i++) { v += a * vn(p); p = p * 2.03 + 11.7; a *= 0.5; }
+  return v;
+}
+void main() {
+  vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
+  float r2 = dot(p, p);
+  float t = uTime * 0.035;
+  // domain-warped noise: slow, smoky filaments that drift and fold into each other
+  vec2 q = p * 2.4;
+  vec2 w = vec2(fbm(q + vec2(t, -t)), fbm(q + vec2(5.2, 1.3) - t));
+  float n = fbm(q + 2.2 * w + vec2(0.0, t * 2.0));
+  float fil = smoothstep(0.5, 0.82, n) * (1.0 - smoothstep(0.82, 0.98, n) * 0.4);
+  float halo = exp(-r2 * mix(7.5, 2.2, uGlow));
+  float core = exp(-r2 * mix(900.0, 70.0, uGlow * uGlow));
+  float breathe = 0.92 + 0.08 * sin(uTime * 0.8);
+  vec3 col = mix(uBg, uNeb, clamp(halo * (0.45 + 0.75 * n), 0.0, 1.0));
+  col = mix(col, uFil, clamp(fil * halo * (0.55 + 0.35 * uGlow), 0.0, 1.0));
+  col = mix(col, uCore, clamp(core * breathe * (0.9 + 0.6 * uGlow), 0.0, 1.0));
+  gl_FragColor = vec4(col, 1.0);
+}
+`;
+
 // Sculpt a painted cut-out into relief: inflate the silhouette by its distance from the edge
 // (thin fingers stay slim, the forearm swells round). SX grid columns span the image; EXC more
 // carry the form on past its left edge. Returns a plane whose z is the height, in image widths.
@@ -295,6 +343,7 @@ const sculpt = (iw: number, ih: number, SX: number, EXC: number, isIn: (u: numbe
 export default function SculptureViewer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const flashRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const targetMouse = useRef({ x: 0, y: 0 });
   const currentMouse = useRef({ x: 0, y: 0 });
@@ -304,6 +353,7 @@ export default function SculptureViewer() {
     if (!containerRef.current || !wrapperRef.current) return;
     const container = containerRef.current;
     const wrapper = wrapperRef.current;
+    const flash = flashRef.current;
     gsap.registerPlugin(ScrollTrigger);
     let disposed = false;
 
@@ -332,6 +382,32 @@ export default function SculptureViewer() {
 
     const dprU = { value: maxDpr };
 
+    // The void: its own full-screen pass, drawn before the hands and particles
+    const voidMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uRes: { value: new THREE.Vector2(1, 1) },
+        uTime: { value: 0 },
+        uGlow: { value: 0 },
+        uBg: { value: hex3(isDark ? 0x000000 : 0xffffff) },
+        uNeb: { value: hex3(isDark ? 0x1d0b3a : 0xeee5ff) },
+        uFil: { value: hex3(isDark ? 0x7c3aed : 0xd8c8ff) },
+        uCore: { value: hex3(isDark ? 0xeadcff : 0xb99cf6) },
+      },
+      vertexShader: voidVert,
+      fragmentShader: voidFrag,
+      depthWrite: false,
+      depthTest: false,
+    });
+    const voidTri = new THREE.BufferGeometry();
+    voidTri.setAttribute("position", new THREE.Float32BufferAttribute([-1, -1, 0, 3, -1, 0, -1, 3, 0], 3));
+    const voidMesh = new THREE.Mesh(voidTri, voidMat);
+    voidMesh.frustumCulled = false;
+    const voidScene = new THREE.Scene();
+    voidScene.add(voidMesh);
+    const voidCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    // the glow's colour on the hands' edges (soft violet in the dark, barely there in the light)
+    const rimCol = hex3(isDark ? 0x7a4fd0 : 0x6d4bb8).multiplyScalar(isDark ? 0.55 : 0.12);
+
     const adamMat = new THREE.ShaderMaterial({
       uniforms: {
         uMap: { value: adamTex },
@@ -340,6 +416,7 @@ export default function SculptureViewer() {
         uBottom: { value: ADAM_BOT },
         uShade: { value: 0 },
         uSat: { value: 0.85 },
+        uRim: { value: rimCol },
       },
       vertexShader: adamVert,
       fragmentShader: adamFrag,
@@ -387,6 +464,7 @@ export default function SculptureViewer() {
         uTint: { value: isDark ? 0.86 : 1 },
         uShade: { value: 0 },
         uSat: { value: 0.85 },
+        uRim: { value: rimCol },
       },
       vertexShader: adamVert,
       fragmentShader: godFrag,
@@ -497,6 +575,7 @@ export default function SculptureViewer() {
       sparkMat.uniforms.uD.value = D;
       sparkMat.uniforms.uVolR.value = Math.max(W, H) * 0.6;
       sparkMat.uniforms.uAspect.value = W / H;
+      voidMat.uniforms.uRes.value.set(W * renderer.getPixelRatio(), H * renderer.getPixelRatio());
     };
     build();
 
@@ -557,6 +636,7 @@ export default function SculptureViewer() {
           renderer.setPixelRatio(dpr);
           renderer.setSize(W, H);
           dprU.value = dpr;
+          voidMat.uniforms.uRes.value.set(W * dpr, H * dpr);
         }
         frameAcc = 0;
         frameN = 0;
@@ -612,7 +692,13 @@ export default function SculptureViewer() {
       sparkMat.uniforms.uGap.value.set(gap.x, gap.y, 0);
       sparks.visible = sparkMat.uniforms.uOpacity.value > 0.001;
 
+      // the nebula brightens as the camera nears the gap, flares as it passes through, then settles
+      voidMat.uniforms.uTime.value = time;
+      voidMat.uniforms.uGlow.value = 0.15 + 0.85 * zoom - 0.35 * calm;
+      if (flash) flash.style.opacity = (sstep(p, 0.2, 0.31) * (1 - sstep(p, 0.33, 0.5)) * (isDark ? 0.85 : 0.9)).toFixed(3);
+
       renderer.clear();
+      renderer.render(voidScene, voidCam);
       renderer.render(scene, camera);
     };
 
@@ -652,6 +738,8 @@ export default function SculptureViewer() {
           (m.material as THREE.Material | undefined)?.dispose();
         });
       }
+      voidTri.dispose();
+      voidMat.dispose();
       adamTex.dispose();
       godTex.dispose();
       try {
@@ -666,7 +754,17 @@ export default function SculptureViewer() {
   return (
     <div ref={wrapperRef} className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden select-none z-0">
       <div ref={containerRef} className="w-full h-full absolute inset-0 pointer-events-none" />
-      <div className="absolute inset-0 z-0 bg-transparent border-x border-[var(--border)]/15 pointer-events-none max-w-7xl mx-auto w-full" />
+      {/* the flare as the camera passes between the fingertips */}
+      <div
+        ref={flashRef}
+        className="absolute inset-0 pointer-events-none opacity-0"
+        style={{
+          background:
+            theme === "dark"
+              ? "radial-gradient(ellipse at 50% 50%, rgba(214,190,255,.9) 0%, rgba(124,58,237,.42) 34%, rgba(0,0,0,0) 78%)"
+              : "radial-gradient(ellipse at 50% 50%, rgba(255,255,255,1) 0%, rgba(237,228,255,.75) 40%, rgba(255,255,255,0) 80%)",
+        }}
+      />
     </div>
   );
 }

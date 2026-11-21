@@ -20,24 +20,29 @@ export default function AvatarShowcase() {
   const designerOpacity = useTransform(scrollYProgress, (v) => 1 - ramp(v, 0.06, 0.26));
   const designerVisibility = useTransform(scrollYProgress, (v) => (v >= 0.27 ? "hidden" : "visible"));
 
-  // Quote: the first two lines fade in, hold, fade out; "I build with both." fades in and stays
-  const quoteOpacity = useTransform(scrollYProgress, (v) => Math.min(ramp(v, 0.55, 0.65), 1 - ramp(v, 0.86, 0.92)));
-  const finalLineOpacity = useTransform(scrollYProgress, (v) => ramp(v, 0.55, 0.65));
-  const quoteX1 = useTransform(scrollYProgress, [0.6, 0.95], [-60, 0]);
-  const quoteX2 = useTransform(scrollYProgress, [0.6, 0.95], [60, 0]);
-  const quoteX3 = useTransform(scrollYProgress, [0.6, 0.95], [-60, 0]);
+  // After the flare: "Code is logic." surfaces on its own, "Design is emotion." joins it, then both
+  // give way to "I build with both.", which stays. Each line rises a little as it fades in.
+  const line1Opacity = useTransform(scrollYProgress, (v) => Math.min(ramp(v, 0.42, 0.52), 1 - ramp(v, 0.74, 0.82)));
+  const line2Opacity = useTransform(scrollYProgress, (v) => Math.min(ramp(v, 0.54, 0.64), 1 - ramp(v, 0.74, 0.82)));
+  const finalLineOpacity = useTransform(scrollYProgress, (v) => ramp(v, 0.8, 0.9));
+  const quoteX1 = useTransform(scrollYProgress, (v) => 18 * (1 - ramp(v, 0.42, 0.56)));
+  const quoteX2 = useTransform(scrollYProgress, (v) => 18 * (1 - ramp(v, 0.54, 0.68)));
+  const quoteX3 = useTransform(scrollYProgress, (v) => 18 * (1 - ramp(v, 0.8, 0.94)));
 
   // Explicitly hide the quote block outside of its active viewport range
   // At the very end the fixed quote hands over to an identical copy pinned to the bottom of the
   // section, so "I build with both." stays where it is and then scrolls away with the page.
   const quoteVisibility = useTransform(scrollYProgress, (pos) =>
-    pos >= 0.995 || pos < 0.5 ? "hidden" : "visible"
+    pos >= 0.995 || pos < 0.4 ? "hidden" : "visible"
   );
   const restingVisibility = useTransform(scrollYProgress, (pos) => (pos >= 0.995 ? "visible" : "hidden"));
-  const quoteLine = "font-display font-semibold text-3xl sm:text-4xl xl:text-5xl tracking-tight leading-[1.15] text-center md:text-left";
-  const halo = "0 0 24px var(--bg), 0 0 10px var(--bg), 0 0 4px var(--bg)";
-  const quoteBox =
-    "top-1/2 -translate-y-1/2 left-1/2 md:left-[52%] -translate-x-1/2 md:translate-x-0 z-20 pointer-events-none w-full max-w-[90vw] md:max-w-md lg:max-w-xl xl:max-w-2xl flex flex-col items-center md:items-start";
+  // thin, airy type that floats over the glow
+  const quoteLine = "font-display font-extralight text-4xl sm:text-5xl xl:text-6xl tracking-[-0.03em] leading-[1.15] text-center";
+  const finalLine = "font-display font-extralight text-4xl sm:text-5xl xl:text-6xl tracking-[-0.03em] leading-[1.15] text-center";
+  const halo = "0 0 22px var(--bg), 0 0 6px var(--bg)";
+  // the first two lines sit up top, out of the glow; the closing line lands low, like a caption
+  const quoteBox = "top-[20vh] left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full max-w-[90vw] flex flex-col items-center";
+  const finalBox = "top-[70vh] left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full max-w-[90vw] flex flex-col items-center";
 
   return (
     <section
@@ -56,18 +61,20 @@ export default function AvatarShowcase() {
           opacity: designerOpacity,
           visibility: designerVisibility,
         }}
-        className="fixed top-1/2 left-1/2 z-20 pointer-events-none -translate-x-1/2 -translate-y-1/2 w-full max-w-[90vw]"
+        className="fixed top-[68vh] sm:top-[70vh] left-1/2 z-20 pointer-events-none -translate-x-1/2 w-full max-w-[94vw]"
       >
         <div className="mx-auto w-fit">
+        {/* thin and wide, low on the screen, so the hands and the glow stay the centre of it */}
         <h2
-          className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-center leading-[1.1] flex flex-col md:flex-row items-center justify-center gap-y-2 md:gap-x-6"
-          style={{ color: "var(--heading)" }}
+          className="font-display text-[44px] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[104px] font-extralight tracking-[-0.03em] text-center leading-none flex flex-col md:flex-row items-center justify-center gap-y-1 md:gap-x-5"
+          // set inline: the global h2 rule (weight 700) would otherwise win over the utility class
+          style={{ color: "var(--heading)", textShadow: halo, fontWeight: 200, letterSpacing: "-0.03em" }}
         >
           <span>Designer</span>
-          <span className="text-[var(--accent)] font-light opacity-60 flex items-center justify-center">//</span>
+          <span className="text-[var(--accent)] font-extralight opacity-70 flex items-center justify-center">//</span>
           <span>Developer</span>
         </h2>
-        <p className="mt-4 sm:mt-6 text-right font-mono text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-[var(--text-muted)]" style={{ textShadow: "0 0 16px var(--bg), 0 0 8px var(--bg), 0 0 3px var(--bg)" }}>
+        <p className="mt-5 sm:mt-7 text-center font-mono text-[10px] sm:text-xs font-medium uppercase tracking-[0.32em] text-[var(--text-muted)]" style={{ textShadow: halo }}>
           <span className="text-[var(--accent)]">computer vision</span>
           <span className="mx-3 text-[var(--text-muted)] opacity-60">|</span>
           {/* kept as "LLMs" (not "LLMS") inside the all-caps line */}
@@ -80,23 +87,23 @@ export default function AvatarShowcase() {
 
       {/* Quote: fixed while the hero plays */}
       <motion.div className={`fixed ${quoteBox} will-change-[opacity]`} style={{ visibility: quoteVisibility }}>
-        <motion.p className={quoteLine} style={{ x: quoteX1, opacity: quoteOpacity, color: "var(--heading)", textShadow: halo }}>
+        <motion.p className={quoteLine} style={{ y: quoteX1, opacity: line1Opacity, color: "var(--heading)", textShadow: halo }}>
           Code is logic.
         </motion.p>
-        <motion.p className={quoteLine} style={{ x: quoteX2, opacity: quoteOpacity, color: "var(--heading)", textShadow: halo }}>
+        <motion.p className={quoteLine} style={{ y: quoteX2, opacity: line2Opacity, color: "var(--heading)", textShadow: halo }}>
           Design is emotion.
         </motion.p>
-        <motion.p className={quoteLine} style={{ x: quoteX3, opacity: finalLineOpacity, color: "var(--heading)", textShadow: halo }}>
+      </motion.div>
+      <motion.div className={`fixed ${finalBox} will-change-[opacity]`} style={{ visibility: quoteVisibility }}>
+        <motion.p className={finalLine} style={{ y: quoteX3, opacity: finalLineOpacity, color: "var(--heading)", textShadow: halo }}>
           I build with both.
         </motion.p>
       </motion.div>
 
       {/* Same spot, pinned to the last screen of the section: the closing line stays, then scrolls away */}
       <div className="absolute inset-x-0 bottom-0 h-screen pointer-events-none">
-        <motion.div className={`absolute ${quoteBox}`} style={{ visibility: restingVisibility }}>
-          <p className={`${quoteLine} invisible`} aria-hidden>Code is logic.</p>
-          <p className={`${quoteLine} invisible`} aria-hidden>Design is emotion.</p>
-          <p className={quoteLine} style={{ color: "var(--heading)", textShadow: halo }}>
+        <motion.div className={`absolute top-[70%] left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full max-w-[90vw] flex flex-col items-center`} style={{ visibility: restingVisibility }}>
+          <p className={finalLine} style={{ color: "var(--heading)", textShadow: halo }}>
             I build with both.
           </p>
         </motion.div>
