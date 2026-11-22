@@ -217,6 +217,20 @@ export const portfolioData: PortfolioData = {
       darkImage: true
     },
     {
+      title: "Sphera",
+      category: "web",
+      subtitle: "3D Scroll Concept Site",
+      year: "2026",
+      isNew: true,
+      role: ["Concept, design & development"],
+      description: "A concept website for Sphera Labs, a fictional healthcare company. Scrolling flies the camera over a living sphere built from custom WebGL shaders, down into six glowing chambers, one for each of the company's disciplines.",
+      tags: ["Three.js", "WebGL", "GLSL", "JavaScript"],
+      demoUrl: "https://spheralabs.vercel.app/",
+      githubUrl: "https://github.com/myrielleai/sphera",
+      image: "/sphera.webp",
+      imageAlt: "Sphera home page: a glowing blue sphere above the words CURE THE SYSTEM"
+    },
+    {
       title: "BookSwap",
       category: "web",
       subtitle: "Peer-to-Peer Book Exchange",

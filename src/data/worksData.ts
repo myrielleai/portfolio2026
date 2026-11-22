@@ -89,6 +89,26 @@ export const worksCategories: WorkCategory[] = [
     description: "Full-stack web apps, cloud backends and interactive sites.",
     items: [
       {
+        id: "web-6",
+        title: "Sphera",
+        subtitle: "3D Scroll Concept Site for a Fictional Healthcare Company",
+        description: "A concept website for Sphera Labs, a fictional healthcare company. The page is one long 3D journey: a living sphere, drawn with custom GLSL shaders, turns slowly in the hero, then scrolling flies the camera over its surface and down to a glowing core, past six chambers for the company's disciplines (Diagnostics, Behavioral & Neural, Clinical, Geriatric Care, Pediatrics and Research).",
+        tags: ["Three.js", "WebGL", "GLSL", "JavaScript", "Vercel"],
+        image: "/sphera.webp",
+        pitch: "A healthcare brand told as one scroll-driven flight through a 3D sphere.",
+        role: "Concept, design & development",
+        highlights: [
+          "Living sphere surface drawn with custom GLSL noise and Voronoi shaders",
+          "Scroll-driven camera flyover with smoothed, inertial scrolling",
+          "Six labelled chambers, one per discipline, around a breathing core",
+          "Reframes for portrait screens and shows a fallback where WebGL isn't available",
+        ],
+        demoUrl: "https://spheralabs.vercel.app/",
+        githubUrl: "https://github.com/myrielleai/sphera",
+        date: "2026",
+        category: "websites"
+      },
+      {
         id: "web-1",
         title: "BookSwap",
         subtitle: "Peer-to-Peer Book Exchange",
