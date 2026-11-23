@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { whenIntro } from "../utils/intro";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -482,7 +483,6 @@ export default function SculptureViewer() {
       adam.geometry = geo;
       adamMat.uniforms.uShade.value = 1;
     };
-    adamImg.src = "/adam-layer-clean.webp";
 
     // God's hand, sculpted the same way from its own cut-out
     const godTex = loader.load("/god-arm.webp");
@@ -524,7 +524,24 @@ export default function SculptureViewer() {
       god.geometry = geo;
       godMat.uniforms.uShade.value = 1;
     };
-    godImg.src = "/god-arm.webp";
+    // Sculpting the two reliefs and compiling the shaders are one-off jobs heavy enough to stall a
+    // frame or two, so they wait for the preloader's pause at 97%, when nothing on screen moves.
+    // (The images are already cached by then: the preloader fetched them.)
+    let sculpted = 0;
+    const warmUp = () => {
+      if (disposed || ++sculpted < 2) return;
+      renderer.compile(voidScene, voidCam);
+      renderer.compile(blitScene, voidCam);
+      renderer.compile(scene, camera);
+      renderer.initTexture(adamTex);
+      renderer.initTexture(godTex);
+    };
+    adamImg.addEventListener("load", warmUp);
+    godImg.addEventListener("load", warmUp);
+    const cancelSculpt = whenIntro("quiet", () => {
+      adamImg.src = "/adam-layer-clean.webp";
+      godImg.src = "/god-arm.webp";
+    });
 
     // Particles in the gap
     const SPARKS = isCoarse ? 2400 : 5200;
@@ -753,15 +770,21 @@ export default function SculptureViewer() {
       renderer.render(scene, camera);
     };
 
+    // No drawing while the preloader covers the page: it would only compete with the logo animation
+    let introDone = false;
+    const startLoop = () => {
+      if (!introDone || !isIntersecting || animationFrameId) return;
+      clock.start();
+      animate();
+    };
+    const cancelIntro = whenIntro("done", () => { introDone = true; startLoop(); });
+
     const showcaseElem = document.getElementById("showcase") || container;
     const observer = new IntersectionObserver(
       ([entry]) => {
         isIntersecting = entry.isIntersecting;
         if (isIntersecting) {
-          if (!animationFrameId) {
-            clock.start();
-            animate();
-          }
+          startLoop();
         } else if (animationFrameId) {
           cancelAnimationFrame(animationFrameId);
           animationFrameId = null;
@@ -774,8 +797,12 @@ export default function SculptureViewer() {
 
     return () => {
       disposed = true;
+      cancelSculpt();
+      cancelIntro();
       godImg.onload = null;
       adamImg.onload = null;
+      godImg.removeEventListener("load", warmUp);
+      adamImg.removeEventListener("load", warmUp);
       trigger.kill();
       observer.disconnect();
       window.clearTimeout(resizeTimer);

@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { portfolioData } from "../data/portfolioData";
+import { setIntroPhase } from "../utils/intro";
 
 interface PreloaderProps {
   onComplete: () => void;
@@ -18,7 +19,12 @@ const MIN_MS = 1900; // never flashes by faster than this, even from cache
 const MAX_MS = 9000; // never holds the visitor longer than this, even on a bad connection
 
 export default function Preloader({ onComplete }: PreloaderProps) {
-  const [progress, setProgress] = useState(0);
+  // the count lives in a ref and is painted straight onto the elements each frame, so the logo
+  // animation never waits on a React render
+  const progressRef = useRef(0);
+  const nameRef = useRef<HTMLDivElement>(null);
+  const boxRef = useRef<SVGSVGElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
   const [leaving, setLeaving] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [weatherTemp, setWeatherTemp] = useState<string>("--°");
@@ -30,6 +36,35 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const [restWidth, setRestWidth] = useState(0);
   // the square box, measured from the m's actual ink so the letter sits dead centre in it
   const [box, setBox] = useState<{ left: number; top: number; size: number; cx: number; adv: number } | null>(null);
+  const layoutRef = useRef({ box, restWidth });
+  layoutRef.current = { box, restWidth };
+
+  // the count climbs fast early on, so the stages sit late: 0–45% just the name · 45–62% the box
+  // snaps onto the m · 68–96% the rest fades and the [m] glides to the centre
+  const paint = useRef((progress: number) => {
+    const { box: b, restWidth: rw } = layoutRef.current;
+    const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+    const smooth = (v: number) => v * v * (3 - 2 * v);
+    const boxIn = smooth(clamp01((progress - 45) / 17));
+    const restGone = smooth(clamp01((progress - 68) / 28));
+    // how far the rest of the name moves over so the box clears the y, with a small gap
+    const room = b ? Math.max(0, b.left + b.size - b.adv) + b.size * 0.08 : 0;
+    if (nameRef.current) {
+      nameRef.current.style.transform = `translate3d(${b ? ((b.adv + rw) / 2 - b.cx) * restGone : 0}px, 0, 0)`;
+      nameRef.current.setAttribute("aria-label", `${portfolioData.name}, loading ${progress}%`);
+    }
+    if (boxRef.current) {
+      boxRef.current.style.opacity = String(boxIn);
+      boxRef.current.style.transform = `scale(${1 + (1 - boxIn) * 0.35})`;
+    }
+    if (restRef.current) {
+      restRef.current.style.opacity = String(1 - restGone);
+      restRef.current.style.transform = `translate3d(${room * boxIn}px, 0, 0)`;
+    }
+    if (barRef.current) barRef.current.style.transform = `scaleX(${progress / 100})`;
+  }).current;
+  // repaint when the measurements change (first layout, fonts arriving, resizes)
+  useLayoutEffect(() => paint(progressRef.current), [box, restWidth, paint]);
   useLayoutEffect(() => {
     const measure = () => {
       if (!restRef.current || !mRef.current) return;
@@ -91,13 +126,18 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       shown += (target - shown) * (1 - Math.exp(-dt / 110));
       if (target >= 100 && shown > 99.4) shown = 100;
       // a brief breath at 97 before the last few percent
-      if (!held && shown >= 97) { held = true; holdUntil = now + 650; }
+      if (!held && shown >= 97) { held = true; holdUntil = now + 650; setIntroPhase("quiet"); }
       if (now < holdUntil) shown = 97;
-      setProgress(Math.max(0, Math.floor(shown)));
+      const pct = Math.max(0, Math.floor(shown));
+      if (pct !== progressRef.current) {
+        progressRef.current = pct;
+        paint(pct);
+      }
       if (shown >= 100) {
         // hold on 100 for a beat, fade the type, then lift the curtain
         finishTimer = window.setTimeout(() => {
           setLeaving(true);
+          setIntroPhase("done");
           finishTimer = window.setTimeout(() => {
             setIsComplete(true);
             doneRef.current();
@@ -114,7 +154,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       window.clearTimeout(finishTimer);
       imgs.forEach((img) => { img.onload = img.onerror = null; });
     };
-  }, []);
+  }, [paint]);
 
   // Fetch live weather for Makati City with fallback to "--°"
   useEffect(() => {
@@ -145,14 +185,6 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   }, [isComplete]);
 
   const ease = [0.76, 0, 0.24, 1] as const;
-  const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
-  const smooth = (v: number) => v * v * (3 - 2 * v);
-  // the count climbs fast early on, so the stages sit late: 0–45% just the name · 45–62% the box
-  // snaps onto the m · 68–96% the rest fades and the [m] glides to the centre
-  const boxIn = smooth(clamp01((progress - 45) / 17));
-  const restGone = smooth(clamp01((progress - 68) / 28));
-  // how far the rest of the name moves over so the box clears the y, with a small gap
-  const room = box ? Math.max(0, box.left + box.size - box.adv) + box.size * 0.08 : 0;
 
   return (
     <AnimatePresence>
@@ -174,15 +206,16 @@ export default function Preloader({ onComplete }: PreloaderProps) {
             transition={{ duration: leaving ? 0.3 : 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
             <div
+              ref={nameRef}
               className="flex items-baseline font-display text-[56px] font-extrabold leading-none tracking-[-0.05em] text-[var(--heading)] will-change-transform sm:text-[120px]"
-              style={{ transform: `translate3d(${box ? ((box.adv + restWidth) / 2 - box.cx) * restGone : 0}px, 0, 0)` }}
               role="img"
-              aria-label={`${portfolioData.name}, loading ${progress}%`}
+              aria-label={`${portfolioData.name}, loading`}
             >
               <span ref={mRef} className="relative">
                 m
                 {/* the detection box: arrives a touch large and settles onto the letter */}
                 <svg
+                  ref={boxRef}
                   viewBox="0 0 240 240"
                   aria-hidden="true"
                   className="absolute overflow-visible"
@@ -192,8 +225,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                     top: box ? `${box.top}px` : "0.07em",
                     width: box ? `${box.size}px` : "1em",
                     height: box ? `${box.size}px` : "1em",
-                    opacity: boxIn,
-                    transform: `scale(${1 + (1 - boxIn) * 0.35})`,
+                    opacity: 0,
                   }}
                 >
                   <path
@@ -207,7 +239,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 </svg>
               </span>
               {/* "yrielle" steps aside a little as the box lands, so the box doesn't sit on the y */}
-              <span ref={restRef} className="will-change-[opacity,transform]" style={{ opacity: 1 - restGone, transform: `translate3d(${room * boxIn}px, 0, 0)` }}>
+              <span ref={restRef} className="will-change-[opacity,transform]">
                 {portfolioData.name.toLowerCase().slice(1)}
               </span>
             </div>
@@ -220,10 +252,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
           {/* A hairline along the bottom edge that fills with the count */}
           <div className="absolute left-0 right-0 bottom-0 h-px bg-[var(--border)]/40">
-            <div
-              className="h-full bg-[var(--accent)] origin-left"
-              style={{ transform: `scaleX(${progress / 100})` }}
-            />
+            <div ref={barRef} className="h-full bg-[var(--accent)] origin-left" style={{ transform: "scaleX(0)" }} />
           </div>
         </motion.div>
       )}
