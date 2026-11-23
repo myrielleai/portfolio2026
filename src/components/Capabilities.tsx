@@ -179,7 +179,7 @@ export default function Capabilities() {
                     className="card__classic"
                     style={{ objectPosition: item.focus }}
                   />
-                  <span className="absolute bottom-1.5 left-2 font-serif text-[10px] italic opacity-0 transition-opacity duration-300 group-hover:opacity-90" style={{ color: item.fallbackTextColor, textShadow: "0 1px 4px rgba(0,0,0,0.35)" }}>
+                  <span className="absolute bottom-1.5 left-2 z-10 font-serif text-[10px] italic opacity-0 transition-opacity duration-300 group-hover:opacity-90" style={{ color: item.fallbackTextColor, textShadow: "0 1px 4px rgba(0,0,0,0.35)" }}>
                     {item.credit}
                   </span>
                 </div>
