@@ -104,14 +104,6 @@ function ShotTile({ project, index, className, big = false }: { project: Project
 /* past on the right, and the details switch as each screenshot        */
 /* reaches the middle of the screen. Phones get a simple card stack.   */
 /* ------------------------------------------------------------------ */
-const scrollToEl = (el: HTMLElement | null) => {
-  if (!el) return;
-  const lenis = (window as unknown as { lenis?: { scrollTo: (t: HTMLElement, o?: { offset?: number }) => void } }).lenis;
-  const offset = -(window.innerHeight / 2 - el.offsetHeight / 2);
-  if (lenis) lenis.scrollTo(el, { offset });
-  else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + offset, behavior: "smooth" });
-};
-
 function WebStory({ projects }: { projects: Project[] }) {
   const [active, setActive] = useState(0);
   const frames = useRef<(HTMLDivElement | null)[]>([]);
@@ -164,22 +156,6 @@ function WebStory({ projects }: { projects: Project[] }) {
       <div className="relative z-10 lg:grid lg:grid-cols-12 lg:gap-14">
         <div className="lg:col-span-5">
           <div className="sticky top-0 flex h-screen flex-col justify-center py-24">
-            {/* where you are in the list; each name jumps to its screenshot */}
-            <ol className="mb-10 flex flex-col gap-2">
-              {projects.map((proj, i) => (
-                <li key={proj.title}>
-                  <button
-                    type="button"
-                    onClick={() => scrollToEl(frames.current[i])}
-                    className={`group flex items-center gap-3 font-mono text-[11px] uppercase tracking-widest transition-colors ${i === active ? (proj.award ? "text-[var(--award-text)]" : "text-[var(--accent)]") : "text-[var(--text-muted)] hover:text-[var(--heading)]"}`}
-                  >
-                    <span className={`h-px transition-all duration-500 ${i === active ? (proj.award ? "w-10 bg-[var(--award-solid)]" : "w-10 bg-[var(--accent)]") : "w-4 bg-[var(--border-strong)] group-hover:w-6"}`} />
-                    {String(i + 1).padStart(2, "0")} {proj.title}
-                  </button>
-                </li>
-              ))}
-            </ol>
-
             <AnimatePresence mode="wait">
               <motion.div
                 key={p.title}
