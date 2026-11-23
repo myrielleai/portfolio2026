@@ -222,7 +222,7 @@ function WorksFooterSection() {
       </div>
 
       {/* Scroll Buffer: Pinned duration before Footer gets seen */}
-      <div className="h-[120vh] pointer-events-none" />
+      <div className="h-[40vh] pointer-events-none" />
 
       {/* Homepage Footer sliding UP over the previous section like a photo card */}
       <div className="relative z-20 bg-[var(--bg)] border-t border-[var(--border)] shadow-[0_-25px_60px_rgba(0,0,0,0.06)]">
